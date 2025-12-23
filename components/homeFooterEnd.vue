@@ -106,11 +106,10 @@
   transform: translateY(-4px);
 }
 
-  .text-gradient {
-  background: linear-gradient(90deg, #c1ac24, #0342e0);
+.text-gradient {
+  background: linear-gradient(90deg, #21c6df, #6366f1);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 /* Scoped styles if any overrides needed; global CSS already handles classes. */
-</style>
+</style> 

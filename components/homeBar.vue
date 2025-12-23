@@ -71,8 +71,7 @@
                        :key="product.id"
                        @click="selectProduct(product)"
                        @mousedown.prevent
-                       class="product-result flex items-center gap-12 p-12 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors duration-200 last:border-b-0"
-                       style="cursor: pointer !important;">
+                       class="product-result flex items-center gap-12 p-12 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors duration-200 last:border-b-0">
                     
                     <!-- Product Image -->
                     <div class="w-60 h-60 flex-shrink-0 rounded-6 bg-gray-100 overflow-hidden">
@@ -1202,6 +1201,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
 }
+
 /* SEARCH DROPDOWN SCROLLBAR STYLES - HIDDEN BUT FUNCTIONAL */
 .search-dropdown {
   max-height: 400px;
@@ -1224,13 +1224,11 @@ onUnmounted(() => {
 
 /* For better scrolling experience */
 .search-dropdown > div {
-  /* This ensures content is fully visible */
   padding-right: 1px; /* Prevents content from being cut off */
 }
 
 /* Hover effect without scrollbar */
 .search-dropdown:hover {
-  /* Optional: Add slight shadow on hover */
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
 }
 
@@ -1247,65 +1245,11 @@ onUnmounted(() => {
   }
 }
 
-/* Fix for older browsers */
-.search-dropdown {
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  &::-webkit-scrollbar {
-    width: 0px;
-    background: transparent;
-  }
-  
-  /* Hide scrollbar for IE, Edge and Firefox */
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Alternative method using padding */
-.search-dropdown-wrapper {
-  position: relative;
-}
-
-.search-dropdown-wrapper::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 20px;
-  background: linear-gradient(to bottom, transparent, white);
-  pointer-events: none;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
-}
-
-/* For the results container inside */
-.search-dropdown > div {
-  /* Add padding to prevent content from touching edges */
-  padding-bottom: 8px;
-}
-
 /* Individual result item styling */
 .product-result {
   position: relative;
-  z-index: 1
-  ;
-}
-
-/* Ensure smooth scrolling on touch devices */
-@media (hover: none) and (pointer: coarse) {
-  .search-dropdown {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-  }
-}
-/*  CRITICAL FIXES FOR DESKTOP DROPDOWN */
-
-
-.product-result {
   transition: all 0.2s ease !important;
   cursor: pointer !important;
-  position: relative !important;
-  z-index: 1 !important;
 }
 
 .product-result:hover {
@@ -1320,18 +1264,6 @@ onUnmounted(() => {
 
 .product-result {
   pointer-events: all !important;
-}
-
-/* Ensure search wrapper has proper z-index */
-.search-form__wrapper {
-  position: relative !important;
-  z-index: 1000 !important;
-}
-
-/* Fix for input blur issue */
-.common-input {
-  position: relative !important;
-  z-index: 1001 !important;
 }
 
 /* Cart Badge Styles with Real-time Animation */
@@ -1407,23 +1339,8 @@ onUnmounted(() => {
   object-fit: contain;
 }
 
-/* Fix for hover states */
-.item-hover {
-  position: relative;
-  z-index: 1;
-}
-
-/* Ensure header doesn't interfere */
-.header-middle {
-  position: relative;
-  z-index: 100;
-}
-
-/* Fix for other dropdowns interference */
-.form-location-wrapper {
-  position: relative;
-  z-index: 1000;
-}
+/* Removed all unnecessary z-index declarations */
+/* Only search dropdown keeps high z-index via inline style */
 
 /* Prevent body scroll when mobile search is open */
 body.mobile-search-open {

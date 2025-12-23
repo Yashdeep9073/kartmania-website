@@ -1268,7 +1268,7 @@ const addToCart = () => {
         productId: product.id,
         variantId: selectedVariant.value?.id || null,
         name: mainProduct.value.name,
-        groupIid:groupID.value,
+        groupId:groupID.value,
         color: selectedVariant.value?.color || null,
         size: selectedVariant.value?.size || null,
         sku: product.sku,

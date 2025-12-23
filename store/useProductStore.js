@@ -135,7 +135,7 @@ export const useProductStore = defineStore('productStore', () => {
     return null
   }
 const getDescription = (product)=>{
-  return product.mainProduct
+  return product.mainProduct.description
 }
   const getProductBrand = (product) => {
     return product.brand?.name || null
@@ -929,6 +929,7 @@ const ProductColor = (product) => {
     syncFiltersFromURL,
 
     // Helper functions
+    getDescription,
     getProductColor,
     getProductSize,
     getProductBrand,

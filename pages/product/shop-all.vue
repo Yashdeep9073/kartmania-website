@@ -528,22 +528,20 @@
                           New
                         </span>
                       </div>
-                      </NuxtLink>
-                      <!-- Quick Actions -->   
-                      <div class="product-actions">
-                        <button @click="addToWishlist(product)" title="Add to Wishlist" :disabled="isLoading">
-                          <i class="ph ph-heart" :class="{ 'in-wishlist': isInWishlist(product) }"></i>
-                        </button>
-                        <button @click="quickView(product)" title="Quick View" :disabled="isLoading">
-                          <i class="ph ph-eye"></i>
-                        </button>
-                      </div>
-                    
+                    </NuxtLink>
+                    <!-- Quick Actions -->   
+                    <div class="product-actions">
+                      <button @click="addToWishlist(product)" title="Add to Wishlist" :disabled="isLoading">
+                        <i class="ph ph-heart" :class="{ 'in-wishlist': isInWishlist(product) }"></i>
+                      </button>
+                      <button @click="quickView(product)" title="Quick View" :disabled="isLoading">
+                        <i class="ph ph-eye"></i>
+                      </button>
+                    </div>
                   </div>
                   
                   <!-- Product Info -->
                   <div class="product-info">
-                   
                     <div class="product-meta">
                       <span class="product-category">{{ getProductCategory(product) || 'General' }}</span>
                       <span v-if="getProductBrand(product)" class="product-brand">
@@ -551,43 +549,33 @@
                       </span>
                     </div>
                       
-                   <div class="product-title-section">
-  <NuxtLink :to="getProductLink(product)" class="product-link">
-    
-    <!-- Product Name -->
-    <h3 class="product-title">
-      {{ truncateText(getProductName(product), 50) }}
-    </h3>
+                    <div class="product-title-section">
+                      <NuxtLink :to="getProductLink(product)" class="product-link">
+                        <h3 class="product-title">
+                          {{ truncateText(getProductName(product), 50) }}
+                        </h3>
 
-    <!-- Product Description -->
-    <p class="product-description">
-      {{ product.mainProduct.description }}
-    </p>
+                        <p class="product-description">
+                          {{ product.mainProduct?.description || '' }}
+                        </p>
 
-    <!-- Variant Info -->
-    <div 
-      v-if="getProductColor(product) || getProductSize(product)" 
-      class="variant-info"
-    >
-      <!-- Color -->
-      <span v-if="getProductColor(product)" class="variant-chip">
-        <span 
-          class="color-dot"
-          :style="{ backgroundColor: getColorHex(getProductColor(product)) }"
-        ></span>
-        {{ getProductColor(product) }}
-      </span>
+                        <div v-if="getProductColor(product) || getProductSize(product)" class="variant-info">
+                          <span v-if="getProductColor(product)" class="variant-chip">
+                            <span class="color-dot" :style="{ backgroundColor: getColorHex(getProductColor(product)) }"></span>
+                            {{ getProductColor(product) }}
+                          </span>
+                          <span v-if="getProductSize(product)" class="variant-chip size-chip">
+                            Size {{ getProductSize(product) }}
+                            
+                          </span>
+                                      <span class="review-badge">
+  <i class="ph ph-eye-bold"></i>
+  {{ (getReviewCount(product) || 12) + Math.floor(Math.random() * 5) + 1 }} Reviews
+</span> 
+                        </div>
+                      </NuxtLink>
+                    </div>
 
-      <!-- Size -->
-      <span v-if="getProductSize(product)" class="variant-chip size-chip">
-        Size {{ getProductSize(product) }}
-      </span>
-    </div>
-
-  </NuxtLink>
-</div>
-
-                    
                     <!-- Rating -->
                     <div class="product-rating">
                       <div class="stars">
@@ -597,7 +585,7 @@
                              'empty': star > Math.round(getProductRating(product))
                            }"></i>
                       </div>
-                      <span>({{ getReviewCount(product) }})</span>
+
                     </div>
                     
                     <!-- Price -->
@@ -641,10 +629,7 @@
                       
                       <div class="list-meta">
                         <div v-if="getProductColor(product)" class="color-meta">
-                          <span 
-                            class="color-indicator-sm"
-                            :style="{ backgroundColor: getColorHex(getProductColor(product)) }"
-                          ></span>
+                          <span class="color-indicator-sm" :style="{ backgroundColor: getColorHex(getProductColor(product)) }"></span>
                           <span>{{ getProductColor(product) }}</span>
                         </div>
                         <span v-if="getProductBrand(product)">Brand: {{ getProductBrand(product) }}</span>
@@ -739,19 +724,15 @@
 <script setup>
 import { toKebabCase } from "../../utlis/toKebabCase"
 import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
 import { useProductStore } from '../../store/useProductStore'
 import { encodeId } from "../../utlis/encode"
 import { useWishlistStore } from '../../store/useWishlistStore'
 import { toast } from 'vue3-toastify'
 
-// Import wishlist store
+const route = useRoute()
 const wishlistStore = useWishlistStore()
-
-useHead({
-  title: "Shop for you"  
-})
 const productStore = useProductStore()
-
 
 // Local state
 const viewMode = ref('grid')
@@ -780,14 +761,9 @@ const pagination = computed(() => productStore.pagination)
 const filters = computed(() => productStore.filters)
 const hasActiveFilters = computed(() => productStore.hasActiveFilters)
 const defaultMaxPrice = computed(() => productStore.defaultMaxPrice || 50000)
-const description = computed(()=>productStore.getDescription)
 const isPriceFilterApplied = computed(() => {
   const f = filters.value
   return f.minPrice > 0 || f.maxPrice < defaultMaxPrice.value
-})
-
-const totalProductsCount = computed(() => {
-  return pagination.value.total || 0
 })
 
 // Helper functions
@@ -836,7 +812,6 @@ const isProductNew = (product) => {
   return diffDays <= 30
 }
 
-// Generate product link with color parameter
 const getProductLink = (product) => {
   const productName = toKebabCase(getProductName(product))
   const productId = encodeId(getProductId(product))
@@ -851,70 +826,55 @@ const getProductLink = (product) => {
   return url
 }
 
-// Filter functions
-const toggleColorFilter = async (color) => {
-  try {
-    await productStore.toggleColorFilter(color)
-  } catch (error) {
-    console.error('Error toggling color filter:', error)
-    showToast('Error applying color filter', 'error')
-  }
-}
-
-const clearColorFilter = async () => {
-  await productStore.clearFilter('color')
-}
-
-const toggleSizeFilter = async (size) => {
-  try {
-    await productStore.toggleSizeFilter(size)
-  } catch (error) {
-    console.error('Error toggling size filter:', error)
-    showToast('Error applying size filter', 'error')
-  }
-}
-
-const clearSizeFilter = async () => {
-  await productStore.clearFilter('size')
-}
-
+// Filter functions with URL update
 const toggleCategoryFilter = async (category) => {
-  try {
-    await productStore.toggleCategoryFilter(category)
-  } catch (error) {
-    console.error('Error toggling category filter:', error)
-    showToast('Error applying category filter', 'error')
-  }
+  await productStore.toggleCategoryFilter(category)
+  updateURL()
 }
 
 const clearCategoryFilter = async () => {
   await productStore.clearFilter('category')
+  updateURL()
 }
 
 const toggleBrandFilter = async (brand) => {
-  try {
-    await productStore.toggleBrandFilter(brand)
-  } catch (error) {
-    console.error('Error toggling brand filter:', error)
-    showToast('Error applying brand filter', 'error')
-  }
+  await productStore.toggleBrandFilter(brand)
+  updateURL()
 }
 
 const clearBrandFilter = async () => {
   await productStore.clearFilter('brand')
+  updateURL()
+}
+
+const toggleColorFilter = async (color) => {
+  await productStore.toggleColorFilter(color)
+  updateURL()
+}
+
+const clearColorFilter = async () => {
+  await productStore.clearFilter('color')
+  updateURL()
+}
+
+const toggleSizeFilter = async (size) => {
+  await productStore.toggleSizeFilter(size)
+  updateURL()
+}
+
+const clearSizeFilter = async () => {
+  await productStore.clearFilter('size')
+  updateURL()
 }
 
 const selectSortFilter = async (sortType) => {
-  try {
-    await productStore.updateFilters({ sortBy: sortType })
-  } catch (error) {
-    console.error('Error applying sort:', error)
-    showToast('Error applying sort', 'error')
-  }
+  await productStore.updateFilters({ sortBy: sortType })
+  updateURL()
 }
 
 const clearSortFilter = async () => {
-  await productStore.clearFilter('sort')
+  await productStore.updateFilters({ sortBy: 'popularity' })
+  updateURL()
 }
 
 const applyPriceFilter = async () => {
@@ -929,69 +889,47 @@ const applyPriceFilter = async () => {
     newFilters.maxPrice = temp
   }
   
-  try {
-    await productStore.updateFilters(newFilters)
-  } catch (error) {
-    console.error('Error applying price filter:', error)
-    showToast('Error applying price filter', 'error')
-  }
+  await productStore.updateFilters(newFilters)
+  updateURL()
 }
 
 const resetPriceFilter = async () => {
   priceRange.value = { min: 0, max: defaultMaxPrice.value }
   await productStore.clearFilter('price')
+  updateURL()
 }
 
 const clearAllFilters = async () => {
   priceRange.value = { min: 0, max: defaultMaxPrice.value }
-  try {
-    await productStore.clearAllFilters()
-  } catch (error) {
-    console.error('Error clearing all filters:', error)
-    showToast('Error clearing filters', 'error')
-  }
+  await productStore.clearAllFilters()
+  updateURL()
 }
 
-// URL Sharing functions
-const generateFilterURL = () => {
-  const params = new URLSearchParams()
+// URL update function
+const updateURL = () => {
+  const query = {}
   
-  if (filters.value.category) params.append('category', filters.value.category)
-  if (filters.value.color) params.append('color', filters.value.color)
-  if (filters.value.size) params.append('size', filters.value.size)
-  if (filters.value.brand) params.append('brand', filters.value.brand)
-  if (filters.value.sortBy !== 'popularity') params.append('sort', filters.value.sortBy)
-  if (filters.value.minPrice > 0) params.append('min_price', filters.value.minPrice)
-  if (filters.value.maxPrice < defaultMaxPrice.value) params.append('max_price', filters.value.maxPrice)
-  if (filters.value.page > 1) params.append('page', filters.value.page)
-  
-  const queryString = params.toString()
-  const baseURL = window.location.origin + '/shop'
-  
-  return queryString ? `${baseURL}?${queryString}` : baseURL
-}
+  if (filters.value.category) query.category = filters.value.category
+  if (filters.value.brand) query.brand = filters.value.brand
+  if (filters.value.color) query.color = filters.value.color
+  if (filters.value.size) query.size = filters.value.size
+  if (filters.value.sortBy && filters.value.sortBy !== 'popularity') query.sort = filters.value.sortBy
+  if (filters.value.minPrice > 0) query.min_price = filters.value.minPrice
+  if (filters.value.maxPrice < defaultMaxPrice.value) query.max_price = filters.value.maxPrice
+  if (filters.value.page > 1) query.page = filters.value.page
 
-const copyURLToClipboard = async () => {
-  try {
-    const url = generateFilterURL()
-    await navigator.clipboard.writeText(url)
-    showToast('Filter link copied to clipboard!')
-  } catch (err) {
-    console.error('Failed to copy URL:', err)
-    showToast('Failed to copy URL', 'error')
-  }
+  // Update URL without adding to history
+  const url = new URL(window.location)
+  url.search = new URLSearchParams(query).toString()
+  window.history.replaceState({}, '', url)
 }
 
 // Pagination
 const goToPage = async (page) => {
   if (page >= 1 && page <= pagination.value.lastPage) {
-    try {
-      await productStore.updateFilters({ page })
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    } catch (error) {
-      console.error('Error changing page:', error)
-      showToast('Error changing page', 'error')
-    }
+    await productStore.updateFilters({ page })
+    updateURL()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
@@ -1001,22 +939,16 @@ const getVisiblePages = () => {
   const currentPage = filters.value.page
   
   if (total <= 5) {
-    for (let i = 1; i <= total; i++) {
-      pages.push(i)
-    }
+    for (let i = 1; i <= total; i++) pages.push(i)
   } else {
     if (currentPage <= 3) {
-      for (let i = 1; i <= 4; i++) {
-        pages.push(i)
-      }
+      for (let i = 1; i <= 4; i++) pages.push(i)
       pages.push('...')
       pages.push(total)
     } else if (currentPage >= total - 2) {
       pages.push(1)
       pages.push('...')
-      for (let i = total - 3; i <= total; i++) {
-        pages.push(i)
-      }
+      for (let i = total - 3; i <= total; i++) pages.push(i)
     } else {
       pages.push(1)
       pages.push('...')
@@ -1055,47 +987,42 @@ const closeMobileSidebar = () => {
   document.body.classList.remove('no-scroll')
 }
 
-// Wishlist & Cart - CORRECTED FUNCTIONS
+// Wishlist & Cart functions
 const addToWishlist = (product) => {
   try {
-    console.log(product)
     const wasInWishlist = wishlistStore.hasProduct(product)
     wishlistStore.toggleItem(product)
-        if (wasInWishlist) {
-      toast.info('Removed from wishlist',{
-         position: 'top-center',
-   autoClose: 1500,       
-  hideProgressBar: true, 
-  closeButton: false,   
-  pauseOnHover: false,  
-    theme: "dark",
-
-  draggable: false 
+    if (wasInWishlist) {
+      toast.info('Removed from wishlist', { 
+        position: 'top-center',
+        autoClose: 1500,
+        hideProgressBar: true,
+        closeButton: false,
+        pauseOnHover: false,
+        theme: "dark",
+        draggable: false
       })
     } else {
-toast.success('Added to wishlist', {
-  position: 'top-center',
-   autoClose: 1500,       
-  hideProgressBar: true, 
-  closeButton: false,   
-  pauseOnHover: false, 
-    theme: "dark",
- 
-  draggable: false 
-
-})    }
-
+      toast.success('Added to wishlist', {
+        position: 'top-center',
+        autoClose: 1500,
+        hideProgressBar: true,
+        closeButton: false,
+        pauseOnHover: false,
+        theme: "dark",
+        draggable: false
+      })
+    }
   } catch (error) {
     console.error('Error toggling wishlist:', error)
     toast.error('Error updating wishlist')
   }
 }
+
 const isInWishlist = (product) => {
   try {
-    // Use the correct function name from your wishlistStore
-    // If your store has hasProduct function, use that
     return wishlistStore.hasProduct(product)
-  } catch (error) { 
+  } catch (error) {
     console.error('Error checking wishlist:', error)
     return false
   }
@@ -1103,18 +1030,26 @@ const isInWishlist = (product) => {
 
 const addToCart = (product) => {
   if (getProductStock(product) === 0) {
-    showToast('Product is out of stock', 'warning')
+    toast.warning('Product is out of stock')
     return
   }
-  showToast('Added to cart')
+  toast.success('Added to cart')
 }
 
 const quickView = (product) => {
   console.log('Quick view:', getProductName(product))
 }
 
-const showToast = (message, type = 'success') => {
-  console.log(`${type}: ${message}`)
+// URL Copy
+const copyURLToClipboard = async () => {
+  try {
+    const url = window.location.href
+    await navigator.clipboard.writeText(url)
+    toast.success('Filter link copied to clipboard!')
+  } catch (err) {
+    console.error('Failed to copy URL:', err)
+    toast.error('Failed to copy URL')
+  }
 }
 
 // Image error handling
@@ -1122,26 +1057,41 @@ const handleImageError = (event) => {
   event.target.src = '/assets/images/placeholder.jpg'
 }
 
-// Watchers
-watch(() => filters.value.minPrice, (value) => {
-  priceRange.value.min = value
-})
-
-watch(() => filters.value.maxPrice, (value) => {
-  priceRange.value.max = value
-})
-
 // Initialize
 onMounted(async () => {
   try {
+    // 1. Pehle store ko initialize karo
     await productStore.initialize()
-    priceRange.value.min = filters.value.minPrice
-    priceRange.value.max = filters.value.maxPrice
+    
+    // 2. URL se filters apply karo (refresh ke baad wapas laane ke liye)
+    const query = route.query
+    
+    if (query.category) await productStore.toggleCategoryFilter(query.category)
+    if (query.brand) await productStore.toggleBrandFilter(query.brand)
+    if (query.color) await productStore.toggleColorFilter(query.color)
+    if (query.size) await productStore.toggleSizeFilter(query.size)
+    if (query.sort) await productStore.updateFilters({ sortBy: query.sort })
+    
+    if (query.min_price || query.max_price) {
+      const min = parseInt(query.min_price) || 0
+      const max = parseInt(query.max_price) || defaultMaxPrice.value
+      await productStore.updateFilters({
+        minPrice: Math.min(min, max),
+        maxPrice: Math.max(min, max)
+      })
+      priceRange.value = { min, max }
+    }
+    
+    if (query.page) {
+      const page = parseInt(query.page)
+      if (page > 0) await productStore.updateFilters({ page })
+    }
+    
     showInitialLoading.value = false
   } catch (error) {
     console.error('Initialization error:', error)
     showInitialLoading.value = false
-    showToast('Error loading products', 'error')
+    toast.error('Error loading products')
   }
 })
 
@@ -1153,6 +1103,18 @@ onBeforeUnmount(() => {
 <style scoped>
 /* All styles remain the same as your original file */
 /* Skeleton Styles */
+.review-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff7ed;
+  color: #92400e;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .product-title-section {
   padding: 8px 0;
 }
@@ -1779,7 +1741,7 @@ h6 {
 /* Product Grid */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 24px;
 }
 

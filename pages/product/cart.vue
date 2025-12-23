@@ -64,7 +64,7 @@
                     <td>
                       <div class="table-product d-flex align-items-center gap-24">
                         <NuxtLink 
-                          :to="`/product/${item.name}--${item.groupIid}`" 
+                          :to="`/product/${item.name}--${item.groupId}`" 
                           class="table-product__thumb border border-gray-100 rounded-8 flex-center"
                           style="width: 100px; height: 100px;"
                         >
@@ -257,7 +257,7 @@
             <div class="bg-color-three rounded-8 p-24 mt-24">
               <div class="flex-between gap-8">
                 <span class="text-gray-900 text-xl fw-semibold">Total</span>
-                <span class="text-gray-900 text-xl fw-semibold">₹{{ total.toFixed(2) }}</span>
+                <span class="text-gray-900 text-xl fw-semibold">₹{{ total.toFixed(0) }}</span>
               </div>
             </div>
             
@@ -310,6 +310,8 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from '#app'
 import CartBreakcrumb from '~/components/cartBreakcrumb.vue'
 import CartShop from '~/components/cartShop.vue'
+import Swal from 'sweetalert2'
+
 useHead({
   title: "Cart"  
 })
@@ -394,13 +396,24 @@ const saveCartToStorage = () => {
   }
 }
 
-const removeItem = (itemId) => {
-  if (confirm('Are you sure you want to remove this item from your cart?')) {
-    cartItems.value = cartItems.value.filter(item => item.id !== itemId)
-    saveCartToStorage()
-  }
-}
 
+const removeItem = (itemId) => {
+  Swal.fire({
+    title: 'Remove item?',
+    text: 'This item will be removed from your cart.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Remove',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#111',
+    cancelButtonColor: '#d1d5db'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      cartItems.value = cartItems.value.filter(item => item.id !== itemId)
+      saveCartToStorage()
+    }
+  })
+}
 const increaseQuantity = (itemId) => {
   const itemIndex = cartItems.value.findIndex(item => item.id === itemId)
   if (itemIndex > -1) {
@@ -537,6 +550,10 @@ onUnmounted(() => {
   .variant-info {
   font-size: 13px;
 }
+.swal-center-popup {
+  border-radius: 14px;
+}
+
 
 .variant-chip {
   padding: 4px 10px;

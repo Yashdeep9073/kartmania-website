@@ -174,17 +174,17 @@ function showCartNotification(productName, quantity) {
     }, 300)
   }, 4000)
   
-  // Remove on click
+  // Remove on click 
   notification.addEventListener('click', (e) => {
     if (!e.target.closest('.view-cart-btn')) {
       notification.style.animation = 'slideOutRight 0.3s ease'
-      setTimeout(() => {
+      setTimeout(() => { 
         if (notification.parentNode) {
           document.body.removeChild(notification)
-        }
+        } 
         if (style.parentNode) {
           document.head.removeChild(style)
-        }
+        } 
       }, 300)
     }
   })

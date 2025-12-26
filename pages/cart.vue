@@ -72,6 +72,7 @@
                             :src="item.image || '/assets/images/thumbs/default-product.png'" 
                             :alt="item.name" 
                             class="w-100 h-100 object-cover rounded-8"
+
                           />
                         </NuxtLink>
                         <div class="table-product__content text-start">
@@ -190,7 +191,7 @@
               </div>
               <div class="flex-align gap-16">
                 <NuxtLink 
-                  to="/products" 
+                  to="/shop-all" 
                   class="text-lg text-gray-500 hover-text-main-600 transition-colors"
                 >
                   <i class="ph ph-arrow-left me-2"></i> Continue Shopping
@@ -273,12 +274,12 @@
               </NuxtLink>
               
               <NuxtLink 
-                to="/products" 
+                to="/shop-all" 
                 class="btn btn-outline-main py-18 w-100 rounded-8 fw-semibold flex-center gap-12"
               >
                 <i class="ph ph-shopping-bag"></i>
                 Continue Shopping
-              </NuxtLink>
+              </NuxtLink>  
             </div>
 
             <!-- Secure Checkout Info -->

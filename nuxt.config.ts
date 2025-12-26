@@ -1,4 +1,6 @@
 export default defineNuxtConfig({
+    plugins: ['~/plugins/toast.client.js']
+,
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   ssr: false,

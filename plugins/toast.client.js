@@ -1,7 +1,13 @@
-// plugins/toast.client.js
-import Vue3Toastify, { toast } from 'vue3-toastify'
-import 'vue3-toastify/dist/index.css'
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
 export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.use(Vue3Toastify)
-})
+  nuxtApp.vueApp.use(Toast, {
+    position: "top-center",
+    timeout: 1500,
+    hideProgressBar: true,
+    closeButton: false,
+    pauseOnHover: false,
+    draggable: false,
+  });
+});

@@ -27,7 +27,7 @@
           <div class="blog-item-wrapper">
             <div v-for="(post, index) in paginatedBlogPosts" :key="post.slug" class="blog-item"
               :class="{ 'mb-40': index < paginatedBlogPosts.length - 1 }">
-              <NuxtLink :to="`/person/${post.slug}`" class="w-100 h-100 rounded-16 overflow-hidden block">
+              <NuxtLink :to="`/Blogs/${post.slug}`" class="w-100 h-100 rounded-16 overflow-hidden block">
                 <img :src="post.image" :alt="post.title" class="cover-img w-100" loading="lazy"
                   @error="handleImageError" />
               </NuxtLink>
@@ -37,9 +37,9 @@
                 </span>
                 <h6 class="text-2xl mb-24">
                   <NuxtLink :to="`/person${post.slug}`" class="text-neutral-900 hover-text-main-600">
-                    {{ post.title }}
+                    {{ post.title }} 
                   </NuxtLink>
-                </h6>
+                </h6> 
                 <p class="text-gray-700 text-line-2">{{ post.excerpt }}</p>
 
                 <div class="flex-align flex-wrap gap-24 pt-24 mt-24 border-top border-gray-100">
@@ -47,7 +47,7 @@
                     <span class="text-lg text-main-600"><i class="ph ph-calendar-dots"></i></span>
                     <span class="text-sm text-gray-500">
                       <NuxtLink :to="`/blog/${post.slug}`" class="text-gray-500 hover-text-main-600">
-                        {{ post.date }}
+                        {{ post.date }} 
                       </NuxtLink>
                     </span>
                   </div>
@@ -126,7 +126,7 @@
               <div class="flex-grow-1">
                 <h6 class="text-lg">
                   <NuxtLink :to="`/blog/${post.slug}`" class="text-line-3 text-neutral-900 hover-text-main-600">
-                    {{ post.title }}
+                    {{ post.title }}   
                   </NuxtLink>
                 </h6>
                 <div class="flex-align flex-wrap gap-8">

@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-const config = useRuntimeConfig();
-
 
 export const useProductStore = defineStore('productStore', () => {
   const route = useRoute()
   const router = useRouter()
+  const config = useRuntimeConfig()
 
   // ==================== STATE ====================
   const state = ref({
@@ -23,10 +22,11 @@ export const useProductStore = defineStore('productStore', () => {
       to: 0
     },
 
-    // Filter options (from separate APIs)
+    // Category data with nested structure
     categories: [],
-    colors: [], // From colors API: ["Green", "Pink"]
-    sizes: [], // From sizes API: [{id: 180, size: "S"}, ...]
+    categoryTree: [], // This will hold the nested structure
+    colors: [],
+    sizes: [],
     brands: [],
 
     // Current filters for GraphQL queries
@@ -48,12 +48,81 @@ export const useProductStore = defineStore('productStore', () => {
     urlUpdateInProgress: false
   })
 
+  // ==================== NEW: CATEGORY FUNCTIONS ====================
+
+  const buildCategoryTree = (categories) => {
+    return categories.map(category => ({
+      id: category.id,
+      name: category.name,
+      image: category.image,
+      logo: category.logo,
+      productCount: category._count?.products || 0,
+      subCategories: category.subCategories?.map(subCat => ({
+        id: subCat.id,
+        name: subCat.name,
+        image: subCat.image,
+        logo: subCat.logo,
+        subSubCategories: subCat.subSubCategories?.map(subSubCat => ({
+          id: subSubCat.id,
+          name: subSubCat.name,
+          image: subSubCat.image,
+          logo: subSubCat.logo,
+          subSubSubCategories: subSubCat.subSubSubCategory?.map(subSubSubCat => ({
+            id: subSubSubCat.id,
+            name: subSubSubCat.name,
+            logo: subSubSubCat.logo,
+            image: subSubSubCat.image
+          })) || []
+        })) || []
+      })) || []
+    }))
+  }
+
+  const fetchCategoriesWithNestedData = async () => {
+    try {
+      console.log('Fetching categories with nested data...')
+      
+      const response = await fetch('https://kartmania-api.vibrantick.org/common/product-category/read')
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      console.log('Categories API Response:', data)
+      
+      if (data.data && Array.isArray(data.data)) {
+        state.value.categories = data.data
+        state.value.categoryTree = buildCategoryTree(data.data)
+        console.log('Category tree built:', state.value.categoryTree)
+        
+        // Calculate total products count
+        const totalProducts = data.data.reduce((sum, category) => {
+          return sum + (category._count?.products || 0)
+        }, 0)
+        
+        return {
+          categories: data.data,
+          categoryTree: state.value.categoryTree,
+          totalProductsCount: totalProducts
+        }
+      } else {
+        console.warn('No categories data found in response')
+        return { categories: [], categoryTree: [], totalProductsCount: 0 }
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      return { categories: [], categoryTree: [], totalProductsCount: 0 }
+    }
+  }
+
   // ==================== GETTERS ====================
 
   const products = computed(() => state.value.filteredAndSortedProducts)
   const categories = computed(() => state.value.categories)
-  const colors = computed(() => state.value.colors) // Direct from API
-  const sizes = computed(() => state.value.sizes) // Direct from API
+  const categoryTree = computed(() => state.value.categoryTree)
+  const colors = computed(() => state.value.colors)
+  const sizes = computed(() => state.value.sizes)
   const brands = computed(() => state.value.brands)
   const pagination = computed(() => state.value.pagination)
   const filters = computed(() => state.value.filters)
@@ -111,8 +180,6 @@ export const useProductStore = defineStore('productStore', () => {
     graphql: config.public.api.graphql
   }
 
-
-
   // ==================== HELPER FUNCTIONS ====================
 
   const getProductColor = (product) => {
@@ -134,9 +201,11 @@ export const useProductStore = defineStore('productStore', () => {
     }
     return null
   }
-const getDescription = (product)=>{
-  return product.mainProduct.description
-}
+
+  const getDescription = (product) => {
+    return product.mainProduct.description
+  }
+
   const getProductBrand = (product) => {
     return product.brand?.name || null
   }
@@ -226,29 +295,30 @@ const getDescription = (product)=>{
   const getProductName = (product) => {
     return product.name || product.mainProduct?.name || 'Unnamed Product'
   }
-const ProductSize = (product) => {
-  if (!product?.variants) return []
 
-  return [
-    ...new Set(
-      product.variants
-        .map(v => v?.attributes?.[0]?.size)
-        .filter(Boolean)
-    )
-  ]
-}
-const ProductColor = (product) => {
-  if (!product?.variants) return []
+  const ProductSize = (product) => {
+    if (!product?.variants) return []
 
-  return [
-    ...new Set(
-      product.variants
-        .map(v => v?.attributes?.[0]?.color)
-        .filter(Boolean)
-    )
-  ]
-}
+    return [
+      ...new Set(
+        product.variants
+          .map(v => v?.attributes?.[0]?.size)
+          .filter(Boolean)
+      )
+    ]
+  }
 
+  const ProductColor = (product) => {
+    if (!product?.variants) return []
+
+    return [
+      ...new Set(
+        product.variants
+          .map(v => v?.attributes?.[0]?.color)
+          .filter(Boolean)
+      )
+    ]
+  }
 
   const getProductCategory = (product) => {
     return product.category?.name || null
@@ -447,32 +517,18 @@ const ProductColor = (product) => {
 
   const fetchFilterOptions = async () => {
     try {
-      const [categoriesRes, colorsRes, sizesRes, brandsRes] = await Promise.all([
-        fetch(API_ENDPOINTS.categories),
-        fetch(API_ENDPOINTS.colors),
-        fetch(API_ENDPOINTS.sizes),
-        fetch(API_ENDPOINTS.brands)
-      ])
-
-      const [categoriesData, colorsData, sizesData, brandsData] = await Promise.all([
-        categoriesRes.json(),
-        colorsRes.json(),
-        sizesRes.json(),
-        brandsRes.json()
+      // Fetch categories with nested data
+      const categoriesResult = await fetchCategoriesWithNestedData()
+      
+      // Use $fetch for other APIs
+      const [colorsData, sizesData, brandsData] = await Promise.all([
+        $fetch(API_ENDPOINTS.colors),
+        $fetch(API_ENDPOINTS.sizes),
+        $fetch(API_ENDPOINTS.brands)
       ])
 
       console.log('Colors API Response:', colorsData)
       console.log('Sizes API Response:', sizesData)
-
-      // Categories
-      if (categoriesData.data?.length) {
-        state.value.categories = categoriesData.data.map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          image: cat.image,
-          productCount: cat._count?.products || 0
-        }))
-      }
 
       // Colors - Direct from API
       if (colorsData.colors && Array.isArray(colorsData.colors)) {
@@ -517,6 +573,7 @@ const ProductColor = (product) => {
       state.value.colors = []
       state.value.sizes = []
       state.value.categories = []
+      state.value.categoryTree = []
       state.value.brands = []
 
       return false
@@ -647,18 +704,21 @@ const ProductColor = (product) => {
       // Build GraphQL query with all active filters
       const query = buildGraphQLQuery(mergedFilters)
 
-      const response = await fetch(API_ENDPOINTS.graphql, {
+      console.log('Sending GraphQL query:', query)
+
+      // Use $fetch with proper configuration
+      const response = await $fetch(API_ENDPOINTS.graphql, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: query
-        })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query })
       })
 
-      const result = await response.json()
+      console.log('GraphQL response:', response)
 
-      if (result.data?.productFilter?.data) {
-        const products = result.data.productFilter.data.map(product => {
+      if (response.data?.productFilter?.data) {
+        const products = response.data.productFilter.data.map(product => {
           // Fix image URLs
           const fixImageUrl = (url) => {
             if (url && !url.startsWith('http')) {
@@ -695,7 +755,7 @@ const ProductColor = (product) => {
 
         // Update state with new products
         state.value.allProducts = products
-        state.value.pagination = result.data.productFilter.pagination
+        state.value.pagination = response.data.productFilter.pagination
 
         // Apply client-side price filtering and sorting
         filterAndSortProducts()
@@ -708,13 +768,22 @@ const ProductColor = (product) => {
           pagination: state.value.pagination
         }
       } else {
-        console.error('No products data in response:', result.errors)
+        console.error('No products data in response:', response.errors)
         state.value.allProducts = []
         filterAndSortProducts()
         throw new Error('No products found')
       }
     } catch (error) {
       console.error('Error fetching products:', error)
+      
+      // More detailed error logging
+      if (error.response) {
+        console.error('Response error:', error.response)
+      }
+      if (error.status) {
+        console.error('Status code:', error.status)
+      }
+      
       state.value.allProducts = []
       filterAndSortProducts()
       throw error
@@ -729,7 +798,7 @@ const ProductColor = (product) => {
     await fetchProductsWithFilters(newFilters)
   }
 
-  // ==================== TOGGLE FILTER FUNCTIONS ====================
+  // ====================TOGGLE FILTER FUNCTIONS====================
 
   const toggleColorFilter = async (color) => {
     const currentFilters = { ...state.value.filters }
@@ -900,7 +969,10 @@ const ProductColor = (product) => {
   // ==================== EXPORTS ====================
 
   return {
-    // Getters
+    // New getters
+    categoryTree,
+    
+    // Existing getters
     products,
     categories,
     colors,
@@ -916,7 +988,10 @@ const ProductColor = (product) => {
     hasActiveFilters,
     defaultMaxPrice,
 
-    // Actions
+    // New actions
+    fetchCategoriesWithNestedData,
+    
+    // Existing actions
     fetchProducts: fetchProductsWithFilters,
     updateFilters,
     toggleColorFilter,

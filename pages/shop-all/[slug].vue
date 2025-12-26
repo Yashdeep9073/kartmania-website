@@ -558,10 +558,10 @@
                   </div>
                   <div class="flex-between pt-8 border-t border-gray-200">
                     <span class="text-sm font-semibold text-gray-900">Total:</span>
-                    <span class="text-lg font-bold text-main-600">₹{{ cartTotalPrice.toFixed(2) }}</span>
+                    <span class="text-lg font-bold text-main-600">₹{{ cartTotalPrice.toFixed(2)}}</span>
                   </div>
                   
-                  <NuxtLink to="/product/cart" class="btn btn-main w-100 mt-16">
+                  <NuxtLink to="/cart" class="btn btn-main w-100 mt-16">
                     <i class="ph ph-shopping-cart me-2"></i> View Cart
                   </NuxtLink>
                   
@@ -1148,10 +1148,8 @@ const availableColorsWithImages = computed(() => {
       });
     }
   });
-  
   return Array.from(colorsMap.values());
 });
-
 const availableSizes = computed(() => {
   const sizes = new Set()
   variants.value.forEach(variant => {
@@ -1442,54 +1440,47 @@ const fetchProductStyleGroup = async (id) => {
   selectedColor.value = null
   selectedSize.value = null
 
-  try {
-    console.log('Fetching product style group with ID:', id)
-    
-    const response = await fetch(`https://kartmania-api.vibrantick.org/common/product/read/group/style/${styleGroupId.value}`)
-    
-    console.log('Response status:', response.status)
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+try {
+  console.log('Fetching product style group with ID:', styleGroupId.value)
+
+  const result = await $fetch(
+    `https://kartmania-api.vibrantick.org/common/product/read/group/style/${styleGroupId.value}`
+  )
+
+  console.log('API Response:', result)
+
+  if (result.message === 'Product style group fetched successfully' && result.data) {
+    groupID.value = result.data.groupId
+    mainProduct.value = result.data.mainProduct
+    variants.value = result.data.variants || []
+
+    // Default selection
+    if (variants.value.length > 0) {
+      selectedVariant.value = variants.value[0]
+      selectedColor.value = variants.value[0].color
+      selectedSize.value = variants.value[0].size
+      updateImagesFromVariant(variants.value[0])
+    } else if (mainProduct.value) {
+      selectedVariant.value = mainProduct.value
+      updateImagesFromAPI(mainProduct.value)
     }
 
-    const result = await response.json()
-    console.log('API Response:', result)
-    
-    if (result.message === 'Product style group fetched successfully' && result.data) {
-      groupID.value = result.data.groupId
-     
-      mainProduct.value = result.data.mainProduct
-      
-      variants.value = result.data.variants || []
-      
-      // Set default selection to first variant
-      if (variants.value.length > 0) {
-        selectedVariant.value = variants.value[0]
-        selectedColor.value = variants.value[0].color
-        selectedSize.value = variants.value[0].size
-        updateImagesFromVariant(variants.value[0])
-      } else if (mainProduct.value) {
-        // If no variants, use main product
-        selectedVariant.value = mainProduct.value
-        updateImagesFromAPI(mainProduct.value)
-      }
-      
-      console.log('Product style group loaded:', {
-        mainProduct: mainProduct.value,
-        variants: variants.value,
-        selectedVariant: selectedVariant.value
-      })
-    } else {
-      error.value = 'Product style group not found'
-    }
-    
-  } catch (err) {
-    console.error('Error fetching product style group:', err)
-    error.value = `Failed to load product: ${err.message}`
-  } finally {
-    loading.value = false
+    console.log('Product style group loaded:', {
+      mainProduct: mainProduct.value,
+      variants: variants.value,
+      selectedVariant: selectedVariant.value
+    })
+  } else {
+    error.value = 'Product style group not found'
   }
+
+} catch (err) {
+  console.error('Error fetching product style group:', err)
+  error.value = `Failed to load product: ${err?.data?.message || err.message}`
+} finally {
+  loading.value = false
+}
+
 }
 
 // Update images from variant

@@ -1,174 +1,229 @@
 <template>
   <div class="pt-20">
-    <WishlistBreakcrumb/>
+
+  <Breadcrumbwishlist/>
   </div>
+  
   <section class="wishlist py-80">
     <div class="container container-lg">
+      <!-- Loading State -->
       <div v-if="loading" class="text-center py-80">
         <div class="spinner-border text-main-600" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
         <p class="mt-16">Loading wishlist...</p>
       </div>
+
+      <!-- Empty Wishlist State -->
       <div v-else-if="wishlistStore.count === 0" class="text-center py-80">
         <div class="empty-wishlist">
           <i class="ph ph-heart text-6xl text-gray-300 mb-24 d-block"></i>
           <h4 class="text-2xl fw-bold mb-16">Your wishlist is empty</h4>
           <p class="text-gray-600 mb-32">You haven't added any products to your wishlist yet.</p>
-          <NuxtLink to="/products" class="btn btn-main py-16 px-32 rounded-8">
+          <NuxtLink to="/shop-all" class="btn btn-main py-16 px-32 rounded-8">
             <i class="ph ph-shopping-cart me-8"></i>
             Start Shopping
           </NuxtLink>
         </div>
       </div>
-      <div v-else class="row g-4">
-        <!-- Wishlist Products Grid -->
-    <div class="col-12">
-  <div class="flex-between mb-32">
-    <h3 class="text-2xl fw-bold">My Wishlist</h3>
-    <span class="text-gray-600">{{ wishlistStore.count }} items</span>
-  </div>
 
-  <div class="row g-4">
-    <div
-      v-for="product in wishlistStore.items"
-      :key="getProductId(product)"
-      class="col-xl-3 col-lg-4 col-md-6"
-    >
-      <div class="product-card-compact border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
-        <!-- Compact Image + Heart -->
-        <div class="relative">
-          <NuxtLink :to="getProductLink(product)" class="block">
-            <div class="aspect-square bg-gray-50 overflow-hidden">
-              <img
-                :src="getPrimaryImage(product)"
-                :alt="getProductName(product)"
-                class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                loading="lazy"
-              />
+      <!-- Wishlist Content (Cart-style Layout) -->
+      <div v-else class="row gy-4">
+        <!-- Wishlist Table Header (Cart-style) -->
+        <div class="col-12">
+          <div class="flex-between mb-32">
+            <h3 class="text-2xl fw-bold text-gray-800">My Wishlist</h3>
+            <div class="text-sm text-gray-600">
+              <span class="fw-semibold">{{ wishlistStore.count }}</span> items
             </div>
-
-            <!-- Badges - Smaller & compact -->
-            <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
-              <span
-                v-if="getProductStock(product) <= getProductAlertThreshold(product) && getProductStock(product) > 0"
-                class="inline-block bg-amber-600 text-white text-[10px] font-medium px-2 py-0.5 rounded-full shadow-sm"
-              >
-                Low
-              </span>
-              <span
-                v-else-if="getDiscountValue(product) > 0"
-                class="inline-block bg-red-600 text-black text-[10px] font-medium px-2 py-0.5 rounded-full shadow-sm"
-              >
-                -{{ getDiscountValue(product) }}%
-              </span>
-              <span
-                v-else-if="getProductStock(product) <= 0"
-                class="inline-block bg-gray-700 text-white text-[10px] font-medium px-2 py-0.5 rounded-full shadow-sm"
-              >
-                Out
-              </span>
-            </div>
-          </NuxtLink>
-
-          <!-- Small Heart Button -->
-          <button
-            type="button"
-            class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-red-50 text-gray-700 hover:text-red-600 transition-all duration-300 z-20"
-            @click="removeFromWishlist(product)"
-            title="Remove from wishlist"
-          >
-            <i class="ph ph-heart text-base"></i>
-          </button>
-        </div>
-
-        <!-- Compact Info -->
-        <div class="p-3 flex flex-col flex-grow">
-          <!-- Name -->
-          <h6 class="text-sm font-semibold mb-1 line-clamp-2 min-h-[2.5rem] hover:text-main-600 transition-colors">
-            <NuxtLink :to="getProductLink(product)">
-              {{ getProductName(product) }}
-            </NuxtLink>
-          </h6>
-
-          <!-- Price - Very compact -->
-          <div class="flex items-center gap-2 mb-2">
-            <span class="text-lg font-bold text-gray-900">
-              ₹{{ formatPrice(getDiscountedPrice(product)) }}
-            </span>
-            <span
-              v-if="getDiscountValue(product) > 0"
-              class="text-xs text-gray-400 line-through"
-            >
-              ₹{{ formatPrice(getOriginalPrice(product)) }}
-            </span>
           </div>
 
-          <!-- Quick Add to Cart -->
-          <button
-            type="button"
-            class="w-full py-2 px-3 bg-main-600 text-white text-sm font-medium rounded-lg hover:bg-main-700 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
-            @click="openAddToCartModal(product)"
-            :disabled="getProductStock(product) <= 0"
-          >
-            <i class="ph ph-shopping-cart text-base"></i>
-            <span>Add</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-        <!-- Sidebar Actions -->
-        <div class="col-12">
-          <div class="border border-gray-100 rounded-12 p-32 mt-32 bg-gray-50">
-            <div class="row g-4">
-              <div class="col-md-6">
-                <!-- <button
-                  type="button"
-                  class="btn btn-outline-main border-2 w-100 py-16 rounded-12 flex-align justify-content-center gap-12 hover:bg-main-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  @click="openBulkAddModal"
-                  :disabled="!hasInStockItems"
-                >
-                  <i class="ph ph-shopping-cart"></i>
-                  Add All to Cart
-                </button> -->
-              </div>
-              <div class="col-md-6">
-          <button
-  type="button"
-  class="btn bg-danger-50 text-danger-700 border border-danger-200
-         w-100 py-14 rounded-12 flex-align justify-content-center gap-10
-         hover:bg-danger-100 transition-all duration-300"
-  @click="clearWishlist"
->
-  <i class="ph ph-trash text-lg"></i>
-  <span class="fw-semibold">Clear Wishlist</span>
-</button>
+          <!-- Wishlist Table -->
+          <div class="wishlist-table border border-gray-100 rounded-8 px-40 py-48">
+            <div class="overflow-x-auto scroll-sm scroll-sm-horizontal">
+              <table class="table style-three">
+                <thead>
+                  <tr>
+                    <th class="h6 mb-0 text-lg fw-bold">Remove</th>
+                    <th class="h6 mb-0 text-lg fw-bold">Product</th>
+                    <th class="h6 mb-0 text-lg fw-bold">Price</th>
+                    <!-- <th class="h6 mb-0 text-lg fw-bold">Stock Status</th> -->
+                    <th class="h6 mb-0 text-lg fw-bold text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="product in wishlistStore.items" :key="getProductId(product)">
+                    <!-- Remove Button -->
+                    <td>
+                      <button 
+                        type="button" 
+                        class="remove-tr-btn flex-align gap-12 hover-text-danger-600"
+                        @click="removeFromWishlist(product)"
+                      >
+                        <i class="ph ph-x-circle text-2xl d-flex"></i>
+                        Remove
+                      </button>
+                    </td>
 
-              </div>
+                    <!-- Product Details -->
+                    <td>
+                      <div class="table-product d-flex align-items-center gap-24">
+                        <NuxtLink 
+                          :to="getProductLink(product)" 
+                          class="table-product__thumb border border-gray-100 rounded-8 flex-center"
+                          style="width: 100px; height: 100px;"
+                        >
+                          <img 
+                            :src="getPrimaryImage(product)" 
+                            :alt="getProductName(product)" 
+                            class="w-100 h-100 object-cover rounded-8"
+                            loading="lazy"
+                          />
+                        </NuxtLink>
+                        <div class="table-product__content text-start">
+                          <h6 class="title text-lg fw-semibold mb-8">
+                            <NuxtLink 
+                              :to="getProductLink(product)" 
+                              class="link text-line-2 hover-text-main-600"
+                            > 
+                              {{ getProductName(product) }}
+                            </NuxtLink>
+                          </h6>
+
+                          <!-- Variant Info -->
+                          <div v-if="getAvailableColors(product).length > 0 || getAvailableSizes(product).length > 0" 
+                               class="variant-info flex-align gap-10 mb-10">
+                            <span v-if="getAvailableColors(product).length > 0" class="variant-chip">
+                              Color: {{ getAvailableColors(product)[0] }}
+                            </span>
+
+                            <span v-if="getAvailableSizes(product).length > 0" class="variant-chip">
+                              Size: {{ getAvailableSizes(product)[0] }}
+                            </span>
+                          </div>
+
+                          <!-- Rating -->
+                          <div class="flex-align gap-16 mb-16">
+                            <div class="flex-align gap-6">
+                              <span class="text-md fw-medium text-warning-600 d-flex">
+                                <i class="ph-fill ph-star"></i>
+                              </span>
+                              <span class="text-md fw-semibold text-gray-900">
+                                {{ getProductRating(product).toFixed(1) }}
+                              </span>
+                            </div>
+                            <span class="text-sm fw-medium text-gray-200">|</span>
+                            <span class="text-neutral-600 text-sm">
+                              {{ getReviewCount(product) }} Reviews
+                            </span>
+                          </div>
+
+                          <!-- Tags -->
+                          <div class="flex-align gap-16">
+                            <span 
+                              v-for="tag in product.mainProduct?.tags || ['New', 'Popular']" 
+                              :key="tag"
+                              class="product-card__cart btn bg-gray-50 text-heading text-sm hover-bg-main-600 hover-text-white py-7 px-8 rounded-8 flex-center gap-8 fw-medium"
+                            >
+                              {{ tag }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Price -->
+                    <td>
+                      <div class="d-flex flex-column gap-4">
+                        <span class="text-lg h6 mb-0 fw-semibold text-main-600">
+                          ₹{{ formatPrice(getDiscountedPrice(product)) }}
+                        </span>
+                        <span v-if="getDiscountValue(product) > 0" 
+                              class="text-sm text-gray-500 text-decoration-line-through">
+                          ₹{{ formatPrice(getOriginalPrice(product)) }}
+                        </span>
+                        <span v-if="getDiscountValue(product) > 0" 
+                              class="text-xs text-success-600 fw-medium">
+                          Save {{ getDiscountValue(product) }}%
+                        </span>
+                      </div>
+                    </td>
+
+                    <!-- Stock Status -->
+                    <!-- <td>
+                      <div class="d-flex align-items-center gap-8">
+                        <span :class="{
+                          'text-success-600': getProductStock(product) > 10,
+                          'text-warning-600': getProductStock(product) <= 10 && getProductStock(product) > 0,
+                          'text-danger-600': getProductStock(product) <= 0
+                        }">
+                          <i :class="{
+                            'ph ph-check-circle': getProductStock(product) > 0,
+                            'ph ph-warning-circle': getProductStock(product) <= 10 && getProductStock(product) > 0,
+                            'ph ph-x-circle': getProductStock(product) <= 0
+                          }" class="me-2"></i>
+                          {{ getStockStatus(product) }}
+                        </span>
+                        <div v-if="getProductStock(product) > 0 && getProductStock(product) <= 10" 
+                             class="text-xs text-gray-500">
+                          (Only {{ getProductStock(product) }} left)
+                        </div>
+                      </div>
+                    </td> -->
+ 
+                    <!-- Action Buttons -->
+                    <td>
+                      <div class="d-flex flex-column gap-8">
+                        <button
+                          type="button"
+                          class="btn btn-main py-8 px-16 rounded-8 fw-medium text-sm flex-align justify-content-center gap-8 hover-bg-main-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          @click="openAddToCartModal(product)"
+                          :disabled="getProductStock(product) <= 0"
+                        >
+                          <i class="ph ph-shopping-cart text-sm"></i>
+                          Add to Cart
+                        </button>
+                        
+                        <NuxtLink 
+                          :to="getProductLink(product)" 
+                          class="btn btn-outline-main border py-8 px-16 rounded-8 fw-medium text-sm flex-align justify-content-center gap-8 hover-bg-main-50 transition-all duration-300"
+                        >
+                          <i class="ph ph-eye text-sm"></i>
+                          View Details
+                        </NuxtLink>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-           
-            <!-- Cart Summary -->
-            <div v-if="cartSummary && cartSummary.itemCount > 0" class="mt-24 pt-24 border-t border-gray-200">
-              <div class="flex-between mb-8">
-                <span class="text-sm text-gray-600">Your cart has:</span>
-                <span class="text-sm font-semibold">{{ cartSummary.itemCount }} items</span>
+
+            <!-- Clear Wishlist Button -->
+            <div class="flex-between flex-wrap gap-16 mt-32 pt-32 border-t border-gray-100">
+              <div class="flex-align gap-16">
+                <NuxtLink 
+                  to="/shop-all" 
+                  class="text-lg text-gray-500 hover-text-main-600 transition-colors"
+                >
+                  <i class="ph ph-arrow-left me-2"></i> Continue Shopping
+                </NuxtLink>
               </div>
-              <div class="flex-between">
-                <span class="text-sm text-gray-600">Total:</span>
-                <span class="text-lg font-bold text-main-600">₹{{ formatPrice(cartSummary.totalPrice) }}</span>
+              <div class="flex-align gap-16">
+                <button
+                  type="button"
+                  class="text-lg text-gray-500 hover-text-danger-600 transition-colors"
+                  @click="clearWishlist"
+                >
+                  <i class="ph ph-trash me-2"></i> Clear Wishlist
+                </button>
               </div>
-              <NuxtLink to="/cart" class="btn btn-main w-100 mt-16">
-                <i class="ph ph-shopping-cart me-8"></i> View Cart
-              </NuxtLink>
             </div>
           </div>
         </div>
       </div>
     </div>
   </section>
- 
+
   <!-- Add to Cart Modal -->
   <div v-if="showAddToCartModal" class="modal-overlay" @click.self="closeAddToCartModal">
     <div class="modal-content">
@@ -252,6 +307,7 @@
             </div>
           </div>
         </div>
+
         <!-- Color Selection -->
         <div v-if="availableColors.length > 0" class="mb-24">
           <div class="flex-between mb-12">
@@ -302,6 +358,7 @@
             </div>
           </div>
         </div>
+
         <!-- Size Selection -->
         <div v-if="availableSizes.length > 0" class="mb-24">
           <div class="flex-between mb-12">
@@ -331,7 +388,8 @@
             </div>
           </div>
         </div>
-        <!-- Quantity Selection - ALWAYS VISIBLE AND ENABLED IF STOCK > 0 -->
+
+        <!-- Quantity Selection -->
         <div class="mb-24">
           <div class="flex-between mb-12">
             <h6 class="text-sm font-semibold">Quantity:</h6>
@@ -410,6 +468,7 @@
             </button>
           </div>
         </div>
+
         <!-- Selected Variant Details -->
         <div v-if="selectedVariant || selectedColor || selectedSize" class="mb-24 p-16 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100 shadow-sm">
           <h6 class="text-sm font-semibold mb-8 text-gray-700 flex items-center gap-8">
@@ -477,6 +536,7 @@
             </div>
           </div>
         </div>
+
         <!-- Error/Success Messages -->
         <div v-if="errorMessage" class="mb-16">
           <div class="alert alert-danger p-12 rounded-xl border border-red-200 bg-red-50">
@@ -494,8 +554,9 @@
             </div>
           </div>
         </div>
+
         <!-- Actions -->
-        <div class="flex gap-16">
+<div class="flex justify-center items-center h-screen">
           <button
             @click="confirmAddToCart"
             :class="[
@@ -514,141 +575,38 @@
             Cancel
           </button>
         </div>
-       
-        <!-- Quick Actions -->
-        <div class="flex gap-8 mt-16">
-          <button
-            @click="addToWishlist"
-            :class="[
-              'btn btn-outline-gray border border-gray-300 py-8 px-16 rounded-xl text-sm flex-1 hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-8 shadow-sm',
-              isInWishlist(selectedProduct) ? 'text-danger-600 hover:text-danger-700' : ''
-            ]"
-          >
-            <i class="ph" :class="isInWishlist(selectedProduct) ? 'ph-heart-fill' : 'ph-heart'"></i>
-            {{ isInWishlist(selectedProduct) ? 'In Wishlist' : 'Add to Wishlist' }}
-          </button>
-          <NuxtLink
-            :to="getProductLink(selectedProduct)"
-            class="btn btn-outline-gray border border-gray-300 py-8 px-16 rounded-xl text-sm flex-1 hover:bg-gray-50 transition-all duration-300 text-center flex items-center justify-center gap-8 shadow-sm"
-            @click="closeAddToCartModal"
-          >
-            <i class="ph ph-eye"></i>
-            View Details
-          </NuxtLink>
-        </div>
       </div>
     </div>
   </div>
- 
-  <!-- Bulk Add Modal -->
-  <div v-if="showBulkAddModal" class="modal-overlay" @click.self="closeBulkAddModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add All to Cart</h5>
-        <button @click="closeBulkAddModal" class="close-btn">&times;</button>
-      </div>
-     
-      <div class="modal-body">
-        <p class="text-gray-700 mb-24">
-          You are about to add {{ inStockProducts.length }} products to your cart.
-          Please select options for products with variants:
-        </p>
-        <div class="space-y-4 max-h-300 overflow-y-auto pr-2">
-          <div
-            v-for="product in productsWithVariants"
-            :key="getProductId(product)"
-            class="border border-gray-200 rounded-xl p-16 shadow-sm"
-          >
-            <div class="flex items-start gap-12 mb-12">
-              <img
-                :src="getProductImage(product)"
-                :alt="getProductName(product)"
-                class="w-60 h-60 object-cover rounded-lg"
-              />
-              <div class="flex-1">
-                <h6 class="text-sm font-semibold mb-2">{{ getProductName(product) }}</h6>
-                <div class="flex items-center gap-8">
-                  <span class="text-sm font-bold text-main-600">
-                    ₹{{ formatPrice(getDiscountedPrice(product)) }}
-                  </span>
-                  <span class="text-xs text-gray-600">
-                    Stock: {{ getProductStock(product) }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <!-- Color Selection for Bulk Add -->
-            <div v-if="getAvailableColors(product).length > 0" class="mb-8">
-              <label class="text-xs text-gray-600 mb-4 block">Color:</label>
-              <select
-                v-model="bulkSelections[getProductId(product)].color"
-                class="w-full border border-gray-300 rounded-xl py-8 px-12 text-sm focus:ring-2 focus:ring-main-500 focus:ring-opacity-20 focus:border-main-600 transition-all duration-200"
-              >
-                <option value="">Select Color</option>
-                <option v-for="color in getAvailableColors(product)" :key="color" :value="color">
-                  {{ color }}
-                </option>
-              </select>
-            </div>
-            <!-- Size Selection for Bulk Add -->
-            <div v-if="getAvailableSizes(product).length > 0">
-              <label class="text-xs text-gray-600 mb-4 block">Size:</label>
-              <select
-                v-model="bulkSelections[getProductId(product)].size"
-                class="w-full border border-gray-300 rounded-xl py-8 px-12 text-sm focus:ring-2 focus:ring-main-500 focus:ring-opacity-20 focus:border-main-600 transition-all duration-200"
-              >
-                <option value="">Select Size</option>
-                <option v-for="size in getAvailableSizes(product)" :key="size" :value="size">
-                  {{ size }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="mt-24 pt-24 border-t border-gray-200">
-          <div class="flex gap-16">
-            <button
-              @click="confirmBulkAddToCart"
-              class="btn btn-main flex-1 py-12 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
-            >
-              <i class="ph ph-shopping-cart me-8"></i>
-              Add All to Cart
-            </button>
-            <button
-              @click="closeBulkAddModal"
-              class="btn btn-outline-main border-2 py-12 px-24 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
- 
-  <WishlistShop/>
+
+  <!-- <WishlistShop /> -->
 </template>
+
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useProductStore } from '../../store/useProductStore'
-import { useWishlistStore } from '../../store/useWishlistStore'
-import { toKebabCase } from "../../utlis/toKebabCase"
-import { encodeId } from "../../utlis/encode"
+import { ref, computed, onMounted } from 'vue'
+import { useProductStore } from '../store/useProductStore'
+import { useWishlistStore } from '../store/useWishlistStore'
+import { toKebabCase } from "../utlis/toKebabCase"
 import WishlistBreakcrumb from '../../components/WishlistBreakcrumb.vue'
+import Breadcrumbs from '~/components/Breadcrumbs.vue'
 import WishlistShop from '../../components/WishlistShop.vue'
 import Swal from 'sweetalert2'
+import { useToast } from 'vue-toastification'
+
+const toast = useToast()
+
 
 useHead({
   title: "My Wishlist"
 })
+
 // Pinia Stores
 const productStore = useProductStore()
 const wishlistStore = useWishlistStore()
+
 // Refs
 const loading = ref(false)
-// Add to Cart Modal State
 const showAddToCartModal = ref(false)
-const showBulkAddModal = ref(false)
 const selectedProduct = ref(null)
 const selectedProductName = ref('')
 const selectedProductStock = ref(0)
@@ -657,123 +615,54 @@ const selectedSize = ref('')
 const selectedVariant = ref(null)
 const selectedVariantPrice = ref(0)
 const selectedVariantStock = ref(0)
-const selectedVariantImages = ref([]) // Images of selected variant
-const activeImageIndex = ref(0) // Current image index
+const selectedVariantImages = ref([])
+const activeImageIndex = ref(0)
 const quantity = ref(1)
 const errorMessage = ref('')
 const successMessage = ref('')
-const bulkSelections = ref({})
+
 // Computed properties
-const hasInStockItems = computed(() => {
-  return wishlistStore.items.some(product => getProductStock(product) > 0)
-})
-const inStockProducts = computed(() => {
-  return wishlistStore.items.filter(product => getProductStock(product) > 0)
-})
-const productsWithVariants = computed(() => {
-  return inStockProducts.value.filter(product => hasVariants(product))
-})
 const availableColors = computed(() => {
   if (!selectedProduct.value) return []
   return getAvailableColors(selectedProduct.value)
 })
+
 const availableSizes = computed(() => {
   if (!selectedProduct.value) return []
   return getAvailableSizes(selectedProduct.value)
 })
-const canAddToCart = computed(() => {
-  // Simplified: Always allow if stock > 0, even without variant selection (use main product)
-  return selectedProductStock.value > 0
-})
-const cartSummary = computed(() => {
-  try {
-    const cartData = localStorage.getItem('shopping_cart')
-    if (!cartData) return { itemCount: 0, totalPrice: 0 }
-   
-    const cart = JSON.parse(cartData)
-    const itemCount = cart.reduce((total, item) => total + item.quantity, 0)
-    const totalPrice = cart.reduce((total, item) => total + (item.price * item.quantity), 0)
-   
-    return { itemCount, totalPrice }
-  } catch (error) {
-    console.error('Error calculating cart summary:', error)
-    return { itemCount: 0, totalPrice: 0 }
-  }
-})
+
 // Helper functions from product store
 const getProductName = (product) => productStore.getProductName(product)
-const getProductImage = (product) => {
-  const image = productStore.getProductImage(product)
-  return image || '/assets/images/placeholder-product.jpg'
-}
-const getDiscountedPrice = (product) => {
-  // Always use discounted price for cart
-  return productStore.getDiscountedPrice(product)
-}
+const getPrimaryImage = (product) => productStore.getProductImage(product) || '/assets/images/placeholder-product.jpg'
+const getDiscountedPrice = (product) => productStore.getDiscountedPrice(product)
 const getOriginalPrice = (product) => productStore.getOriginalPrice(product)
 const getProductStock = (product) => productStore.getProductStock(product)
-const getProductCategory = (product) => productStore.getProductCategory(product)
 const getProductId = (product) => productStore.getProductId(product)
 const getProductRating = (product) => productStore.getProductRating(product) || 4.5
 const getReviewCount = (product) => productStore.getReviewCount(product) || 0
 const getColorHex = (color) => productStore.getColorHex(color)
-const getProductDescription = (product) => {
-return productStore.getDescription(product) || 'No description available'
-}
-const getDiscountValue = (product) => {
-  return product?.mainProduct?.discountValue || 0
-}
-const getProductAlertThreshold = (product) => {
-  return product?.mainProduct?.quantityAlertThreshold || 5
-}
+const getDiscountValue = (product) => product?.mainProduct?.discountValue || 0
+
 const formatPrice = (price) => {
   if (!price && price !== 0) return '0'
   return Number(price).toLocaleString('en-IN')
 }
-const getPrimaryImage = (product) => {
-  return getProductImage(product)
-}
+
 const getProductLink = (product) => {
   const productName = toKebabCase(getProductName(product))
   const productId = product.groupId || getProductId(product)
- 
-  let url = `/product/${productName}--${productId}`
- 
-  // Add color query param if available
-  const colors = getAvailableColors(product)
-  if (colors.length > 0) {
-    url += `?color=${encodeURIComponent(colors[0])}`
-  }
- 
-  return url
+  return `/shop-all/${productName}--${productId}`
 }
-const truncateDescription = (description, length = 60) => {
-  if (!description) return 'No description available'
-  return description.length > length
-    ? description.substring(0, length) + '...'
-    : description
+
+const getStockStatus = (product) => {
+  const stock = getProductStock(product)
+  if (stock > 10) return 'In Stock'
+  if (stock > 0) return 'Low Stock'
+  return 'Out of Stock'
 }
-const getTotalPrice = () => {
-  if (!selectedProduct.value) return 0
-  const price = selectedVariantPrice.value || getDiscountedPrice(selectedProduct.value)
-  return price * quantity.value
-}
-// Image functions
-const getCurrentMainImage = () => {
-  if (selectedVariantImages.value.length > 0 && activeImageIndex.value < selectedVariantImages.value.length) {
-    return selectedVariantImages.value[activeImageIndex.value]
-  }
-  return getProductImage(selectedProduct.value)
-}
-const setActiveImageIndex = (index) => {
-  activeImageIndex.value = index
-}
+
 // Variant functions
-const hasVariants = (product) => {
-  const colors = getAvailableColors(product)
-  const sizes = getAvailableSizes(product)
-  return colors.length > 0 || sizes.length > 0
-}
 const getAvailableColors = (product) => {
   if (!product?.variants || !Array.isArray(product.variants)) return []
   const colors = product.variants
@@ -781,6 +670,7 @@ const getAvailableColors = (product) => {
     .filter(Boolean)
   return [...new Set(colors)]
 }
+
 const getAvailableSizes = (product) => {
   if (!product?.variants || !Array.isArray(product.variants)) return []
   const sizes = product.variants
@@ -788,88 +678,111 @@ const getAvailableSizes = (product) => {
     .filter(Boolean)
   return [...new Set(sizes)]
 }
+
 const getColorImage = (color) => {
   if (!selectedProduct.value?.variants) return null
- 
-  // Find variant with this color to get its image
   const variant = selectedProduct.value.variants.find(v =>
     v?.attributes?.[0]?.color === color && v.images?.length > 0
   )
- 
-  if (variant?.images?.[0]?.imageUrl) {
-    return variant.images[0].imageUrl
-  }
- 
-  // If no variant image, try to get from main product
-  return getProductImage(selectedProduct.value)
+  return variant?.images?.[0]?.imageUrl || getPrimaryImage(selectedProduct.value)
 }
+
 const getVariantImages = (color, size) => {
   if (!selectedProduct.value?.variants) return []
- 
-  // Find variant matching color and size
+  
   const variant = selectedProduct.value.variants.find(v => {
     const variantColor = v?.attributes?.[0]?.color
     const variantSize = v?.attributes?.[0]?.size
-   
     const colorMatch = !color || variantColor === color
     const sizeMatch = !size || variantSize === size
-   
     return colorMatch && sizeMatch
   })
- 
+  
   if (variant?.images?.length > 0) {
     return variant.images.map(img => img.imageUrl).filter(Boolean)
   }
- 
-  // Fallback to main product images
+  
   return selectedProduct.value.mainProduct?.images?.map(img => img.imageUrl).filter(Boolean) || []
 }
+
 const getSizeGuide = (size) => {
   const sizeGuide = {
-    'XS': 'Extra Small - Fits chest 32-34"',
-    'S': 'Small - Fits chest 34-36"',
-    'M': 'Medium - Fits chest 38-40"',
-    'L': 'Large - Fits chest 40-42"',
-    'XL': 'Extra Large - Fits chest 42-44"',
-    'XXL': '2XL - Fits chest 44-46"',
-    'XXXL': '3XL - Fits chest 46-48"'
+    'XS': 'Extra Small',
+    'S': 'Small',
+    'M': 'Medium',
+    'L': 'Large',
+    'XL': 'Extra Large',
+    'XXL': '2XL',
+    'XXXL': '3XL'
   }
   return sizeGuide[size] || ''
 }
+
+const findMatchingVariant = () => {
+  if (!selectedProduct.value?.variants) return null
+  return selectedProduct.value.variants.find(variant => {
+    const variantColor = variant?.attributes?.[0]?.color
+    const variantSize = variant?.attributes?.[0]?.size
+    const colorMatch = !selectedColor.value || variantColor === selectedColor.value
+    const sizeMatch = !selectedSize.value || variantSize === selectedSize.value
+    return colorMatch && sizeMatch
+  })
+}
+
+// Image functions
+const getCurrentMainImage = () => {
+  if (selectedVariantImages.value.length > 0 && activeImageIndex.value < selectedVariantImages.value.length) {
+    return selectedVariantImages.value[activeImageIndex.value]
+  }
+  return getPrimaryImage(selectedProduct.value)
+}
+
+const setActiveImageIndex = (index) => {
+  activeImageIndex.value = index
+}
+
+// Quantity functions
+const getMaxQuantity = () => {
+  return selectedVariant.value?.stock ?? selectedProductStock.value
+}
+
+const getTotalPrice = () => {
+  if (!selectedProduct.value) return 0
+  const price = selectedVariantPrice.value || getDiscountedPrice(selectedProduct.value)
+  return price * quantity.value
+}
+
+const decreaseQuantity = () => {
+  if (quantity.value > 1 && selectedProductStock.value > 0) {
+    quantity.value--
+  }
+}
+
+const increaseQuantity = () => {
+  const maxQty = getMaxQuantity()
+  if (quantity.value < maxQty && selectedProductStock.value > 0) {
+    quantity.value++
+  }
+}
+
+const validateQuantity = () => {
+  if (quantity.value < 1) quantity.value = 1
+  const maxQty = getMaxQuantity()
+  if (quantity.value > maxQty) quantity.value = maxQty
+}
+
 const getStockPercentage = () => {
   const stock = selectedVariantStock.value ?? selectedProductStock.value
   const maxStock = selectedProduct.value?.mainProduct?.maxStock || 100
   return Math.min((stock / maxStock) * 100, 100)
 }
-const findMatchingVariant = () => {
-  if (!selectedProduct.value?.variants) return null
- 
-  return selectedProduct.value.variants.find(variant => {
-    const variantColor = variant?.attributes?.[0]?.color
-    const variantSize = variant?.attributes?.[0]?.size
-   
-    const colorMatch = !selectedColor.value || variantColor === selectedColor.value
-    const sizeMatch = !selectedSize.value || variantSize === selectedSize.value
-   
-    return colorMatch && sizeMatch
-  })
-}
-const getMaxQuantity = () => {
-  return selectedVariant.value?.stock ?? selectedProductStock.value
-}
-const isInWishlist = (product) => {
-  if (!product) return false
-  return wishlistStore.items.some(item =>
-    item.groupId === product.groupId ||
-    item.mainProduct?.id === product.mainProduct?.id
-  )
-}
+
 // Modal functions
 const openAddToCartModal = (product) => {
   selectedProduct.value = product
   selectedProductName.value = getProductName(product)
   selectedProductStock.value = getProductStock(product)
- 
+  
   // Reset selections
   selectedColor.value = ''
   selectedSize.value = ''
@@ -879,12 +792,12 @@ const openAddToCartModal = (product) => {
   quantity.value = 1
   errorMessage.value = ''
   successMessage.value = ''
- 
+  
   // Get initial images
   selectedVariantImages.value = getVariantImages('', '')
- 
   showAddToCartModal.value = true
 }
+
 const closeAddToCartModal = () => {
   showAddToCartModal.value = false
   setTimeout(() => {
@@ -897,127 +810,70 @@ const closeAddToCartModal = () => {
     successMessage.value = ''
   }, 300)
 }
-const openBulkAddModal = () => {
-  // Initialize bulk selections
-  bulkSelections.value = {}
-  productsWithVariants.value.forEach(product => {
-    const productId = getProductId(product)
-    bulkSelections.value[productId] = {
-      color: '',
-      size: ''
-    }
-  })
-  showBulkAddModal.value = true
-}
-const closeBulkAddModal = () => {
-  showBulkAddModal.value = false
-}
+
 // Selection functions
 const selectColor = (color) => {
   selectedColor.value = color
- 
-  // Update selected variant
   updateSelectedVariant()
- 
-  // Update images based on selected color
   selectedVariantImages.value = getVariantImages(color, selectedSize.value)
-  activeImageIndex.value = 0 // Reset to first image
+  activeImageIndex.value = 0
 }
+
 const selectSize = (size) => {
   selectedSize.value = size
- 
-  // Update selected variant
   updateSelectedVariant()
- 
-  // Update images based on selected size
   selectedVariantImages.value = getVariantImages(selectedColor.value, size)
-  activeImageIndex.value = 0 // Reset to first image
+  activeImageIndex.value = 0
 }
+
 const updateSelectedVariant = () => {
   if (!selectedProduct.value) return
- 
+  
   selectedVariant.value = findMatchingVariant()
   if (selectedVariant.value) {
-    // Always use discounted price
     selectedVariantPrice.value = getDiscountedPrice(selectedProduct.value)
     selectedVariantStock.value = selectedVariant.value.stock ?? selectedProductStock.value
-   
-    // Reset quantity if exceeds stock
+    
     if (quantity.value > selectedVariantStock.value) {
       quantity.value = selectedVariantStock.value
     }
-   
-    // Update images for the selected variant
+    
     selectedVariantImages.value = getVariantImages(selectedColor.value, selectedSize.value)
   } else {
     selectedVariantPrice.value = getDiscountedPrice(selectedProduct.value)
     selectedVariantStock.value = selectedProductStock.value
-   
-    // If no variant selected, show all images
     selectedVariantImages.value = getVariantImages('', '')
   }
 }
-// Quantity functions - ALWAYS ENABLED IF STOCK > 0, REGARDLESS OF SELECTION
-const decreaseQuantity = () => {
-  if (quantity.value > 1 && selectedProductStock.value > 0) {
-    quantity.value--
-  }
-}
-const increaseQuantity = () => {
-  const maxQty = getMaxQuantity()
-  if (quantity.value < maxQty && selectedProductStock.value > 0) {
-    quantity.value++
-  }
-}
-const validateQuantity = () => {
-  if (quantity.value < 1) {
-    quantity.value = 1
-  } 
-  const maxQty = getMaxQuantity()
-  if (quantity.value > maxQty) {
-    quantity.value = maxQty
-  } 
-}  
-// Watch for color/size changes
-watch([selectedColor, selectedSize], () => {
-  updateSelectedVariant()
-})
-// Add to Cart function
+
+// Cart functions
 const addToCart = (product, variant = null, qty = 1, selectedColor = null, selectedSize = null) => {
   try {
-    // Get existing cart or initialize
     const existingCart = localStorage.getItem('shopping_cart')
     let cart = existingCart ? JSON.parse(existingCart) : []
-   
-    // Use variant or main product
+    
     const targetProduct = variant || product.mainProduct || product
-   
-    // Check if product already exists in cart with same variant
+    
+    // Check if product already exists
     const existingIndex = cart.findIndex(item => {
       const sameProduct = item.productId === targetProduct.id
       const sameVariant = item.variantId === (variant?.id || null)
       const sameColor = item.color === selectedColor
       const sameSize = item.size === selectedSize
-     
       return sameProduct && sameVariant && sameColor && sameSize
     })
-   
-    // Always use discounted price
+    
     const discountedPrice = getDiscountedPrice(product)
-   
+    
     if (existingIndex > -1) {
-      // Update existing item quantity
       const newQuantity = cart[existingIndex].quantity + qty
       const maxQuantity = cart[existingIndex].maxStock ?? cart[existingIndex].stock
-     
-      if (newQuantity > maxQuantity) {
-        return false // Cannot exceed stock
-      }
-     
+      
+      if (newQuantity > maxQuantity) return false
+      
       cart[existingIndex].quantity = newQuantity
       cart[existingIndex].totalPrice = cart[existingIndex].price * newQuantity
     } else {
-      // Add new item
       const cartItem = {
         id: Date.now(),
         productId: targetProduct.id,
@@ -1026,32 +882,29 @@ const addToCart = (product, variant = null, qty = 1, selectedColor = null, selec
         color: selectedColor,
         size: selectedSize,
         sku: targetProduct.sku || product.mainProduct?.sku,
-        price: discountedPrice, // Discounted price saved
+        price: discountedPrice,
         quantity: qty,
         totalPrice: discountedPrice * qty,
-        image: getCurrentMainImage(), // Current selected image
+        image: getCurrentMainImage(),
         stock: variant?.stock ?? getProductStock(product),
         maxStock: variant?.stock ?? getProductStock(product),
         groupId: product.groupId || product.id
       }
       cart.push(cartItem)
     }
-   
-    // Save to localStorage
+    
     localStorage.setItem('shopping_cart', JSON.stringify(cart))
-   
-    // Dispatch cart update event
     window.dispatchEvent(new CustomEvent('cart-updated'))
-   
     return true
   } catch (error) {
     console.error('Error adding to cart:', error)
     return false
   }
 }
+
 const confirmAddToCart = () => {
   if (!selectedProduct.value) return
- 
+  
   const success = addToCart(
     selectedProduct.value,
     selectedVariant.value,
@@ -1059,88 +912,28 @@ const confirmAddToCart = () => {
     selectedColor.value,
     selectedSize.value
   )
- 
+  
   if (success) {
     successMessage.value = `✓ ${quantity.value} × ${selectedProductName.value} added to cart!`
-   
-    // Update cart count in UI
-    updateCartCount()
-   
-    // Auto close after 2 seconds
     setTimeout(() => {
-      if (successMessage.value) {
-        closeAddToCartModal()
-      }
+      if (successMessage.value) closeAddToCartModal()
     }, 500)
   } else {
     errorMessage.value = 'Failed to add product to cart. Stock might be insufficient.'
   }
 }
-const confirmBulkAddToCart = () => {
-  let successCount = 0
-  let failedCount = 0
- 
-  // Add all in-stock products
-  inStockProducts.value.forEach(product => {
-    const productId = getProductId(product)
-    const selections = bulkSelections.value[productId] || {}
-   
-    // Find matching variant based on selections
-    let variant = null
-    if (selections.color || selections.size) {
-      variant = product.variants?.find(v => {
-        const variantColor = v?.attributes?.[0]?.color
-        const variantSize = v?.attributes?.[0]?.size
-       
-        const colorMatch = !selections.color || variantColor === selections.color
-        const sizeMatch = !selections.size || variantSize === selections.size
-       
-        return colorMatch && sizeMatch
-      })
-    }
-   
-    const success = addToCart(
-      product,
-      variant,
-      1, // Default quantity 1 for bulk add
-      selections.color,
-      selections.size
-    )
-   
-    if (success) {
-      successCount++
-    } else {
-      failedCount++
-    }
-  })
- 
-  closeBulkAddModal()
-                  
-  if (successCount > 0) { 
-    alert(`Successfully added ${successCount} products to cart!`)
-  }
- 
-  if (failedCount > 0) {
-    alert(`Failed to add ${failedCount} products to cart.`)
-  }
-}
-// Update cart count function
-const updateCartCount = () => {
-  // This will trigger any cart count components to update
-  const event = new CustomEvent('cart-count-updated')
-  window.dispatchEvent(event)
-}
+
 // Wishlist actions
 const removeFromWishlist = async (product) => {
   const result = await Swal.fire({
     title: 'Remove item?',
-    text: 'This product will be removed from your wishlist.',
+    text: 'This product will be removed from your wishlist.', 
     icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Yes, remove',
     cancelButtonText: 'Cancel',
     reverseButtons: true,
-    buttonsStyling: false,
+    buttonsStyling: true,
     customClass: {
       popup: 'rounded-16',
       confirmButton: 'swal-confirm-btn',
@@ -1150,45 +943,314 @@ const removeFromWishlist = async (product) => {
 
   if (result.isConfirmed) {
     const removed = wishlistStore.removeItem(product)
-
     if (removed) {
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
-        title: 'Removed from wishlist',
-        showConfirmButton: false,
-        timer: 1800,
-        timerProgressBar: true
+      // Vue Toastification
+      toast.success('Removed from wishlist', {
+        position: 'top-right',
+        timeout: 1800,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
       })
     }
   }
 }
 
-const addToWishlist = () => {
-  if (selectedProduct.value) {
-    const added = wishlistStore.addItem(selectedProduct.value)
-    if (added) {
-      successMessage.value = 'Product added to wishlist!'
-    }
-  }
-}
 const clearWishlist = () => {
   const confirmClear = confirm('Are you sure you want to clear your entire wishlist?')
- 
   if (confirmClear) {
     wishlistStore.clearAll()
     alert('Wishlist cleared!')
   }
 }
+
 // Lifecycle hooks
 onMounted(() => {
-  // Wishlist store automatically loads from localStorage
   console.log('Wishlist items:', wishlistStore.items)
 })
 </script>
+
 <style scoped>
-/* Modal Styles - Simplified and Smoother */
+/* Cart-style Table Styling */
+.wishlist-table {
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.table.style-three {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table.style-three th,
+.table.style-three td {
+  padding: 20px 16px;
+  text-align: left;
+  border-bottom: 1px solid #f1f1f1;
+  vertical-align: middle;
+}
+
+.table.style-three th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #374151;
+  font-size: 16px;
+}
+
+.table.style-three tr:hover {
+  background-color: #f9fafb;
+}
+
+.table-product__thumb {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-product__thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.table-product__thumb:hover img {
+  transform: scale(1.05);
+}
+
+/* Variant Chips */
+.variant-info {
+  font-size: 13px;
+}
+
+.variant-chip {
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #f7f7f7;
+  color: #111;
+  font-weight: 500;
+  border: 1px solid #e5e5e5;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.variant-chip:hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+/* Remove Button */
+.remove-tr-btn {
+  transition: all 0.3s ease;
+  color: #6b7280;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.remove-tr-btn:hover {
+  color: #dc2626;
+  transform: translateX(-2px);
+}
+
+/* Button Styles */
+.btn-main {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-main:hover:not(.disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+
+.btn-main.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-outline-main {
+  background: transparent;
+  border: 2px solid #3b82f6;
+  color: #3b82f6;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-main:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+  border-radius: 16px 16px 0 0;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+/* Color and Size Options */
+.color-option {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.color-option:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.size-option {
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.size-option:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Quantity Input */
+.quantity__input {
+  -moz-appearance: textfield;
+}
+
+.quantity__input::-webkit-outer-spin-button,
+.quantity__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.quantity__input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Progress Bar */
+.progress {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar {
+  position: relative;
+  border-radius: 9999px;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* SweetAlert Customization */
 .swal-confirm-btn {
   background-color: #dc2626;
   color: #fff;
@@ -1209,296 +1271,85 @@ onMounted(() => {
   font-weight: 500;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 16px;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.3s ease-out;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-.modal-content {
-  background: white;
-  border-radius: 16px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
-  animation: modalSlideIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-.modal-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 10;
-  border-radius: 16px 16px 0 0;
-}
-.modal-title {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #111827;
-}
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #6b7280;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-.close-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-.modal-body {
-  padding: 20px;
-}
-/* Color Option Enhancements - Simpler */
-.color-option {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-.color-option:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-/* Size Option Enhancements - Simpler */
-.size-option {
-  position: relative;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-.size-option:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-}
-/* Quantity Input Styling */
-.quantity__input {
-  -moz-appearance: textfield;
-}
-.quantity__input::-webkit-outer-spin-button,
-.quantity__input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.quantity__input:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-/* Progress Bar - Smoother */
-.progress {
-  position: relative;
-  overflow: hidden;
-}
-.progress-bar {
-  position: relative;
-  border-radius: 9999px;
-}
-.progress-bar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.4) 50%,
-    transparent 100%
-  );
-  animation: shimmer 1.5s infinite;
-}
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-/* Main Image Container */
-.main-image-container {
-  position: relative;
-}
-.main-image-container img {
-  transition: transform 0.4s ease;
-}
-/* Quick Select Buttons */
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 /* Responsive Adjustments */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .wishlist-table {
+    padding: 20px;
+  }
+  
+  .table.style-three th,
+  .table.style-three td {
+    padding: 12px 8px;
+  }
+  
+  .flex-between {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .table-product {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .table-product__thumb {
+    width: 80px;
+    height: 80px;
+  }
+  
   .modal-content {
     max-width: 95%;
     margin: 8px;
     border-radius: 12px;
   }
- 
+  
   .color-option {
     width: 44px;
     height: 44px;
   }
- 
+  
   .size-option {
     min-width: 52px;
     padding: 8px 12px;
     font-size: 14px;
   }
- 
-  .grid.grid-cols-2 {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
- 
-  .modal-header {
-    padding: 12px;
-  }
- 
-  .modal-body {
-    padding: 16px;
-  }
 }
-/* Smooth transitions */
-* {
-  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
-}
-/* Custom scrollbar for modal - Simpler */
-.modal-content::-webkit-scrollbar {
-  width: 6px;
-}
-.modal-content::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
-}
-.modal-content::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-/* Product Card Styles - Enhanced */
-.wishlist-btn {
-  z-index: 10;
-  transition: all 0.4s ease;
-}
-.product-card {
-  position: relative;
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  background: white;
-}
-.product-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-}
-.text-line-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.badge {
-  font-size: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+
+/* Spinner Styles */
 .spinner-border {
   width: 3rem;
   height: 3rem;
 }
-/* Hover effects for product card */
-.product-card__thumb img {
-  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-.product-card:hover .product-card__thumb img {
-  transform: scale(1.12);
+
+/* Custom scrollbar */
+.wishlist-table::-webkit-scrollbar {
+  height: 6px;
 }
-/* Alert styles */
-.alert {
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-}
-.alert-success {
-  background-color: #d1fae5;
-  border-color: #10b981;
-  color: #065f46;
-}
-.alert-danger {
-  background-color: #fee2e2;
-  border-color: #ef4444;
-  color: #991b1b;
-}
-/* Bulk Add Modal */
-.max-h-300 {
-  max-height: 300px;
-}
-.max-h-300::-webkit-scrollbar {
-  width: 6px;
-}
-.max-h-300::-webkit-scrollbar-track {
-  background: #f1f5f9;
+
+.wishlist-table::-webkit-scrollbar-track {
+  background: #f1f1f1;
   border-radius: 3px;
 }
-.max-h-300::-webkit-scrollbar-thumb {
+
+.wishlist-table::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
-.max-h-300::-webkit-scrollbar-thumb:hover {
+
+.wishlist-table::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
-}
-/* Rounded corners for better design */
-.rounded-12 {
-  border-radius: 12px;
-}
-.rounded-xl {
-  border-radius: 12px;
 }
 </style>

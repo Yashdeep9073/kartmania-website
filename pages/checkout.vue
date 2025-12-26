@@ -14,7 +14,20 @@
         </span>
       </div>
 
-      <div class="row">
+      <!-- Empty Cart State -->
+      <div v-if="cartItems.length === 0" class="text-center py-80">
+        <div class="mb-32">
+          <i class="ph ph-shopping-cart text-6xl text-gray-300"></i>
+        </div>
+        <h4 class="text-2xl fw-bold text-gray-800 mb-16">Your cart is empty</h4>
+        <p class="text-gray-600 mb-32">Add some products to your cart to checkout</p>
+        <NuxtLink to="/shop-all" class="btn btn-main py-16 px-32 rounded-8">
+          <i class="ph ph-shopping-bag me-2"></i> Continue Shopping
+        </NuxtLink>
+      </div>
+
+      <!-- Checkout Form (Show only if cart has items) -->
+      <div v-else class="row">
         <!-- Checkout Form -->
         <div class="col-xl-9 col-lg-8">
           <form @submit.prevent="handleSubmit" class="pe-xl-5">
@@ -182,15 +195,23 @@
                 <span class="text-gray-900 fw-medium text-xl font-heading-two">Subtotal</span>
               </div>
 
-              <!-- Order Items List -->
+              <!-- Order Items List (From localStorage cart) -->
               <div 
-                v-for="item in orderItems" 
-                :key="item.id"
+                v-for="(item, index) in cartItems" 
+                :key="item.id || index"
                 class="flex-between gap-24 mb-32"
               >
                 <div class="flex-align gap-12">
                   <span class="text-gray-900 fw-normal text-md font-heading-two w-144">
                     {{ item.name }}
+                    <div v-if="item.color || item.size" class="variant-info flex-align gap-8 mt-1">
+                      <span v-if="item.color" class="text-xs text-gray-500">
+                        Color: {{ item.color }}
+                      </span>
+                      <span v-if="item.size" class="text-xs text-gray-500">
+                        Size: {{ Array.isArray(item.size) ? item.size.join(', ') : item.size }}
+                      </span>
+                    </div>
                   </span>
                   <span class="text-gray-900 fw-normal text-md font-heading-two">
                     <i class="ph-bold ph-x"></i>
@@ -200,7 +221,7 @@
                   </span>
                 </div>
                 <span class="text-gray-900 fw-bold text-md font-heading-two">
-                  ${{ (item.price * item.quantity).toFixed(2) }}
+                  ₹{{ (item.price * item.quantity).toFixed(2) }}
                 </span>
               </div>
 
@@ -209,25 +230,25 @@
                 <div class="mb-32 flex-between gap-8">
                   <span class="text-gray-900 font-heading-two text-xl fw-semibold">Subtotal</span>
                   <span class="text-gray-900 font-heading-two text-md fw-bold">
-                    ${{ subtotal.toFixed(2) }}
+                    ₹{{ subtotal.toFixed(2) }}
                   </span>
                 </div>
                 <div class="mb-32 flex-between gap-8">
                   <span class="text-gray-900 font-heading-two text-xl fw-semibold">Shipping</span>
                   <span class="text-gray-900 font-heading-two text-md fw-bold">
-                    {{ shippingCharge === 0 ? 'Free' : `$${shippingCharge.toFixed(2)}` }}
+                    {{ shippingCharge === 0 ? 'Free' : `₹${shippingCharge.toFixed(2)}` }}
                   </span>
                 </div>
                 <div class="mb-32 flex-between gap-8">
                   <span class="text-gray-900 font-heading-two text-xl fw-semibold">Tax</span>
                   <span class="text-gray-900 font-heading-two text-md fw-bold">
-                    ${{ tax.toFixed(2) }}
+                    ₹{{ tax.toFixed(2) }}
                   </span>
                 </div>
                 <div class="mb-0 flex-between gap-8">
                   <span class="text-gray-900 font-heading-two text-xl fw-semibold">Total</span>
                   <span class="text-gray-900 font-heading-two text-md fw-bold">
-                    ${{ total.toFixed(2) }}
+                    ₹{{ total.toFixed(2) }}
                   </span>
                 </div>
               </div>
@@ -281,7 +302,7 @@
                 <i class="ph ph-circle-notch ph-spin"></i> Processing...
               </span>
               <span v-else>
-                Place Order
+                Place Order (₹{{ total.toFixed(2) }})
               </span>
             </button>
           </div>
@@ -289,22 +310,39 @@
       </div>
     </div>
   </section>
-  <CartShop/>
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import CartShop from '~/components/cartShop.vue'
 
 const router = useRouter()
+
+// Cart items from localStorage
+const cartItems = ref([])
+
+// Load cart from localStorage
+const loadCartFromStorage = () => {
+  try {
+    const cartData = localStorage.getItem('shopping_cart')
+    if (cartData) {
+      cartItems.value = JSON.parse(cartData)
+      console.log('Cart loaded in checkout:', cartItems.value)
+    } else {
+      cartItems.value = []
+    }
+  } catch (error) {
+    console.error('Error loading cart:', error)
+    cartItems.value = []
+  }
+}
 
 // Form data
 const formData = reactive({
   firstName: '',
   lastName: '',
   businessName: '',
-  country: '',
+  country: 'IN', // Default to India
   address1: '',
   address2: '',
   city: '',
@@ -318,34 +356,6 @@ const formData = reactive({
 // Form validation errors
 const errors = reactive({})
 
-// Order items
-const orderItems = ref([
-  {
-    id: 1,
-    name: 'HP Chromebook With Intel Celeron',
-    price: 250.00,
-    quantity: 1
-  },
-  {
-    id: 2,
-    name: 'HP Chromebook With Intel Celeron',
-    price: 250.00,
-    quantity: 1
-  },
-  {
-    id: 3,
-    name: 'HP Chromebook With Intel Celeron',
-    price: 250.00,
-    quantity: 1
-  },
-  {
-    id: 4,
-    name: 'HP Chromebook With Intel Celeron',
-    price: 250.00,
-    quantity: 1
-  }
-])
-
 // Payment methods
 const paymentMethods = ref([
   {
@@ -355,13 +365,18 @@ const paymentMethods = ref([
   },
   {
     id: 2,
-    name: 'Check Payments',
-    description: 'Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode.'
+    name: 'UPI Payment',
+    description: 'Pay using any UPI app like Google Pay, PhonePe, Paytm. Scan the QR code or enter UPI ID.'
   },
   {
     id: 3,
     name: 'Cash on Delivery',
     description: 'Pay with cash upon delivery. Additional fees may apply.'
+  },
+  {
+    id: 4,
+    name: 'Credit/Debit Card',
+    description: 'Pay securely using your credit or debit card. We accept Visa, MasterCard, American Express.'
   }
 ])
 
@@ -370,17 +385,18 @@ const selectedPayment = ref(1) // Default to Direct Bank Transfer
 // Form submission state
 const isSubmitting = ref(false)
 
-// Calculate order totals
+// Calculate order totals from cart items
 const subtotal = computed(() => {
-  return orderItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  if (cartItems.value.length === 0) return 0
+  return cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 })
 
 const shippingCharge = computed(() => {
-  return subtotal.value > 100 ? 0 : 15 // Free shipping over $100
+  return subtotal.value > 500 ? 0 : 50 // Free shipping over ₹500
 })
 
 const tax = computed(() => {
-  return subtotal.value * 0.08 // 8% tax
+  return subtotal.value * 0.18 // 18% GST
 })
 
 const total = computed(() => {
@@ -390,6 +406,7 @@ const total = computed(() => {
 // Form validation
 const isFormValid = computed(() => {
   return (
+    cartItems.value.length > 0 &&
     formData.firstName &&
     formData.lastName &&
     formData.country &&
@@ -408,6 +425,13 @@ const validateForm = () => {
   Object.keys(errors).forEach(key => delete errors[key])
 
   let isValid = true
+
+  // Check if cart has items
+  if (cartItems.value.length === 0) {
+    alert('Your cart is empty. Please add items to cart before checkout.')
+    router.push('/cart')
+    return false
+  }
 
   // Required fields validation
   if (!formData.firstName.trim()) {
@@ -444,8 +468,8 @@ const validateForm = () => {
   if (!formData.phone.trim()) {
     errors.phone = 'Phone number is required'
     isValid = false
-  } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/\D/g, ''))) {
-    errors.phone = 'Please enter a valid phone number'
+  } else if (!/^[0-9]{10}$/.test(formData.phone.replace(/\D/g, ''))) {
+    errors.phone = 'Please enter a valid 10-digit phone number'
     isValid = false
   }
 
@@ -468,6 +492,12 @@ const handleSubmit = () => {
   }
 }
 
+// Clear cart after successful order
+const clearCartAfterOrder = () => {
+  localStorage.removeItem('shopping_cart')
+  cartItems.value = []
+}
+
 // Place order function
 const placeOrder = async () => {
   if (!validateForm()) {
@@ -480,28 +510,41 @@ const placeOrder = async () => {
   try {
     // Prepare order data
     const orderData = {
+      orderId: 'ORD' + Date.now(),
       customer: { ...formData },
-      items: orderItems.value,
+      items: cartItems.value,
       paymentMethod: paymentMethods.value.find(m => m.id === selectedPayment.value)?.name,
       subtotal: subtotal.value,
       shipping: shippingCharge.value,
       tax: tax.value,
       total: total.value,
       notes: formData.notes,
-      orderDate: new Date().toISOString()
+      orderDate: new Date().toISOString(),
+      status: 'pending'
     }
 
     // In a real app, you would send this to your backend API
     console.log('Order Data:', orderData)
     
+    // Save order to localStorage for order history
+    const existingOrders = JSON.parse(localStorage.getItem('order_history') || '[]')
+    existingOrders.push(orderData)
+    localStorage.setItem('order_history', JSON.stringify(existingOrders))
+    
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500))
 
-    // Show success message
-    alert('Order placed successfully! Thank you for your purchase.')
+    // Clear cart after successful order
+    clearCartAfterOrder()
     
-    // Redirect to order confirmation page
-    router.push('/order-confirmation')
+    // Redirect to order confirmation page with order details
+    // router.push({
+    //   path: '/order-confirmation',
+    //   query: {
+    //     orderId: orderData.orderId,
+    //     total: orderData.total
+    //   }
+    // })
     
   } catch (error) {
     console.error('Error placing order:', error)
@@ -526,8 +569,27 @@ Object.keys(formData).forEach(key => {
   })
 })
 
+// Load cart on component mount
 onMounted(() => {
+  loadCartFromStorage()
   loadUserData()
+  
+  // Listen for storage changes (if cart is updated in another tab)
+  if (typeof window !== 'undefined') {
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'shopping_cart') {
+        console.log('Cart updated in another tab, reloading in checkout...')
+        loadCartFromStorage()
+      }
+    })
+  }
+})
+
+// Cleanup event listener
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('storage', () => {})
+  }
 })
 </script>
 
@@ -621,6 +683,15 @@ onMounted(() => {
   color: #dc2626;
 }
 
+/* Variant info styles */
+.variant-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #666;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1199px) {
   .pe-xl-5 {
@@ -664,23 +735,6 @@ onMounted(() => {
   }
 }
 
-/* Grid system styles */
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin: -12px;
-}
-
-.gy-3 {
-  row-gap: 12px;
-}
-
-.col-sm-6,
-.col-xs-6,
-.col-12 {
-  padding: 12px;
-}
-
 /* Typography */
 .text-lg {
   font-size: 18px;
@@ -698,6 +752,10 @@ onMounted(() => {
   font-size: 14px;
 }
 
+.text-xs {
+  font-size: 12px;
+}
+
 .fw-semibold {
   font-weight: 600;
 }
@@ -712,62 +770,6 @@ onMounted(() => {
 
 .fw-medium {
   font-weight: 500;
-}
-
-/* Spacing */
-.mb-24 {
-  margin-bottom: 24px;
-}
-
-.mb-32 {
-  margin-bottom: 32px;
-}
-
-.mb-40 {
-  margin-bottom: 40px;
-}
-
-.mt-24 {
-  margin-top: 24px;
-}
-
-.mt-32 {
-  margin-top: 32px;
-}
-
-.mt-40 {
-  margin-top: 40px;
-}
-
-.mt-56 {
-  margin-top: 56px;
-}
-
-.py-80 {
-  padding-top: 80px;
-  padding-bottom: 80px;
-}
-
-/* Borders */
-.border-gray-100 {
-  border-color: #f3f4f6;
-}
-
-.border-bottom {
-  border-bottom: 1px solid;
-}
-
-.border-top {
-  border-top: 1px solid;
-}
-
-/* Backgrounds */
-.bg-color-three {
-  background-color: #f9fafb;
-}
-
-.bg-main-50 {
-  background-color: #f8f9fa;
 }
 
 /* Flex utilities */

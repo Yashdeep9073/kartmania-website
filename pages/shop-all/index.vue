@@ -395,25 +395,28 @@
               </div>
 
               <!-- Sort Dropdown -->
-              <div class="custom-dropdown d-none d-lg-block">
-                <button class="custom-btn" @click="toggleSortDropdown" :disabled="isLoading">
-                  <i class="ph ph-arrow-up-down"></i>
-                  <span>Sort by: {{ getSortLabel(filters.sortBy) }}</span>
-                  <i class="arrow" :class="{ open: isSortDropdownOpen }">▼</i>
-                </button>
+             <div class="custom-dropdown d-none d-lg-block">
+  <button class="custom-btn" @click="toggleSortDropdown" :disabled="isLoading">
+    <i class="ph ph-arrow-up-down"></i>
+    <span>Sort by: {{ getSortLabel(filters.sortBy) }}</span>
 
-                <ul v-if="isSortDropdownOpen" class="custom-menu">
-                  <li v-for="option in sortOptions" :key="option.value">
-                    <button
-                      :class="{ active: filters.sortBy === option.value }"
-                      @click="selectSortOption(option.value)"
-                      :disabled="isLoading"
-                    >
-                      {{ option.label }}
-                    </button>
-                  </li>
-                </ul>
-              </div>
+    <!-- arrow -->
+    <i class="arrow" :class="{ open: isSortDropdownOpen }">▼</i>
+  </button>
+
+  <ul v-if="isSortDropdownOpen" class="custom-menu">
+    <li v-for="option in sortOptions" :key="option.value">
+      <button
+        :class="{ active: filters.sortBy === option.value }"
+        @click="selectSortOption(option.value)"
+        :disabled="isLoading"
+      >
+        {{ option.label }}
+      </button>
+    </li>
+  </ul>
+</div>
+
 
               <!-- Mobile Sidebar Filter -->
               <button 
@@ -428,74 +431,73 @@
           </div>
 
           <!-- Active Filters Bar -->
-          <div v-if="hasActiveFilters" class="active-filters-bar mb-32">
-            <div class="d-flex align-items-center gap-12 mb-16">
-              <i class="ph ph-funnel"></i>
-              <span>Active Filters:</span>
-              
-              <button @click="copyURLToClipboard" class="btn-copy-link" :disabled="isLoading">
-                <i class="ph ph-copy"></i>Copy Link
-              </button>
-            </div>
-            
-            <div class="active-filters">
-              <!-- Category Filter -->
-              <div v-if="filters.category" class="active-filter-item">
-                <span>{{ filters.category }}</span>
-                <button @click="clearCategoryFilter" :disabled="isLoading">
-                  <i class="ph ph-x"></i>
-                </button>
-              </div>
-              
-              <!-- Brand Filter -->
-              <div v-if="filters.brand" class="active-filter-item">
-                <div>
-                  <img v-if="getBrandLogo(filters.brand)" 
-                        :src="getBrandLogo(filters.brand)" 
-                        :alt="filters.brand"
-                        class="brand-logo-sm"
-                        @error="handleImageError">
-                  <span>{{ filters.brand }}</span>
-                </div>
-                <button @click="clearBrandFilter" :disabled="isLoading">
-                  <i class="ph ph-x"></i>
-                </button>
-              </div>
-              
-              <!-- Color Filter -->
-              <div v-if="filters.color" class="active-filter-item">
-                <div>
-                  <span class="color-dot" :style="{ backgroundColor: getColorHex(filters.color) }"></span>
-                  <span>{{ filters.color }}</span>
-                </div>
-                <button @click="clearColorFilter" :disabled="isLoading">
-                  <i class="ph ph-x"></i>
-                </button>
-              </div>
-              
-              <!-- Size Filter -->
-              <div v-if="filters.size" class="active-filter-item">
-                <span>Size: {{ filters.size }}</span>
-                <button @click="clearSizeFilter" :disabled="isLoading">
-                  <i class="ph ph-x"></i>
-                </button>
-              </div>
-              
-              <!-- Price Filter -->
-              <div v-if="isPriceFilterApplied" class="active-filter-item">
-                <span>Price: ₹{{ formatPrice(filters.minPrice) }} - ₹{{ formatPrice(filters.maxPrice) }}</span>
-                <button @click="resetPriceFilter" :disabled="isLoading">
-                  <i class="ph ph-x"></i>
-                </button>
-              </div>
-              
-              <!-- Clear All Button -->
-              <button @click="clearAllFilters" class="btn-clear-all" :disabled="isLoading">
-                <i class="ph ph-x"></i>
-                Clear All
-              </button>
-            </div>
-          </div>
+        <div v-if="hasActiveFilters" class="active-filters-bar">
+  
+  <!-- Header -->
+  <div class="filters-header">
+    <div class="title">
+      <i class="ph ph-funnel"></i>
+      <span>Active Filters</span>
+    </div>
+
+    <div class="actions">
+      <button class="link-btn" @click="copyURLToClipboard" :disabled="isLoading">
+        <i class="ph ph-copy"></i>
+        Copy link
+      </button>
+
+      <button class="clear-all" @click="clearAllFilters" :disabled="isLoading">
+        Clear all
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Chips -->
+  <div class="filters-chips">
+
+    <!-- Category -->
+    <button v-if="filters.category" class="chip" @click="clearCategoryFilter">
+      {{ filters.category }}
+      <i class="ph ph-x"></i>
+    </button>
+
+    <!-- Brand -->
+    <button v-if="filters.brand" class="chip" @click="clearBrandFilter">
+      <img
+        v-if="getBrandLogo(filters.brand)"
+        :src="getBrandLogo(filters.brand)"
+        class="chip-logo"
+        @error="handleImageError"
+      />
+      {{ filters.brand }}
+      <i class="ph ph-x"></i>
+    </button>
+
+    <!-- Color -->
+    <button v-if="filters.color" class="chip" @click="clearColorFilter">
+      <span
+        class="color-dot"
+        :style="{ backgroundColor: getColorHex(filters.color) }"
+      ></span>
+      {{ filters.color }}
+      <i class="ph ph-x"></i>
+    </button>
+
+    <!-- Size -->
+    <button v-if="filters.size" class="chip" @click="clearSizeFilter">
+      Size: {{ filters.size }}
+      <i class="ph ph-x"></i>
+    </button>
+
+    <!-- Price -->
+    <button v-if="isPriceFilterApplied" class="chip" @click="resetPriceFilter">
+      ₹{{ formatPrice(filters.minPrice) }} – ₹{{ formatPrice(filters.maxPrice) }}
+      <i class="ph ph-x"></i>
+    </button>
+
+  </div>
+</div>
+
 
           <!-- Products -->
           <div>
@@ -728,7 +730,8 @@ import { useRoute } from 'vue-router'
 import { useProductStore } from '../../store/useProductStore'
 import { encodeId } from "../../utlis/encode"
 import { useWishlistStore } from '../../store/useWishlistStore'
-import { toast } from 'vue3-toastify'
+import { useToast } from "vue-toastification";
+const toast = useToast();
 
 const route = useRoute()
 const wishlistStore = useWishlistStore()
@@ -755,7 +758,7 @@ const isLoading = computed(() => productStore.isLoading)
 const products = computed(() => productStore.products)
 const categories = computed(() => productStore.categories)
 const colors = computed(() => productStore.colors)
-const sizes = computed(() => productStore.sizes)
+const sizes = computed(() => productStore.sizes) 
 const brands = computed(() => productStore.brands)
 const pagination = computed(() => productStore.pagination)
 const filters = computed(() => productStore.filters)
@@ -791,7 +794,7 @@ const getProductSize = (product) => productStore.getProductSize(product)
 const getProductRating = (product) => productStore.getProductRating(product) || 0
 const getReviewCount = (product) => productStore.getReviewCount(product) || 0
 const getPrimaryImage = (product) => productStore.getProductImage(product)
-const getDiscountedPrice = (product) => productStore.getDiscountedPrice(product)
+const getDiscountedPrice = (product) => productStore.getDiscountedPrice(product) 
 const getOriginalPrice = (product) => productStore.getOriginalPrice(product)
 const getDiscountValue = (product) => product.mainProduct?.discountValue || 0
 const getProductName = (product) => productStore.getProductName(product)
@@ -817,7 +820,7 @@ const getProductLink = (product) => {
   const productId = encodeId(getProductId(product))
   const productColor = getProductColor(product)
   
-  let url = `/product/${productName}--${product.groupId}`
+  let url = `/shop-all/${productName}--${product.groupId}`
   
   if (productColor) {
     url += `?color=${encodeURIComponent(productColor)}`
@@ -933,7 +936,7 @@ const goToPage = async (page) => {
   }
 }
 
-const getVisiblePages = () => {
+const getVisiblePages = () => { 
   const pages = []
   const total = pagination.value.lastPage
   const currentPage = filters.value.page
@@ -941,7 +944,7 @@ const getVisiblePages = () => {
   if (total <= 5) {
     for (let i = 1; i <= total; i++) pages.push(i)
   } else {
-    if (currentPage <= 3) {
+     if (currentPage <= 3) {
       for (let i = 1; i <= 4; i++) pages.push(i)
       pages.push('...')
       pages.push(total)
@@ -992,32 +995,29 @@ const addToWishlist = (product) => {
   try {
     const wasInWishlist = wishlistStore.hasProduct(product)
     wishlistStore.toggleItem(product)
-    if (wasInWishlist) {
-      toast.info('Removed from wishlist', { 
-        position: 'top-center',
-        autoClose: 1500,
-        hideProgressBar: true,
-        closeButton: false,
-        pauseOnHover: false,
-        theme: "dark",
-        draggable: false
-      })
-    } else {
-      toast.success('Added to wishlist', {
-        position: 'top-center',
-        autoClose: 1500,
-        hideProgressBar: true,
-        closeButton: false,
-        pauseOnHover: false,
-        theme: "dark",
-        draggable: false
-      })
+
+    const toastOptions = {
+      position: "top-center",
+      timeout: 1500,
+      hideProgressBar: true,
+      closeButton: false,
+      pauseOnHover: false,
+      draggable: false,
+      toastClassName: "dark-toast"
     }
+
+    if (wasInWishlist) {
+      toast.info("Removed from wishlist", toastOptions)
+    } else {
+      toast.success("Added to wishlist", toastOptions)
+    }
+
   } catch (error) {
-    console.error('Error toggling wishlist:', error)
-    toast.error('Error updating wishlist')
+    console.error("Error toggling wishlist:", error)
+    toast.error("Error updating wishlist")
   }
 }
+
 
 const isInWishlist = (product) => {
   try {
@@ -1042,7 +1042,7 @@ const quickView = (product) => {
 
 // URL Copy
 const copyURLToClipboard = async () => {
-  try {
+  try { 
     const url = window.location.href
     await navigator.clipboard.writeText(url)
     toast.success('Filter link copied to clipboard!')
@@ -1058,42 +1058,71 @@ const handleImageError = (event) => {
 }
 
 // Initialize
+// Initialize
 onMounted(async () => {
   try {
-    // 1. Pehle store ko initialize karo
-    await productStore.initialize()
+    // 1. First initialize the store
+    await productStore.initialize();
     
-    // 2. URL se filters apply karo (refresh ke baad wapas laane ke liye)
-    const query = route.query
+    // 2. Parse URL parameters and apply filters
+    const query = route.query;
     
-    if (query.category) await productStore.toggleCategoryFilter(query.category)
-    if (query.brand) await productStore.toggleBrandFilter(query.brand)
-    if (query.color) await productStore.toggleColorFilter(query.color)
-    if (query.size) await productStore.toggleSizeFilter(query.size)
-    if (query.sort) await productStore.updateFilters({ sortBy: query.sort })
+    // First clear any existing filters
+    await productStore.clearAllFilters();
     
+    // Apply URL filters sequentially
+    const filterPromises = [];
+    
+    if (query.category) {
+      filterPromises.push(productStore.toggleCategoryFilter(query.category));
+    }
+        
+    if (query.brand) {
+      filterPromises.push(productStore.toggleBrandFilter(query.brand));
+    }
+    
+    if (query.color) {
+      filterPromises.push(productStore.toggleColorFilter(query.color));
+    }
+    
+    if (query.size) {
+      filterPromises.push(productStore.toggleSizeFilter(query.size));
+    }
+    
+    // Apply other filters after category/brand/color/size
+    if (query.sort) {
+      filterPromises.push(productStore.updateFilters({ sortBy: query.sort }));
+    }
+    
+    // Apply price filters
     if (query.min_price || query.max_price) {
-      const min = parseInt(query.min_price) || 0
-      const max = parseInt(query.max_price) || defaultMaxPrice.value
-      await productStore.updateFilters({
+      const min = parseInt(query.min_price) || 0;
+      const max = parseInt(query.max_price) || defaultMaxPrice.value;
+      filterPromises.push(productStore.updateFilters({
         minPrice: Math.min(min, max),
         maxPrice: Math.max(min, max)
-      })
-      priceRange.value = { min, max }
+      }));
+      priceRange.value = { min, max };
     }
     
+    // Apply pagination
     if (query.page) {
-      const page = parseInt(query.page)
-      if (page > 0) await productStore.updateFilters({ page })
+      const page = parseInt(query.page);
+      if (page > 0) {
+        filterPromises.push(productStore.updateFilters({ page }));
+      }
     }
     
-    showInitialLoading.value = false
+    // Wait for all filters to be applied
+    await Promise.all(filterPromises);
+    
+    showInitialLoading.value = false;
   } catch (error) {
-    console.error('Initialization error:', error)
-    showInitialLoading.value = false
-    toast.error('Error loading products')
+    console.error('Initialization error:', error);
+    showInitialLoading.value = false;
+    toast.error('Error loading products');
   }
-})
+});
 
 onBeforeUnmount(() => {
   document.body.classList.remove('no-scroll')
@@ -1102,7 +1131,98 @@ onBeforeUnmount(() => {
 
 <style scoped>
 /* All styles remain the same as your original file */
-/* Skeleton Styles */
+/* Active Filters*/
+.arrow {
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform 0.25s ease;
+  transform: rotate(0deg);
+}
+
+.arrow.open {
+  transform: rotate(180deg); /* arrow upar chala jayega */
+}
+
+.active-filters-bar {
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.filters-header .title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.filters-header .actions {
+  display: flex;
+  gap: 12px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.clear-all {
+  background: none;
+  border: none;
+  color: #d32f2f;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filters-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  background: #f5f5f5;
+}
+
+.chip i {
+  font-size: 12px;
+}
+
+.color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.chip-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
 .review-badge {
   display: inline-flex;
   align-items: center;
@@ -1124,6 +1244,7 @@ onBeforeUnmount(() => {
   color: inherit;
   display: block;
 }
+/* Active Filters*/
 
 /* Title */
 .product-title {

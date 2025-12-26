@@ -21,7 +21,7 @@
           More than half the units sold in our stores from independent sellers.
         </p>
         <NuxtLink
-          to="/person/profile"
+          to="/profile"
           class="btn btn-main-two rounded-8"
         >
           Create An Account

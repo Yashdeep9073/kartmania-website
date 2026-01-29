@@ -1,5 +1,8 @@
 <template>
-  <section class="account-section py-5 py-md-120">
+  <div class=" pt-20 up">
+    <Breadcrumbprofile/>
+  </div>
+  <section class="account-section py-5 py-md-120"> 
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-lg-5 col-md-7 col-12">
@@ -21,7 +24,7 @@
               <div v-if="errorMessage" class="alert alert-danger mb-32 p-16 rounded-8">
                 <div class="flex-align gap-8">
                   <i class="ph ph-warning-circle text-danger-600 text-lg"></i>
-                  <span class="text-sm">{{ errorMessage }}</span>
+                  <span class="text-sm">{{ errorMessage }}</span> 
                 </div>
               </div>
 
@@ -255,16 +258,16 @@ const REGISTER_API = `${API_BASE_URL}/customer/auth/register`
 const showRegister = ref(false)
 const showLoginPassword = ref(false)
 const showRegisterPassword = ref(false)
-const isLoading = ref(false)
+const isLoading = ref(false)    
 
 // Messages
 const errorMessage = ref('')
-const successMessage = ref('')
+const successMessage = ref('') 
 
 // Form Data
 const loginForm = reactive({
   email: '',
-  password: '',
+  password: '', 
   remember: false
 })
 
@@ -313,7 +316,7 @@ const validateRegisterForm = () => {
     isValid = false
   } else if (registerForm.name.trim().length < 2) {
     errors.name = 'Name must be at least 2 characters'
-    isValid = false
+    isValid = false 
   }
 
   // Email validation
@@ -518,6 +521,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+  .up{
+  margin-top: 50px;
+}
 .account-section {
   min-height: calc(100vh - 120px);
   display: flex;

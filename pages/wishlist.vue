@@ -1,5 +1,5 @@
 <template>
-  <div class="pt-20">
+  <div class="pt-20 up">
 
   <Breadcrumbwishlist/>
   </div>
@@ -972,6 +972,9 @@ onMounted(() => {
 
 <style scoped>
 /* Cart-style Table Styling */
+.up{
+  margin-top: 50px;
+}
 .wishlist-table {
   background-color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);

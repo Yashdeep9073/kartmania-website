@@ -25,11 +25,6 @@
           :slides-per-view="slidesPerView"
           :space-between="10"
           :loop="categories.length > slidesPerView"
-          :autoplay="{
-            delay: 3000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true
-          }"
           :navigation="{
             nextEl: '.slick-next',
             prevEl: '.slick-prev'
@@ -70,7 +65,7 @@
         :modules="modules"
         :slides-per-view="1"
         :space-between="12"
-        :loop="categories.length > 4"
+        :loop="categories.length > 4" 
         class="deal-grid-swiper"
       >
         <!-- 1 slide = 4 cards -->
@@ -89,7 +84,7 @@
     <div
       class="deal-bg"
       :style="{
-        backgroundImage: `url(${getCategoryImage(category)})`
+        backgroundImage: `url(${getCategoryImage(category)})` 
       }"
     ></div>
 
@@ -137,16 +132,16 @@ const categories = ref([])
 const fallbackCategories = [
   {
     id: 1,
-    title: 'Vegetables',
+    title: 'T-shirts',
     products: '125+ Products',
-    image: '/assets/images/thumbs/feature-img1.png',
+    image: '/assets/images/mensection/t-shirt1.jpg',
     link: '/shop-all'
   },
   {
     id: 2,
-    title: 'Fish & Meats',
+    title: 'Pixel',
     products: '125+ Products',
-    image: '/assets/images/thumbs/feature-img2.png',
+    image: '/assets/images/recommended/camera.webp',
     link: '/shop-all'
   },
   {
@@ -216,12 +211,12 @@ const fallbackCategories = [
 
 // Responsive breakpoints - Same as original
 const breakpoints = {
-  320: { slidesPerView: 2 },
-  576: { slidesPerView: 3 },
-  768: { slidesPerView: 4 },
-  992: { slidesPerView: 5 },
-  1200: { slidesPerView: 6 },
-  1400: { slidesPerView: 7 }
+  320: { slidesPerView: 2.6 },
+  576: { slidesPerView: 3.6 },
+  768: { slidesPerView: 4.6 },
+  992: { slidesPerView: 5.6},
+  1200: { slidesPerView: 6.6 },
+  1400: { slidesPerView: 7.6 }
 }
 
 // Responsive slides per view - Same as original

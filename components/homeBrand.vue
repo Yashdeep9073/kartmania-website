@@ -1,91 +1,85 @@
 <template>
-  <div class="brand  overflow-hidden">
+  <section class="brand">
     <div class="container container-lg">
       <div class="brand-inner rounded-16">
-        <div class="section-heading">
-          <div class="flex-between flex-wrap gap-8">
-            <h5 class="mb-0 wow fadeInLeft">Shop by Brands</h5>
-            <div class="flex-align gap-16 wow fadeInRight">
-              <NuxtLink to="/shop-all" class="text-sm fw-medium text-gray-700 hover-text-main-600 hover-text-decoration-underline">
-                View All Deals
-              </NuxtLink>
-              <div class="flex-align gap-8">
-                <button type="button" class="brand-prev slick-arrow flex-center rounded-circle border border-gray-100 hover-border-main-600 text-xl hover-bg-main-600 hover-text-white transition-1">
-                  <i class="ph ph-caret-left"></i>
-                </button>
-                <button type="button" class="brand-next slick-arrow flex-center rounded-circle border border-gray-100 hover-border-main-600 text-xl hover-bg-main-600 hover-text-white transition-1">
-                  <i class="ph ph-caret-right"></i>
-                </button>
-              </div>
+
+        <!-- HEADER -->
+        <div class="section-heading flex-between flex-wrap gap-8">
+          <h5 class="mb-0">Shop by Brands</h5>
+
+          <div class="flex-align gap-12">
+            <NuxtLink
+              to="/shop-all"
+              class="text-sm fw-medium text-gray-700 hover-text-main-600"
+            >
+              View All
+            </NuxtLink>
+
+            <div class="flex-align gap-6">
+              <button class="brand-prev nav-btn">
+                <i class="ph ph-caret-left"></i>
+              </button>
+              <button class="brand-next nav-btn">
+                <i class="ph ph-caret-right"></i>
+              </button>
             </div>
           </div>
         </div>
-        
-        <!-- Loading State -->
+
+        <!-- LOADING -->
         <div v-if="loading" class="text-center py-40">
-          <div class="spinner" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-          <p class="mt-3 text-gray-600">Loading brands...</p>
+          <div class="spinner"></div>
+          <p class="mt-2 text-gray-600">Loading brands...</p>
         </div>
 
-        <!-- Error State -->
-        <div v-else-if="error" class="text-center py-40">
-          <div class="error-icon mb-3">
-            <i class="ph ph-warning-circle text-4xl text-red-500"></i>
-          </div>
-          <p class="text-red-600 mb-3">Failed to load brands. Please try again.</p>
-          <button @click="fetchBrands" class="btn-retry px-4 py-2 bg-main-600 text-white rounded-lg hover:bg-main-700 transition">
-            Retry
-          </button>
+        <!-- ERROR -->
+        <div v-else-if="error" class="text-center py-40 text-red-600">
+          {{ error }}
         </div>
 
-        <!-- Brands Slider -->
-        <div v-else-if="brands.length > 0" class="brand-slider arrow-style-two">
-          <div class="swiper-container">
-            <Swiper
-              :modules="[Navigation]"
-              :slides-per-view="6"
-              :space-between="20"
-              :navigation="{
-                nextEl: '.brand-next',
-                prevEl: '.brand-prev',
-              }"
-              :breakpoints="{
-                320: { slidesPerView: 2, spaceBetween: 10 },
-                576: { slidesPerView: 3, spaceBetween: 15 },
-                768: { slidesPerView: 4, spaceBetween: 15 },
-                992: { slidesPerView: 5, spaceBetween: 20 },
-                1200: { slidesPerView: 6, spaceBetween: 20 }
-              }"
+        <!-- SLIDER -->
+        <ClientOnly>
+          <Swiper
+            v-if="brands.length"
+            :modules="[Navigation]"
+            :slides-per-view="6"
+            :space-between="20"
+            :navigation="{
+              nextEl: '.brand-next',
+              prevEl: '.brand-prev'
+            }"
+            :breakpoints="{
+              320: { slidesPerView: 2 },
+              576: { slidesPerView: 3 },
+              768: { slidesPerView: 4 },
+              992: { slidesPerView: 5 },
+              1200: { slidesPerView: 6 }
+            }"
+          >
+            <SwiperSlide
+              v-for="brand in brands"
+              :key="brand.id"
             >
-              <SwiperSlide v-for="(brand, index) in brands" :key="brand.id">
-                <div class="brand-item" :data-aos="'zoom-in'" :data-aos-duration="(index + 1) * 200">
-                  <NuxtLink :to="`shop-all?brand=${brand.name}`" class="block">
-                    <img 
-                      :src="brand.logo" 
-                      :alt="brand.name"
-                      class="brand-logo"
-                      @error="handleImageError"
-                      loading="lazy"
-                    />
-                  </NuxtLink>
-                </div>
-              </SwiperSlide>
-            </Swiper>
-          </div>
-        </div>
+              <NuxtLink
+                :to="`/shop-all?brand=${encodeURIComponent(brand.name)}`"
+                class="brand-item"
+              >
+                <NuxtImg
+                  :src="brand.logo"
+                  :alt="brand.name"
+                  width="180"
+                  height="100"
+                  loading="lazy"
+                  class="brand-logo"
+                />
+              </NuxtLink>
+            </SwiperSlide>
+          </Swiper>
+        </ClientOnly>
 
-        <!-- Empty State -->
-        <div v-else class="text-center py-40">
-          <div class="empty-icon mb-3">
-            <i class="ph ph-storefront text-4xl text-gray-400"></i>
-          </div>
-          <p class="text-gray-600">No brands available at the moment.</p>
-        </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup>
@@ -94,96 +88,42 @@ import { Navigation } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 
-// Reactive state
 const brands = ref([])
-const loading = ref(false)
+const loading = ref(true)
 const error = ref(null)
 
-// Fetch brands from API
 const fetchBrands = async () => {
   try {
-    loading.value = true
-    error.value = null
-    
-    const { data, error: fetchError } = await useFetch(
+    const res = await $fetch(
       'https://kartmania-api.vibrantick.org/common/brand/read',
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000 // 10 seconds timeout
-      }
+      { timeout: 8000 }
     )
-    
-    if (fetchError.value) {
-      throw new Error(fetchError.value.message || 'Failed to fetch brands')
-    }
-    
-    if (data.value && data.value.success !== false && data.value.data) {
-      brands.value = data.value.data
+
+    if (res?.data) {
+      brands.value = res.data
     } else {
-      throw new Error(data.value?.message || 'No brands data received')
+      error.value = 'No brands found'
     }
   } catch (err) {
-    error.value = err.message || 'An error occurred'
-    console.error('Error fetching brands:', err)
-    brands.value = [] // Reset brands on error
+    console.error(err)
+    error.value = 'Failed to load brands'
   } finally {
     loading.value = false
   }
 }
 
-// Handle broken images
-const handleImageError = (event) => {
-  const fallbackImage = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f5f5f5"/><text x="50" y="55" font-family="Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="%23999">BRAND</text></svg>'
-  event.target.src = fallbackImage
-  event.target.classList.add('error-image')
-}
-
-// Fetch brands on component mount
-onMounted(() => {
-  fetchBrands()
-})
-
-// Optional: Auto-refresh every 5 minutes (uncomment if needed)
-/*
-const { pause, resume } = useInterval(300000, {
-  callback: fetchBrands,
-  immediate: false
-})
-
-onMounted(() => {
-  resume()
-})
-
-onUnmounted(() => {
-  pause()
-})
-*/
-
-// Or use setInterval:
-/*
-let refreshInterval = null
-
-onMounted(() => {
-  fetchBrands()
-  refreshInterval = setInterval(fetchBrands, 5 * 60 * 1000)
-})
-
-onUnmounted(() => {
-  if (refreshInterval) {
-    clearInterval(refreshInterval)
-  }
-})
-*/
+onMounted(fetchBrands)
 </script>
+
+
+
+
 
 <style scoped>
 .swiper-container {
   overflow: hidden;
   position: relative;
-  padding: 10px 0;
+  padding: 0px;
 }
 
 .swiper-slide {
@@ -324,7 +264,7 @@ onUnmounted(() => {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .brand {
-    padding: 20px 0; 
+    padding: 5px 0; 
   }
   
   /* .brand-inner {

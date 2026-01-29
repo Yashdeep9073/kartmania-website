@@ -2,6 +2,7 @@
 <template>
   <section class="flash-sales pt-60 pt-md-80 overflow-hidden">
     <div class="container container-lg">
+      <!-- <h3>Hurry up!!</h3> -->
       <!-- Loading State -->
       <div v-if="loading" class="row gy-4 arrow-style-two">
         <!-- Loading skeletons... (same as before) -->
@@ -14,7 +15,7 @@
         </div>
         <button @click="fetchFlashSales" class="btn btn-main mt-3">
           Retry
-        </button>
+        </button> 
       </div>
       
       <!-- Success State -->
@@ -29,14 +30,15 @@
               :data-aos="index === 0 ? 'fade-up' : 'fade-up'"
               :data-aos-duration="index === 0 ? '600' : '1000'"
             >
-              <div class="flash-sales-item rounded-16 overflow-hidden z-1 position-relative flex-align flex-0 justify-content-between gap-8 ps-56-px">
+              <div class="flash-sales-item rounded-16 overflow-hidden z-1 position-relative flex-align flex-0 justify-content-between gap-8 ps-56-px"
+              :class="imageToneMap[advertisement.id] ? 'dark-image' : 'light-image'">
                 <img 
                   :src="advertisement.image" 
                   :alt="advertisement.title"
                   class="position-absolute inset-block-start-0 inset-inline-start-0 w-100 h-100 object-fit-cover z-n1 flash-sales-item__bg"
                   loading="lazy"
                 >
-                <div :class="['flash-sales-item__content', index === 0 ? 'ms-sm-auto' : '']">
+                <div :class="['flash-sales-item__content', index === 0 ? 'ms-sm-auto' : '']"> 
                   <h6 class="text-32 mb-8">{{ advertisement.title }}</h6>
                   <p :class="index === 0 ? 'text-neutral-500 mb-12' : 'text-heading mb-12'">
                     {{ getDescription(advertisement) }}
@@ -57,7 +59,7 @@
                     </ul>
                   </div>
                   <NuxtLink 
-                    to="/shop" 
+                    to="/shop-all" 
                     :class="[
                       'btn d-inline-flex align-items-center rounded-pill gap-8 mt-24',
                       index === 0 ? 'btn-main' : 'bg-success-600 hover-bg-success-700'
@@ -80,11 +82,11 @@
             :space-between="16"
             :loop="true"
             :autoplay="{
-              delay: 4000,
+              delay: 3000,
               disableOnInteraction: false,
               pauseOnMouseEnter: true
             }"
-            :speed="600"
+            :speed="500"
             :grab-cursor="true"
             :pagination="{
               clickable: true,
@@ -97,7 +99,8 @@
               :key="advertisement.id"
               class="pb-40"
             >
-              <div class="flash-sales-item rounded-12 rounded-md-16 overflow-hidden z-1 position-relative h-100">
+              <div class="flash-sales-item rounded-12 rounded-md-16 overflow-hidden z-1 position-relative h-100"
+                :class="imageToneMap[advertisement.id] ? 'dark-image' : 'light-image'">
                 <img 
                   :src="advertisement.image" 
                   :alt="advertisement.title"
@@ -107,7 +110,7 @@
                 <div class="flash-sales-item__content p-16 p-md-24">
                   <h6 class="text-20 text-md-24 text-lg-32 mb-6 mb-md-8 fw-bold">{{ advertisement.title }}</h6>
                   <p :class="index === 0 ? 'text-neutral-500 mb-8 mb-md-12' : 'text-heading mb-8 mb-md-12 text-sm text-md-base'">
-                    {{ getDescription(advertisement) }}
+                    {{ getDescription(advertisement) }} 
                   </p>
                   <div class="countdown mb-16 mb-md-24">
                     <ul class="countdown-list flex-align flex-wrap gap-4">
@@ -118,7 +121,7 @@
                           'countdown-list__item py-4 py-md-6 px-8 px-md-10 flex-align gap-2 gap-md-3 text-xs text-md-sm fw-medium box-shadow-4xl rounded-5',
                           index === 1 ? 'bg-custom-countdown text-white' : 'text-heading bg-white'
                         ]"
-                      >
+                      > 
                         <span :class="timeUnit">{{ formatTime(getCountdownValue(index, timeUnit)) }}</span> 
                         <span class="d-none d-md-inline">{{ timeUnit.charAt(0).toUpperCase() }}</span>
                         <span class="d-inline d-md-none">{{ timeUnit.charAt(0) }}</span>
@@ -126,7 +129,7 @@
                     </ul>
                   </div>
                   <NuxtLink 
-                    to="/shop" 
+                    to="/shop-all" 
                     :class="[
                       'btn d-inline-flex align-items-center justify-content-center rounded-pill gap-4 gap-md-6 px-4 px-md-5 py-2 py-md-3 text-xs text-md-sm fw-semibold',
                       index === 0 ? 'btn-main' : 'bg-success-600 hover-bg-success-700 text-white'
@@ -158,6 +161,54 @@ import 'swiper/css/pagination'
 // Register Swiper modules
 const SwiperAutoplay = Autoplay
 const SwiperPagination = Pagination
+// Track dark/light image per ad (by id)
+const imageToneMap = ref<Record<number, boolean>>({})
+
+// Detect brightness
+const detectImageBrightness = (src: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.src = src
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return resolve(false)
+
+      canvas.width = img.width
+      canvas.height = img.height
+      ctx.drawImage(img, 0, 0)
+
+      let imageData: ImageData
+      try {
+        imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      } catch (err) {
+        // Could fail due to CORS/security, return safe default
+        return resolve(false)
+      }
+
+      const data = imageData.data
+      if (!data || data.length === 0) return resolve(false)
+
+      let brightness = 0
+  
+      // ensure we don't access undefined indices
+      for (let i = 0; i + 2 < data.length; i += 4) {
+        const r = data[i] ?? 0
+        const g = data[i + 1] ?? 0
+        const b = data[i + 2] ?? 0
+        brightness += (r + g + b) / 3
+      } 
+      const pixels = Math.max(1, data.length / 4)
+      brightness /= pixels
+
+      resolve(brightness < 120) // dark image threshold
+    }
+
+    img.onerror = () => resolve(false)
+  })
+}
 
 // Interfaces
 interface AdvertisementData {
@@ -270,6 +321,13 @@ const fetchFlashSales = async () => {
   } finally {
     loading.value = false
   }
+  // Detect brightness for each image
+for (const ad of flashSales.value) {
+  if (ad.image) {
+    imageToneMap.value[ad.id] = await detectImageBrightness(ad.image)
+  }
+}
+
 }
 
 // Get description with fallback
@@ -359,13 +417,49 @@ onUnmounted(() => {
 
 <style scoped>
 /* Custom Countdown Color for 2nd card (27, 181, 212, 0.727) */
+/*  Dark image → countdown BLACK */
+.dark-image .countdown-list__item {
+  background: #000 !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+/* Countdown number */
+.dark-image .countdown-list__item span {
+  color: #fff !important;
+}
+
+/* Hover effect (optional but nice) */
+.dark-image .countdown-list__item:hover {
+  background: #111 !important;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
+}
+
+.dark-image {
+  color: #fff;
+}
+
+.dark-image .text-heading,
+.dark-image h6,
+.dark-image p {
+  color: #fff !important;
+}
+
+/* .dark-image .text-neutral-500 {
+  color: rgba(255, 255, 255, 0.85) !important;
+} */
+
+/* Light image → default */
+.light-image {
+  color: #1e293b;
+}
+
 .bg-custom-countdown {
   background: rgba(27, 181, 212, 0.727) !important;
   border: none !important;
   color: white !important;
 }
 
-/* Original CSS styles preserved */
 .flash-sales-item {
   min-height: 300px;
 }
@@ -610,6 +704,7 @@ onUnmounted(() => {
   
   :deep(.swiper-pagination-bullet-active) {
     width: 20px;
+    background: rgb(78, 78, 78);
   }
 }
 

@@ -59,6 +59,10 @@
           <div class="swiper-wrapper">
             <!-- Deal 1: API ID 11 -->
             <div v-if="offerId11" class="swiper-slide">
+                     <NuxtLink
+    to="/shop-all/--1"
+    class="deal-card"
+  >
               <div class="deal-card" @click="handleDealClick(offerId11.id)">
                 <div class="deal-image-container">
                   <img 
@@ -92,10 +96,15 @@
                   </div>
                 </div>
               </div>
-            </div>
+               </NuxtLink>
+            </div> 
 
             <!-- Deal 2: API ID 12 -->
             <div v-if="offerId12" class="swiper-slide">
+                     <NuxtLink
+    to="/shop-all/--1"
+    class="deal-card"
+  >
               <div class="deal-card" @click="handleDealClick(offerId12.id)">
                 <div class="deal-image-container">
                   <img 
@@ -126,10 +135,16 @@
                   </div>
                 </div>
               </div>
+              </NuxtLink> 
             </div>
 
             <!-- Additional Static Deals -->
+             
             <div class="swiper-slide">
+              <NuxtLink
+    to="/shop-all/--1"
+    class="deal-card"
+  >
               <div class="deal-card" @click="handleDealClick(3)">
                 <div class="deal-image-container bank-card">
                   <div class="bank-offer-bg">
@@ -157,41 +172,46 @@
                   </div>
                 </div>
               </div>
+                </NuxtLink>
+
             </div>
 
             <div class="swiper-slide">
-              <div class="deal-card" @click="handleDealClick(4)">
-                <div class="deal-image-container">
-                  <img 
-                    src="https://images.unsplash.com/photo-1598327105854-c8674faddf74?w=400&h=500&fit=crop&auto=format" 
-                    alt="OnePlus Nord 5"
-                    class="deal-image"
-                    loading="lazy"
-                  />
-                  <div class="image-overlay"></div>
-                  
-                  <div class="deal-top-content">
-                    <div class="deal-title">Nord 5 - Latest Flagship</div>
-                  </div>
-                  
-                  <div class="deal-bottom-content">
-                    <div class="deal-price">
-                      <span class="current-price">₹29,999</span>
-                      <span class="original-price">₹34,999</span>
-                      <span class="discount-percent">14% off</span>
-                    </div>
-                    <!-- <div class="deal-offer">
-                      <span class="offer-tag">Free Magnetic Case*</span>
-                      <span class="rating">
-                        ★ 4.8 <span class="rating-count">(3.4k)</span>
-                      </span>
-                    </div> -->
-                  </div>
-                </div>
-              </div>
-            </div>
+  <NuxtLink
+    to="/shop-all/--1"
+    class="deal-card"
+  >
+    <div class="deal-image-container">
+      <img 
+        src="/assets/images/recommended/camera.webp" 
+        alt="OnePlus Nord 5"
+        class="deal-image"
+        loading="lazy"
+      />
+      
+      <div class="image-overlay"></div>
+
+      <div class="deal-top-content">
+        <div class="deal-title">Pixel - Latest Flagship</div>
+      </div>
+
+      <div class="deal-bottom-content">
+        <div class="deal-price">
+          <span class="current-price">₹29,999</span>
+          <span class="original-price">₹34,999</span>
+          <span class="discount-percent">14% off</span>
+        </div>
+      </div>
+    </div>
+  </NuxtLink>
+</div>
+
 
             <div class="swiper-slide">
+                <NuxtLink
+    to="/shop-all/--1"
+    class="deal-card"
+  >
               <div class="deal-card" @click="handleDealClick(5)">
                 <div class="deal-image-container">
                   <img 
@@ -221,9 +241,14 @@
                   </div>
                 </div>
               </div>
+              </NuxtLink>
             </div>
 
             <div class="swiper-slide">
+                 <NuxtLink
+    to="/shop-all/--1"
+    class="deal-card"
+  >
               <div class="deal-card" @click="handleDealClick(6)">
                 <div class="deal-image-container">
                   <img 
@@ -253,6 +278,7 @@
                   </div>
                 </div>
               </div>
+              </NuxtLink>
             </div>
           </div>
         </div>
@@ -440,7 +466,7 @@ onUnmounted(() => {
 .deals-header {
   padding: 0 20px 20px;
   border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 24px;
+  /* margin-bottom: 24px; */
 }
 
 .header-main {

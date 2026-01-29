@@ -30,7 +30,7 @@
             >
               <span class="tab-label">
                 {{ category.name }}
-              </span>
+              </span>  
             </button>
           </div>
         </div>
@@ -208,7 +208,7 @@ onMounted(async () => {
     await recommendStore.fetchProducts({
       page: 1,
       limit: productsPerPage,
-      category: null, // यहीं key है - null भेजें
+      category: null, 
       sortBy: 'popularity'
     })
     
@@ -1012,5 +1012,5 @@ const isBestSeller = (product) => recommendStore.isBestSeller(product)
 .view-more-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
+} 
 </style>

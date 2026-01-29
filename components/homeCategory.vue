@@ -3,14 +3,14 @@
     <h4 class="section-title">Explore Top Categories</h4>
 
     <!-- MAIN CATEGORIES -->
-    <div
+    <div 
       v-for="category in categories"
       :key="category.id"
       class="category-block"
     >
       <!-- Main category name OUTSIDE -->
       <h5 class="category-titlee">
-        {{ category.name }}
+        {{ category.name }} 
       </h5>
            
       <!-- Sub categories swiper --> 
@@ -95,7 +95,7 @@ const breakpoints = {
 const fallbackImage =
   'https://via.placeholder.com/300x300?text=Category'
 
-const API_URL =
+const API_URL = 
   'https://kartmania-api.vibrantick.org/common/product-category/read'
 
 const fetchCategories = async () => {

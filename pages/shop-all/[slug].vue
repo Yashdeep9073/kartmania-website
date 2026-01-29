@@ -10,9 +10,8 @@
        </div>
       <!-- Error State -->
        <div v-else-if="error" class="alert alert-danger" role="alert">
-        {{ error }}
+        {{ error }}  
        </div>
-
        <!-- Main Content -->
        <div v-else-if="mainProduct" class="row gy-4">
         <div class="col-lg-9">
@@ -329,7 +328,236 @@
         </div>
 
         <!-- Sidebar -->
+  <div class="col-lg-3">
+          <div class="product-details__sidebar border border-gray-100 rounded-16 overflow-hidden shadow-sm">
+            <!-- Store Info -->
+            <div class="p-24 bg-yellow-400">
+              <div class="flex-between rounded-full p-8">
+                <div class="flex-align gap-8">
+                  <span class="w-44 h-44 bg-white rounded-full flex-center text-2xl text-main-600">
+                    <i class="ph ph-storefront"></i>
+                  </span>
+                  <span class="text-white fw-semibold">by Marketpro</span>
+                </div>
+                <NuxtLink
+                  to="/shop"
+                  class="btn btn-white rounded-full text-uppercase fw-semibold transition-all duration-300"
+                >
+                  View Store
+                </NuxtLink>
+              </div>
+            </div>
 
+            <!-- Features Section -->
+            <div class="sidebar-features">
+              <!-- Fast Delivery -->
+              <div class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300">
+                <span class="w-44 h-44 bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-truck"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Fast Delivery</h6>
+                  <p class="text-gray-700 text-sm">Lightning-fast shipping, guaranteed.</p>
+                </div>
+              </div>
+
+              <!-- Free Returns -->
+              <div class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300">
+                <span class="w-44 h-44 bg-gradient-to-br from-green-100 to-green-50 text-green-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-arrow-u-up-left"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Free 90-day returns</h6>
+                  <p class="text-gray-700 text-sm">Shop risk-free with easy returns.</p>
+                </div>
+              </div>
+
+              <!-- Pickup Available -->
+              <div class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300">
+                <span class="w-44 h-44 bg-gradient-to-br from-purple-100 to-purple-50 text-purple-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-check-circle"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Pickup available at Shop location</h6>
+                  <p class="text-gray-700 text-sm">Usually ready in 24 hours</p>
+                </div>
+              </div>
+
+              <!-- Payment -->
+              <div class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-all duration-300">
+                <span class="w-44 h-44 bg-gradient-to-br from-yellow-100 to-yellow-50 text-yellow-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-credit-card"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Payment</h6>
+                  <p class="text-gray-700 text-sm">Payment upon receipt of goods, Payment by card in the department, Google Pay, Online card.</p>
+                </div>
+              </div>
+
+              <!-- Warranty -->
+              <div class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300">
+                <span class="w-44 h-44 bg-gradient-to-br from-red-100 to-red-50 text-red-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-check-circle"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Warranty</h6>
+                  <p class="text-gray-700 text-sm">The Consumer Protection Act does not provide for the return of this product of proper quality.</p>
+                </div>
+              </div>
+
+              <!-- Packaging -->
+              <div class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 transition-all duration-300">
+                <span class="w-44 h-44 bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-package"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Packaging</h6>
+                  <p class="text-gray-700 text-sm">Research & development value proposition graphical user interface investor.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cart Summary (LIVE UPDATES) -->
+            <div class="p-24 border-t border-gray-100">
+              <div class="flex-between mb-16">
+                <h6 class="text-sm fw-semibold text-gray-900">Cart Summary</h6>
+                <button @click="refreshCartSummary" class="text-xs text-main-600 hover:text-main-800 transition-colors">
+                  <i class="ph ph-arrows-clockwise"></i> Refresh
+                </button>
+              </div>
+              
+              <div v-if="cartItems.length > 0" class="space-y-4">
+                <!-- Cart Items List -->
+                <div class="max-h-60 overflow-y-auto pr-2 space-y-3">
+                  <div v-for="item in cartItems" :key="item.id" 
+                       class="cart-item border border-gray-100 rounded-lg p-12 bg-white">
+                    <div class="flex items-start gap-12">
+                      <div class="flex-shrink-0">
+                        <div class="w-40 h-40 rounded-lg overflow-hidden">
+                          <img :src="item.image" :alt="item.name" class="w-full h-full object-cover">
+                        </div>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex-between items-start">
+                          <div>
+                            <p class="text-xs font-medium text-gray-800 truncate">{{ item.name }}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                              <span v-if="item.color" class="text-xs text-gray-600">{{ item.color }}</span>
+                              <span v-if="item.size" class="text-xs text-gray-600">| {{ item.size }}</span>
+                            </div>
+                          </div>
+                          <button @click="removeFromCart(item.id)" 
+                                  class="text-gray-400 hover:text-red-500 transition-colors">
+                            <i class="ph ph-x text-sm"></i>
+                          </button>
+                        </div>
+                        
+                        <div class="flex-between items-center mt-8">
+                          <div class="flex items-center gap-2">
+                            <button @click="updateCartItemQuantity(item.id, -1)"
+                                    :disabled="item.quantity <= 1"
+                                    :class="['w-20 h-20 flex-center rounded-full text-xs transition-colors', 
+                                             item.quantity <= 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100']">
+                              <i class="ph ph-minus"></i>
+                            </button>
+                            <span class="text-sm font-medium w-24 text-center">{{ item.quantity }}</span>
+                            <button @click="updateCartItemQuantity(item.id, 1)"
+                                    :class="['w-20 h-20 flex-center rounded-full text-xs transition-colors', 
+                                             'text-gray-600 hover:bg-gray-100']">
+                              <i class="ph ph-plus"></i>
+                            </button>
+                          </div>
+                          <div class="text-right">
+                            <p class="text-xs font-semibold text-main-600">₹{{ (item.price * item.quantity).toFixed(2) }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cart Totals -->
+                <div class="pt-16 border-t border-gray-100 space-y-3">
+                  <div class="flex-between">
+                    <span class="text-sm text-gray-600">Total Items:</span>
+                    <span class="text-sm font-semibold">{{ cartItemCount }}</span>
+                  </div>
+                  <div class="flex-between">
+                    <span class="text-sm text-gray-600">Subtotal:</span>
+                    <span class="text-sm font-semibold">₹{{ cartSubtotal.toFixed(2) }}</span>
+                  </div>
+                  <div class="flex-between">
+                    <span class="text-sm text-gray-600">Shipping:</span>
+                    <span class="text-sm font-semibold text-green-600">FREE</span>
+                  </div>
+                  <div class="flex-between pt-8 border-t border-gray-200">
+                    <span class="text-sm font-semibold text-gray-900">Total:</span>
+                    <span class="text-lg font-bold text-main-600">₹{{ cartTotalPrice.toFixed(2)}}</span>
+                  </div>
+                  
+                  <NuxtLink to="/cart" class="btn btn-main w-100 mt-16">
+                    <i class="ph ph-shopping-cart me-2"></i> View Cart
+                  </NuxtLink>
+                  
+                  <NuxtLink to="/checkout" class="btn btn-outline-main w-100">
+                    <i class="ph ph-credit-card me-2"></i> Checkout
+                  </NuxtLink>
+                </div>
+              </div>
+              
+              <div v-else class="text-center py-8">
+                <div class="mb-12">
+                  <i class="ph ph-shopping-cart text-3xl text-gray-300"></i>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">Your cart is empty</p>
+                <p class="text-xs text-gray-400">Add items to your cart to see them here</p>
+              </div>
+            </div>
+
+            <!-- Variants Summary -->
+            <div v-if="variants.length > 0" class="p-24 border-t border-gray-100">
+              <h6 class="text-sm mb-16 fw-semibold text-gray-900">Available Variants</h6>
+              <div class="space-y-3 max-h-200 overflow-y-auto pr-2">
+                <div 
+                  v-for="variant in variants" 
+                  :key="variant.id"
+                  @click="selectVariant(variant)"
+                  :class="[
+                    'variant-item p-12 rounded-lg border cursor-pointer transition-all duration-300',
+                    selectedVariant?.id === variant.id 
+                      ? 'border-main-600 bg-main-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  ]"
+                >
+                  <div class="flex-between items-center">
+                    <div>
+                      <div class="flex-align gap-2 mb-2">
+                        <span class="text-xs text-gray-600">SKU:</span>
+                        <span class="text-xs font-medium">{{ variant.sku }}</span>
+                      </div>
+                      <div class="flex-align gap-2">
+                        <span class="text-xs text-gray-600">Color:</span>
+                        <span class="text-xs font-medium">{{ variant.color }}</span>
+                        <span class="text-xs text-gray-400 mx-2">•</span>
+                        <span class="text-xs text-gray-600">Size:</span>
+                        <span class="text-xs font-medium">{{ variant.size }}</span>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div :class="[
+                        'text-xs font-medium',
+                        variant.stock > 10 ? 'text-green-600' : 
+                        variant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
+                      ]">
+                        {{ variant.stock }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Product Tabs Section -->

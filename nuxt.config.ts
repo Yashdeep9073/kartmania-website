@@ -1,22 +1,21 @@
+
 export default defineNuxtConfig({
-  plugins: ['~/plugins/toast.client.js'],
+  plugins: [
+    '~/plugins/toast.client.js',
+    '~/plugins/scroll.client.ts'
+  ],
 
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   ssr: false,
   components: true,
 
-  devServer: {
-    port: 5180,
-    host: '127.0.0.1'
-  },
-
   modules: [
     '@nuxt/image',
     '@pinia/nuxt',
     '@vueuse/nuxt',
     '@nuxt/ui',
-    '@vite-pwa/nuxt' //  PWA MODULE ADDED
+    '@vite-pwa/nuxt'
   ],
 
   css: [
@@ -32,7 +31,7 @@ export default defineNuxtConfig({
         {
           rel: 'icon',
           type: 'image/png',
-          href: '/icons/icon-192.png' //  PWA icon
+          href: '/icons/icon-192.png'
         },
         {
           rel: 'stylesheet',
@@ -47,6 +46,7 @@ export default defineNuxtConfig({
         { rel: 'stylesheet', href: '/assets/css/main.css' },
         { rel: 'stylesheet', href: 'https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css' }
       ],
+
       script: [
         { src: 'https://unpkg.com/@phosphor-icons/web@2.1.1', defer: true },
         { src: '/assets/js/jquery-3.7.1.min.js', defer: true },
@@ -63,13 +63,7 @@ export default defineNuxtConfig({
         { src: '/assets/js/counter.min.js', defer: true },
         { src: '/assets/js/main.js', defer: true }
       ]
-    }
-  },
-
-  router: {
-    options: {
-      scrollBehaviorType: 'smooth'
-    }
+    },
   },
 
   build: {
@@ -78,43 +72,34 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      api: { 
-          Media:process.env.VITE_API_MEDIA,
-        categories: process.env.VITE_API_CATEGORIES, 
+      api: {
+        Media: process.env.VITE_API_MEDIA,
+        categories: process.env.VITE_API_CATEGORIES,
         colors: process.env.VITE_API_COLORS,
         sizes: process.env.VITE_API_SIZES,
         brands: process.env.VITE_API_BRANDS,
         graphql: process.env.VITE_API_GRAPHQL,
         blogs: process.env.VITE_API_BLOG,
-        contact: process.env.VITE_API_CONATCT
+        contact: process.env.VITE_API_CONATCT,
+        offers: process.env.VITE_API_OFFERS
       }
     }
   },
 
-  //PWA CONFIG
+  //  PWA CONFIG
   pwa: {
     registerType: 'autoUpdate',
-
     manifest: {
       name: 'Kartmania',
       short_name: 'Kartmania',
       description: 'Kartmania Ecommerce App',
       theme_color: '#ffffff',
       background_color: '#ffffff',
-      display: 'standalone',
+      display: 'standalone', 
       start_url: '/',
-
       icons: [
-        {
-          src: '/icons/icon-192.png',
-          sizes: '192x192',
-          type: 'image/png'
-        },
-        {
-          src: '/icons/icon-512.png',
-          sizes: '512x512',
-          type: 'image/png'
-        }
+        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
       ]
     }
   }

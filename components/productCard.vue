@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import { toKebabCase } from '~/utlis/toKebabCase';
 defineProps({
   product: {
@@ -15,4 +15,4 @@ defineProps({
     <p class="text-sm text-gray-600">₹ {{ product.price }}</p>
 
   </NuxtLink>
-</template>
+</template> -->

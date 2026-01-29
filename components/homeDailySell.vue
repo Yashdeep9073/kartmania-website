@@ -7,7 +7,7 @@
         </div>
       </div>
 
-      <div class="row g-12">
+        <div class="row g-12">
         <!-- Left Products Section -->
         <div class="col-xxl-8">
           <div class="row gy-4">
@@ -47,7 +47,7 @@
                     <span class="text-xs fw-bold text-gray-600">(17k)</span>
                   </div>
                   <h6 class="title text-lg fw-semibold mt-12 mb-8">
-                    <NuxtLink to="/product-details" class="link text-line-2">Taylor Farms Broccoli Florets Vegetables</NuxtLink>
+                    <NuxtLink to="/shop-all--1" class="link text-line-2">Taylor Farms Broccoli Florets Vegetables</NuxtLink>
                   </h6>
                   <div class="flex-align gap-4">
                     <span class="text-main-600 text-md d-flex"><i class="ph-fill ph-storefront"></i></span>
@@ -71,7 +71,7 @@
               <div class="product-card style-two h-100 p-8 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2 flex-align gap-16">
                 <div class="">
                   <span class="product-card__badge bg-danger-600 px-8 py-4 text-sm text-white">Sale 50%</span>
-                  <NuxtLink to="/product-details" class="product-card__thumb flex-center overflow-hidden">
+                  <NuxtLink to="/shop-all/--1" class="product-card__thumb flex-center overflow-hidden">
                     <img src="/assets/images/thumbs/best-sell2.png" alt="">
                   </NuxtLink>
                   <div class="countdown">
@@ -92,7 +92,7 @@
                   </div>
                 </div>
                 <div class="product-card__content">
-                  <div class="product-card__price mb-16">
+                  <div class="product-card__price mb-16"> 
                     <span class="text-gray-400 text-md fw-semibold text-decoration-line-through">$28.99</span>
                     <span class="text-heading text-md fw-semibold">$14.99 <span class="text-gray-500 fw-normal">/Qty</span></span>
                   </div>
@@ -102,7 +102,7 @@
                     <span class="text-xs fw-bold text-gray-600">(17k)</span>
                   </div>
                   <h6 class="title text-lg fw-semibold mt-12 mb-8">
-                    <NuxtLink to="/product-details" class="link text-line-2">Taylor Farms Broccoli Florets Vegetables</NuxtLink>
+                    <NuxtLink to="/shop-all/--1" class="link text-line-2">Taylor Farms Broccoli Florets Vegetables</NuxtLink>
                   </h6>
                   <div class="flex-align gap-4">
                     <span class="text-main-600 text-md d-flex"><i class="ph-fill ph-storefront"></i></span>
@@ -126,7 +126,7 @@
               <div class="product-card style-two h-100 p-8 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2 flex-align gap-16">
                 <div class="">
                   <span class="product-card__badge bg-danger-600 px-8 py-4 text-sm text-white">Sale 50%</span>
-                  <NuxtLink to="/product-details" class="product-card__thumb flex-center overflow-hidden">
+                  <NuxtLink to="/shop-all/--1" class="product-card__thumb flex-center overflow-hidden">
                     <img src="/assets/images/thumbs/best-sell3.png" alt="">
                   </NuxtLink>
                   <div class="countdown">
@@ -157,7 +157,7 @@
                     <span class="text-xs fw-bold text-gray-600">(17k)</span>
                   </div>
                   <h6 class="title text-lg fw-semibold mt-12 mb-8">
-                    <NuxtLink to="/product-details" class="link text-line-2">Taylor Farms Broccoli Florets Vegetables</NuxtLink>
+                    <NuxtLink to="/shop-all/--1" class="link text-line-2">Taylor Farms Broccoli Florets Vegetables</NuxtLink>
                   </h6>
                   <div class="flex-align gap-4">
                     <span class="text-main-600 text-md d-flex"><i class="ph-fill ph-storefront"></i></span>
@@ -181,7 +181,7 @@
               <div class="product-card style-two h-100 p-8 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2 flex-align gap-16">
                 <div class="">
                   <span class="product-card__badge bg-danger-600 px-8 py-4 text-sm text-white">Sale 50%</span>
-                  <NuxtLink to="/product-details" class="product-card__thumb flex-center overflow-hidden">
+                  <NuxtLink to="/shop-all/--1" class="product-card__thumb flex-center overflow-hidden">
                     <img src="/assets/images/thumbs/best-sell4.png" alt="">
                   </NuxtLink>
                   <div class="countdown">
@@ -212,7 +212,7 @@
                     <span class="text-xs fw-bold text-gray-600">(17k)</span>
                   </div>
                   <h6 class="title text-lg fw-semibold mt-12 mb-8">
-                    <NuxtLink to="/product-details" class="link text-line-2">Taylor Farms Broccoli Florets Vegetables</NuxtLink>
+                    <NuxtLink to="/shop-all/--1" class="link text-line-2">Taylor Farms Broccoli Florets Vegetables</NuxtLink>
                   </h6>
                   <div class="flex-align gap-4">
                     <span class="text-main-600 text-md d-flex"><i class="ph-fill ph-storefront"></i></span>
@@ -248,7 +248,7 @@
                 <span class="text-sm fw-medium text-heading">Delivery by 6:15am</span>
                 <span class="text-xs text-heading">Expire Aug 5</span>
               </div>
-              <NuxtLink to="/shop" class="mt-16 btn bg-success-600 hover-text-white hover-bg-success-700 text-white fw-medium d-inline-flex align-items-center rounded-pill gap-8">
+              <NuxtLink to="/shop-all" class="mt-16 btn bg-success-600 hover-text-white hover-bg-success-700 text-white fw-medium d-inline-flex align-items-center rounded-pill gap-8">
                 Shop Now
                 <span class="icon text-xl d-flex"><i class="ph ph-arrow-right"></i></span>
               </NuxtLink>

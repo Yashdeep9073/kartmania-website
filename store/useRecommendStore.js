@@ -2,14 +2,14 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
  const config = useRuntimeConfig()
 const graphql = config.public.api.graphql
-const API_URL_MEDIA = config.public.api.Media
+const API_URL_CATEGORY = config.public.api.categories
 export const useRecommendStore = defineStore('recommend', () => {
   // State
   const products = ref([])
   const categories = ref([])
   const isLoading = ref(false)
   const error = ref(null)
-  const pagination = ref({
+  const pagination = ref({  
     currentPage: 1,
     lastPage: 1,
     total: 0,
@@ -116,6 +116,7 @@ export const useRecommendStore = defineStore('recommend', () => {
     lastFetchTime.value[cacheKey] = Date.now()
     
     // Also save to localStorage for persistence
+
     try {
       localStorage.setItem(`products_cache_${cacheKey}`, JSON.stringify({
         products: data,
@@ -142,7 +143,7 @@ export const useRecommendStore = defineStore('recommend', () => {
         }
       })
     } catch (e) {
-      console.warn('LocalStorage load failed:', e)
+      console.warn('LocalStorage load failed:', e) 
     }
   }
 
@@ -164,6 +165,7 @@ const fetchProducts = async (filters = {}, forceRefresh = false) => {
     })
 
     // Check cache if not forcing refresh
+
     if (!forceRefresh) {
       const cached = getFromCache(cacheKey)
       if (cached) {
@@ -254,73 +256,88 @@ const fetchProducts = async (filters = {}, forceRefresh = false) => {
 }
 
   // Fetch categories with caching
-  const fetchCategories = async (forceRefresh = false) => {
-    try {
-      // Check cache first
-      if (!forceRefresh && categoryCache.value && isCacheValid('categories')) {
-        console.log(' Using cached categories')
-        categories.value = categoryCache.value
-        return categories.value
-      }
+const fetchCategories = async (forceRefresh = false) => {
+  try {
+    // Check cache first
+    if (!forceRefresh && categoryCache.value && isCacheValid('categories')) {
+      console.log('Using cached categories')
+      categories.value = categoryCache.value
+      return categories.value
+    }
 
-      isLoading.value = true
-      error.value = null
+    isLoading.value = true
+    error.value = null
 
-      console.log(' Fetching categories from API...')
+    console.log('Fetching categories from API...', API_URL_CATEGORY)
+    const response = await fetch(API_URL_CATEGORY)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
 
-      const response = await fetch(API_URL_MEDIA)
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+    const result = await response.json()
+    console.log('DEBUG: Categories API Response:', {
+      rawResponse: result,
+      hasData: !!result.data,
+      isArray: Array.isArray(result.data),
+      length: result.data?.length || 0
+    })
 
-      const result = await response.json()
-
-      if (result.data && Array.isArray(result.data)) {
-        const allCategories = result.data
-          .filter(category => 
-            category.name && 
-            category.id && 
-            !category.isDeleted
-          )
-          .map(category => ({
-            id: category.id.toString(),
+    if (result.data && Array.isArray(result.data)) {
+      // Process categories properly 
+      const allCategories = result.data
+        .map(category => {
+          // DEBUG: Log each category
+          console.log('Processing category:', {
+            id: category.id,
+            name: category.name,
+            productCount: category._count?.products,
+            hasProducts: (category._count?.products || 0) > 0
+          })
+          
+          return {
+            id: category.id.toString(), // Make sure id is string
             name: category.name,
             productCount: category._count?.products || 0,
             image: category.image,
             logo: category.logo,
             hasProducts: (category._count?.products || 0) > 0
-          }))
-          .sort((a, b) => {
-            if (a.hasProducts !== b.hasProducts) {
-              return b.hasProducts - a.hasProducts
-            }
-            if (b.productCount !== a.productCount) {
-              return b.productCount - a.productCount
-            }
-            return a.name.localeCompare(b.name)
-          })
+          }
+        })
+        .filter(category => {
+          // Filter out categories without proper data
+          const isValid = category.name && category.id
+          if (!isValid) {
+            console.warn('Invalid category filtered out:', category)
+          }
+          return isValid 
+        })
+        .sort((a, b) => {
+          // Sort by product count descending
+          return b.productCount - a.productCount
+        })
 
-        categories.value = allCategories
-        categoryCache.value = allCategories
-        lastFetchTime.value['categories'] = Date.now()
-        
-        console.log(` Categories fetched: ${allCategories.length} items`)
-      } else {
-        console.warn('No categories data in response')
-        categories.value = getFallbackCategories()
-      }
-
-      return categories.value
-    } catch (err) {
-      error.value = err.message
-      console.error(' Error fetching categories:', err)
+      console.log('Processed categories:', allCategories)
+      
+      categories.value = allCategories
+      categoryCache.value = allCategories
+      lastFetchTime.value['categories'] = Date.now()
+      
+      console.log(`Categories fetched: ${allCategories.length} items`)
+    } else {
+      console.warn('No categories data in response, using fallback')
       categories.value = getFallbackCategories()
-      return categories.value
-    } finally {
-      isLoading.value = false
     }
+
+    return categories.value
+  } catch (err) {
+    error.value = err.message
+    console.error('Error fetching categories:', err)
+    categories.value = getFallbackCategories()
+    return categories.value
+  } finally {
+    isLoading.value = false
   }
+}
 
   // Prefetch all categories' products 
   const prefetchAllCategoryProducts = async () => {
@@ -531,8 +548,7 @@ const switchCategory = async (categoryName) => {
       console.error('Initialize failed:', err)
       return { success: false, error: err.message }
     }
-  }
-
+  } 
   return {
     // State
     products,
@@ -546,7 +562,7 @@ const switchCategory = async (categoryName) => {
     hasCategories,
     getAllCategories,
     getCategoriesWithProducts,
-    
+
     // Actions
     fetchProducts,
     fetchCategories,

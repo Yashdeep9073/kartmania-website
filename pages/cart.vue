@@ -1,5 +1,5 @@
-<template>
-  <div class="pt-20">
+<template  >
+  <div class="pt-20 up">
      <CartBreakcrumb/>
   </div>
   
@@ -13,14 +13,14 @@
         <p class="mt-16">Loading cart...</p>
       </div>
 
-      <!-- Empty Cart State -->
+      <!-- Empty Cart State -->  
       <div v-else-if="cartItems.length === 0" class="text-center py-80">
         <div class="mb-32">
           <i class="ph ph-shopping-cart text-6xl text-gray-300"></i>
         </div>
         <h4 class="text-2xl fw-bold text-gray-800 mb-16">Your cart is empty</h4>
         <p class="text-gray-600 mb-32">Add some products to your cart to see them here</p>
-        <NuxtLink to="/product/shop-all" class="btn btn-main py-16 px-32 rounded-8">
+        <NuxtLink to="/shop-all" class="btn btn-main py-16 px-32 rounded-8">
           <i class="ph ph-shopping-bag me-2"></i> Continue Shopping
         </NuxtLink>
       </div>
@@ -548,6 +548,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+  .up{
+    margin-top: 50px;
+  }
   .variant-info {
   font-size: 13px;
 }

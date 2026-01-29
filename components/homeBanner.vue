@@ -2,53 +2,111 @@
 <template>
   <div class="banner pb-0">
     <div class="banner-item position-relative">
-      <!-- Static Camera Background (First Layer) -->
-      <!-- <div class="static-camera-bg position-absolute inset-block-start-0 inset-inline-start-0 w-100 h-100">
-        <img  
-          src="/assets/images/recommended/camera.webp" 
-          alt="Banner Background"
-          class="w-100 h-100 object-fit-cover opacity-50"
+      <!-- Loading State -->
+      <div 
+        v-if="isLoading" 
+        class="banner-loading position-absolute inset-0 d-flex align-items-center justify-content-center"
+      >
+        <div class="loading-content text-center">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading banners...</span>
+          </div>
+          <p class="text-muted">Loading banners...</p>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div 
+        v-else-if="isError" 
+        class="banner-error position-absolute inset-0 d-flex align-items-center justify-content-center"
+      >
+        <div class="error-content text-center p-4">
+          <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+          <p class="text-danger mb-3 fw-semibold">Failed to load banners</p>
+          <p class="text-muted mb-3 small">{{ error?.message || 'Network error' }}</p>
+          <button 
+            type="button"
+            class="btn btn-outline-danger btn-sm"
+            @click="handleRefresh"
+          >
+            <i class="fas fa-redo me-2"></i> Try Again
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div 
+        v-else-if="isEmpty" 
+        class="banner-empty position-absolute inset-0 d-flex align-items-center justify-content-center"
+      >
+        <div class="empty-content text-center p-4">
+          <i class="fas fa-images fa-3x text-secondary mb-3"></i>
+          <p class="text-muted mb-3">No banners available</p>
+          <button 
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            @click="handleRefresh"
+          >
+            <i class="fas fa-sync me-2"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Banner Content -->
+      <div v-else class="banner-main position-relative">
+        <!-- Swiper Container -->
+        <div 
+          ref="swiperContainer" 
+          class="swiper bannerSwiper"
+          :class="{ 'swiper-initialized': swiperInitialized }"
         >
-      </div> -->
+          <div class="swiper-wrapper">
+            <!-- Banner Slides -->
+            <div 
+              v-for="(banner, index) in banners" 
+              :key="`banner-${banner.id}-${index}`" 
+              class="swiper-slide"
+            >
+              <div class="banner-slide position-relative">
+                <!-- Background Image -->
+                <img 
+                  :src="banner.image" 
+                  :alt="banner.title || `Banner ${index + 1}`"
+                  class="api-bg position-absolute inset-0 w-100 h-100 object-fit-cover"
+                  loading="lazy"
+                  @error="handleImageError"
+                />
 
-      <!-- Swiper Container for API Images (Second Layer) -->
-      <div ref="swiperContainer" class="swiper bannerSwiper">
-        <div class="swiper-wrapper">
-          <!-- Dynamic Background Slides -->
-          <div v-for="(banner, index) in banners" :key="banner.id" class="swiper-slide">
-            <div class="banner-slide position-relative">
-              <!-- API Background Image -->
-              <img :src="banner.image" :alt="banner.title || `Banner Image ${index + 1}`"
-                class="api-bg position-absolute inset-block-start-0 inset-inline-start-0 w-100 h-100 object-fit-cover">
+                <!-- Overlay -->
+                <div class="banner-overlay position-absolute inset-0 w-100 h-100"></div>
 
-              <!-- Overlay for better text visibility -->
-              <div class="banner-overlay position-absolute inset-block-start-0 inset-inline-start-0 w-100 h-100"></div>
+                <!-- Content -->
+                <div class="banner-content position-relative z-1 h-100 d-flex align-items-center">
+                  <div class="container container-lg">
+                    <div class="row justify-content-center">
+                      <div class="col-lg-10 col-xl-8 text-center">
+                        <div class="banner-text-wrapper">
+                          <span class="banner-subtitle fw-semibold text-white text-uppercase mb-3 d-block">
+                            {{ banner.description || 'Save up to 50% off on your first order' }}
+                          </span>
+                          <h1 class="banner-title text-white mb-4">
+                            <div class="title-line">{{ banner.title || 'Daily Grocery Order and' }}</div>
+                            <div class="title-line">
+                              Get <span class="text-main-600">Express</span> Delivery
+                            </div>
+                          </h1>
 
-              <!-- Content Container -->
-              <div class="banner-content position-relative z-1 h-100 d-flex align-items-center">
-                <div class="container container-lg">
-                  <div class="row justify-content-center">
-                    <div class="col-lg-10 col-xl-8 text-center">
-                      <!-- Text Content -->
-                      <div class="banner-text-wrapper">
-                        <span class="banner-subtitle fw-semibold text-white text-uppercase mb-3 d-block">
-                          {{ banner.description || 'Save up to 50% off on your first order' }}
-                        </span>
-                        <h1 class="banner-title text-white mb-4">
-                          <div class="title-line">{{ banner.title || 'Daily Grocery Order and' }}</div>
-                          <div class="title-line">
-                            Get <span class="text-main-600">Express</span> Delivery
-                          </div>
-                        </h1>
-
-                        <!-- Call to Action Button -->
-                        <NuxtLink to="/shop-all">
-                          <div class="banner-actions mt-5">
-                            <button class="btn btn-primary btn-lg px-5 py-3 fw-semibold">
-                              Shop Now <i class="fas fa-arrow-right ms-2"></i>
-                            </button>
-                          </div>
-                        </NuxtLink>
+                          <NuxtLink to="/shop-all">
+                            <div class="banner-actions mt-5">
+                              <button 
+                                type="button"
+                                class="btn btn-primary btn-lg px-5 py-3 fw-semibold"
+                              >
+                                Shop Now <i class="fas fa-arrow-right ms-2"></i>
+                              </button>
+                            </div>
+                          </NuxtLink>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -56,97 +114,229 @@
               </div>
             </div>
           </div>
+
+          <!-- <div class="swiper-pagination"></div>
+
+          <div class="swiper-button-next"></div>
+          <div class="swiper-button-prev"></div> -->
         </div>
 
-        <!-- Swiper Pagination (Dots) -->
-        <div class="swiper-pagination"></div>
+        <!-- Revalidation Indicator -->
+        <div 
+          v-if="isValidating" 
+          class="revalidation-indicator position-absolute top-0 end-0 m-3"
+        >
+          <div class="spinner-border spinner-border-sm text-white" role="status">
+            <span class="visually-hidden">Updating...</span>
+          </div>
+          <span class="visually-hidden">Updating banners...</span>
+        </div>
+
+        <!-- Data Status Badge (for debugging) -->
+        <div 
+          v-if="isDev" 
+          class="data-status position-absolute bottom-0 start-0 m-2"
+        >
+          <span class="badge" :class="statusClass">{{ status }}</span>
+          <span class="badge bg-info ms-1">{{ banners?.length || 0 }} items</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue'
+import type { Swiper as SwiperType } from 'swiper'
+import type { SwiperOptions } from 'swiper/types'
+import { useBanners, type BannerItem } from '~/composables/useBanners'
+
 const config = useRuntimeConfig() 
 const API_URL = config.public.api.Media
-const API_URL_Category = config.public.api.categories
-// Type definitions
-interface BannerItem {
-  id: number
-  title: string
-  description: string
-  image: string
-  category: string
-}
 
-interface SwiperInstance {
-  slideNext: () => void
-  slidePrev: () => void
-  destroy: () => void
-}
+// Use SWR composable
+const { 
+  banners, 
+  isLoading, 
+  isError, 
+  isValidating, 
+  refresh, 
+  isEmpty,
+  status,
+  error 
+} = useBanners(API_URL)
 
-const swiperInstance = ref<SwiperInstance | null>(null)
+// Refs
+const swiperInstance = ref<SwiperType | null>(null)
 const swiperContainer = ref<HTMLElement | null>(null)
-const banners = ref<BannerItem[]>([])
+const swiperInitialized = ref(false)
 
-// Fetch banners from API
-const fetchBanners = async () => {
+// Check if in development mode (fix for import.meta error)
+const isDev = process.dev || process.env.NODE_ENV === 'development'
+
+// Computed
+const statusClass = computed(() => {
+  switch (status.value) {
+    case 'loading': return 'bg-warning'
+    case 'error': return 'bg-danger'
+    case 'empty': return 'bg-secondary'
+    case 'success': return 'bg-success'
+    default: return 'bg-dark'
+  }
+})    
+
+// Handle refresh button click
+const handleRefresh = () => {
+  refresh()
+}
+
+// Handle image loading errors
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  console.warn(`Failed to load banner image: ${img.src}`)
+  
+  // Use fallback image
+  img.src = '/images/fallback-banner.jpg'
+  
+  // Prevent infinite loops
+  img.onerror = null
+}
+
+// Initialize Swiper
+const initializeSwiper = async () => {
+  // Only run on client side
+  if (typeof window === 'undefined' || !swiperContainer.value || !banners.value?.length) {
+    return
+  }
+
   try {
-    const response = await fetch(API_URL)
-    if (!response.ok) {
-      throw new Error('Failed to fetch banners')
+    // Dynamic imports for Swiper
+    const SwiperModule = await import('swiper')
+    const { 
+      Autoplay, 
+      EffectFade, 
+      Pagination, 
+      Navigation,
+      Keyboard 
+    } = await import('swiper/modules')
+    
+    const Swiper = SwiperModule.default
+
+    // Destroy existing instance
+    if (swiperInstance.value) {
+      swiperInstance.value.destroy(true, true)
+      swiperInstance.value = null
     }
-    const data = await response.json()
-    if (data.data) {
-      // Filter for BANNER category
-      banners.value = data.data
-        .filter((item: BannerItem) => item.category === 'BANNER')
-        .slice(0, 3)
-      console.log('Banners loaded:', banners.value)
+
+    // Initialize new Swiper instance
+    const swiperOptions: SwiperOptions = {
+      modules: [Autoplay, EffectFade, Pagination, Navigation, Keyboard],
+      loop: true,
+      effect: 'fade' as const,
+      fadeEffect: {
+        crossFade: true
+      },
+      autoplay: {
+        delay: 5000,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true,
+        waitForTransition: true,
+      },
+      speed: 1000,
+      keyboard: {
+        enabled: true,
+        onlyInViewport: true,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+        dynamicBullets: true,
+        dynamicMainBullets: 3,
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      watchOverflow: true,
+      grabCursor: true,
+      breakpoints: {
+        320: {
+          spaceBetween: 0
+        },
+        768: {
+          spaceBetween: 0
+        },
+        1024: {
+          spaceBetween: 0
+        }
+      },
+      on: {
+        init: function (swiper) {
+          swiperInitialized.value = true
+          console.log('Swiper initialized with', swiper.slides.length, 'slides')
+        },
+        destroy: function () {
+          swiperInitialized.value = false
+        }
+      }
     }
+
+    swiperInstance.value = new Swiper(swiperContainer.value, swiperOptions)
+
   } catch (error) {
-    console.error('Error fetching banners:', error)
+    console.error('Failed to initialize Swiper:', error)
   }
 }
 
-onMounted(async () => {
-  // Fetch banners first
-  await fetchBanners()
-
-  if (import.meta.client && swiperContainer.value && banners.value.length > 0) {
-    try {
-      const Swiper = await import('swiper')
-      const { Autoplay, EffectFade, Pagination } = await import('swiper/modules')
-
-      // Initialize Swiper
-      swiperInstance.value = new Swiper.default(swiperContainer.value, {
-        modules: [Autoplay, EffectFade, Pagination],
-        loop: true,
-        effect: 'fade',
-        fadeEffect: {
-          crossFade: true
-        },
-        autoplay: {
-          delay: 2000,
-          disableOnInteraction: false,
-        },
-        speed: 1500, // Slower transition
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true,
-        },
-      }) as SwiperInstance
-
-      console.log('Swiper initialized successfully')
-    } catch (error) {
-      console.error('Swiper loading error:', error)
+// Watch for banner data changes
+watch(
+  () => banners.value,
+  (newBanners) => {
+    if (newBanners && newBanners.length > 0) {
+      // Use nextTick to ensure DOM is updated
+      nextTick(() => {
+        initializeSwiper()
+      })
+    } else if (swiperInstance.value) {
+      swiperInstance.value.destroy(true, true)
+      swiperInstance.value = null
     }
+  },
+  { deep: true, immediate: true }
+)
+
+// Handle window focus for revalidation
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && swiperInstance.value) {
+        const autoplay = (swiperInstance.value as any).autoplay
+        if (autoplay && autoplay.running) {
+          autoplay.start()
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Auto-refresh every 5 minutes
+    const refreshInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        refresh()
+      }
+    }, 5 * 60 * 1000) // 5 minutes
+
+    onUnmounted(() => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      clearInterval(refreshInterval)
+    })
   }
 })
 
+// Cleanup
 onUnmounted(() => {
   if (swiperInstance.value) {
-    swiperInstance.value.destroy()
+    swiperInstance.value.destroy(true, true)
     swiperInstance.value = null
   }
 })
@@ -477,6 +667,137 @@ onUnmounted(() => {
   .banner-subtitle {
     font-size: 0.65rem;
     display: none;
+  }
+}
+.banner-loading,
+.banner-error,
+.banner-empty {
+  min-height: 450px;
+  z-index: 10;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  backdrop-filter: blur(5px);
+}
+
+.banner-error {
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+}
+
+.banner-empty {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Revalidation Indicator */
+.revalidation-indicator {
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Data Status (Debug) */
+.data-status {
+  z-index: 15;
+  opacity: 0.8;
+}
+
+/* Swiper Improvements */
+.swiper-initialized .swiper-slide {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.swiper-initialized .swiper-slide-active,
+.swiper-initialized .swiper-slide-duplicate-active {
+  opacity: 1;
+}
+
+/* Accessibility Improvements */
+/* .swiper-button-next:focus,
+.swiper-button-prev:focus {
+  outline: 2px solid #ff6b35;
+  outline-offset: 2px;
+} */
+
+/* Performance Optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .api-bg,
+  .banner-text-wrapper,
+  .swiper-button-next,
+  .swiper-button-prev {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .swiper-slide {
+    transition: opacity 0.3s ease !important;
+  }
+  
+  .revalidation-indicator {
+    animation: none !important;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .banner-loading,
+  .banner-empty {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  }
+  
+  .banner-error {
+    background: linear-gradient(135deg, #2c1810 0%, #3d2318 100%);
+  }
+}
+
+/* CSS vendor prefix fix */
+.banner-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.banner-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .revalidation-indicator {
+    padding: 3px 8px;
+    font-size: 0.8rem;
+  }
+  
+  .data-status {
+    display: none; /* Hide debug info on mobile */
+  }
+}
+
+@media (max-width: 576px) {
+  .banner-subtitle {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+  
+  .banner-title {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 }
 </style>

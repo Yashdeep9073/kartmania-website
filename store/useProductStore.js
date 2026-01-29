@@ -9,7 +9,7 @@ export const useProductStore = defineStore('productStore', () => {
 
   // ==================== STATE ====================
   const state = ref({
-    // Product data
+    // Product data 
     products: [],
     filteredAndSortedProducts: [],
     allProducts: [],

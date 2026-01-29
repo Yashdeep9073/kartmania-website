@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import { onMounted } from "vue"
 import { useProductStore } from "@/stores/useProductStore"
 
@@ -22,4 +22,4 @@ onMounted(() => {
       </div>
     </div>
   </div>
-</template>
+</template> -->

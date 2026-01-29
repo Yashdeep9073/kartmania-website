@@ -5,7 +5,7 @@
     <HomeHeader />
         <slot/>   
     <HomeFooter/>   
-    <HomeFooterEnd/> 
+    <HomeFooterEnd/>  
   </div>
 </template>
 <script setup>

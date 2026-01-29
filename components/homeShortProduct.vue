@@ -1,14 +1,5 @@
 <template>
-  <!-- <div>
-    <button @click="show = !show">Show Products</button>
-
-    <div v-if="show">
-      <div v-for="item in products" :key="item.id">
-        {{ item.name }}
-      </div>
-    </div>
-  </div>  -->
-   <div class="short-product pt-110">
+  <div class="short-product pt-110">
     <div class="container container-lg">
       <div class="row gy-4">
         <!-- Featured Products -->
@@ -30,8 +21,8 @@
                 <SwiperSlide v-for="product in featuredProducts" :key="product.id">
                   <div class="flex-align gap-16">
                     <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
-                      <NuxtLink to="/product-details" class="link">
-                        <img :src="product.image" :alt="product.name">
+                      <NuxtLink to="shop-all/--1" class="link">
+                        <img :src="product.image" :alt="product.name" loading="lazy">
                       </NuxtLink>
                     </div>
                     <div class="product-card__content mt-12">
@@ -43,7 +34,9 @@
                         <span class="text-xs fw-bold text-gray-500">({{ product.reviews }})</span>
                       </div>
                       <h6 class="title text-lg fw-semibold mt-8 mb-8">
-                        <NuxtLink to="/product-details" class="link text-line-1">{{ product.name }}</NuxtLink>
+                        <NuxtLink to="shop-all/--1" class="link text-line-1">
+                          {{ product.name }}
+                        </NuxtLink>
                       </h6>
                       <div class="product-card__price flex-align gap-8">
                         <span class="text-heading text-md fw-semibold d-block">${{ product.price }}</span>
@@ -76,8 +69,8 @@
                 <SwiperSlide v-for="product in topSellingProducts" :key="product.id">
                   <div class="flex-align gap-16">
                     <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
-                      <NuxtLink to="/product-details" class="link">
-                        <img :src="product.image" :alt="product.name">
+                      <NuxtLink to="shop-all/--1" class="link">
+                        <img :src="product.image" :alt="product.name" loading="lazy">
                       </NuxtLink>
                     </div>
                     <div class="product-card__content mt-12">
@@ -89,7 +82,9 @@
                         <span class="text-xs fw-bold text-gray-500">({{ product.reviews }})</span>
                       </div>
                       <h6 class="title text-lg fw-semibold mt-8 mb-8">
-                        <NuxtLink to="/product-details" class="link text-line-1">{{ product.name }}</NuxtLink>
+                        <NuxtLink to="shop-all/--1" class="link text-line-1">
+                          {{ product.name }}
+                        </NuxtLink>
                       </h6>
                       <div class="product-card__price flex-align gap-8">
                         <span class="text-heading text-md fw-semibold d-block">${{ product.price }}</span>
@@ -122,8 +117,8 @@
                 <SwiperSlide v-for="product in onSaleProducts" :key="product.id">
                   <div class="flex-align gap-16">
                     <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
-                      <NuxtLink to="/product-details" class="link">
-                        <img :src="product.image" :alt="product.name">
+                      <NuxtLink to="shop-all/--1" class="link">
+                        <img :src="product.image" :alt="product.name" loading="lazy">
                       </NuxtLink>
                     </div>
                     <div class="product-card__content mt-12">
@@ -135,7 +130,9 @@
                         <span class="text-xs fw-bold text-gray-500">({{ product.reviews }})</span>
                       </div>
                       <h6 class="title text-lg fw-semibold mt-8 mb-8">
-                        <NuxtLink to="/product-details" class="link text-line-1">{{ product.name }}</NuxtLink>
+                        <NuxtLink to="shop-all/--1" class="link text-line-1">
+                          {{ product.name }}
+                        </NuxtLink>
                       </h6>
                       <div class="product-card__price flex-align gap-8">
                         <span class="text-heading text-md fw-semibold d-block">${{ product.price }}</span>
@@ -177,9 +174,10 @@
               <p class="text-neutral-300 fw-medium text-sm">Don't miss this opportunity at a special</p>
             </div>
             
-            <NuxtLink to="/product-details" class="product-card__thumb flex-center overflow-hidden">
-              <img src="/assets/images/thumbs/product-img32.png" alt="">
+            <NuxtLink to="shop-all/--1" class="product-card__thumb flex-center overflow-hidden">
+              <img :src="weekDealProduct.image" :alt="weekDealProduct.name" loading="lazy">
             </NuxtLink>
+            
             <div class="product-card__content w-100">
               <div class="flex-align gap-4">
                 <div class="flex-align gap-2 me-4">
@@ -189,25 +187,32 @@
                   <span class="text-12 fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
                   <span class="text-12 fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
                 </div>
-                <span class="text-xs fw-medium text-heading">(3)</span>
+                <span class="text-xs fw-medium text-heading">({{ weekDealProduct.reviews }})</span>
               </div>
               <div class="d-flex align-items-center gap-12 mt-6">
-                <h6 class="text-danger-600 mb-0 text-lg"> $60.99</h6>
-                <h6 class="text-neutral-300 fw-medium mb-0 text-lg">$79.99</h6>
+                <h6 class="text-danger-600 mb-0 text-lg"> ${{ weekDealProduct.price }}</h6>
+                <h6 class="text-neutral-300 fw-medium mb-0 text-lg">${{ weekDealProduct.originalPrice }}</h6>
               </div>
               
               <h6 class="title text-md fw-semibold mt-10 mb-0">
-                <NuxtLink to="/product-details" class="link text-line-2 fw-bold">Perfectly Packed Meat Combos for Delicious and Flavorful Meals Every Day</NuxtLink>
+                <NuxtLink to="shop-all/--1" class="link text-line-2 fw-bold">
+                  {{ weekDealProduct.name }}
+                </NuxtLink>
               </h6>   
-              <p class="text-gray-500 text-sm mt-12 pb-12 border-bottom border-neutral-100 mb-8">This product is about to run out</p>
+              
+              <p class="text-gray-500 text-sm mt-12 pb-12 border-bottom border-neutral-100 mb-8">
+                This product is about to run out
+              </p>
   
               <div class="progress w-100 bg-gray-100 rounded-pill h-8" role="progressbar" aria-label="Basic example" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">
                 <div class="progress-bar bg-success-600 rounded-pill" style="width: 35%"></div>
               </div>
+              
               <div class="d-flex align-items-center gap-6 mt-6">
                 <span class="text-sm text-gray-500">available only:</span>
-                <h6 class="text-danger-600 mb-0 text-md fw-semibold"> $60.99</h6>
+                <h6 class="text-danger-600 mb-0 text-md fw-semibold">${{ weekDealProduct.price }}</h6>
               </div>
+              
               <button @click="addToCart(weekDealProduct)" class="product-card__cart btn bg-success-600 text-white hover-bg-success-700 hover-text-white py-11 px-24 rounded-pill flex-align gap-8 mt-16 w-100 justify-content-center">
                 Add To Cart <i class="ph ph-shopping-cart"></i> 
               </button>
@@ -226,10 +231,10 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Autoplay } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/autoplay'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue' 
 
 // Wishlist state
-const isInWishlist = ref(false)
+const isInWishlist = ref(false) 
 
 // Toggle wishlist
 const toggleWishlist = () => {

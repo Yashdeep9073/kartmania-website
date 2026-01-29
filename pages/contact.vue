@@ -1,5 +1,5 @@
 <template>
-  <section class="contact py-80">
+  <section class="contact py-80 up">
     <div class="container container-lg">
       <div class="row gy-5">
         <!-- Contact Form -->
@@ -361,6 +361,9 @@ watch(() => formData.phone, () => {
 
 <style scoped>
 /* Form Styles */
+.up{
+  margin-top: 50px;
+}
 .contact-box {
   background: white;
   transition: all 0.3s ease;

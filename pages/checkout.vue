@@ -1,5 +1,5 @@
 <template>
-  <section class="checkout py-80">
+  <section class="checkout py-80 pt-100 up">
     <div class="container container-lg">
       <!-- Coupon Banner -->
       <div class="border border-gray-100 rounded-8 px-30 py-20 mb-40">
@@ -29,7 +29,7 @@
       <!-- Checkout Form (Show only if cart has items) -->
       <div v-else class="row">
         <!-- Checkout Form -->
-        <div class="col-xl-9 col-lg-8">
+        <div class="col-xl-8 col-lg-7">
           <form @submit.prevent="handleSubmit" class="pe-xl-5">
             <div class="row gy-3">
               <!-- Personal Information -->
@@ -74,11 +74,9 @@
                   required
                 >
                   <option value="">Select Country</option>
+                  <option value="IN">India</option>
                   <option value="US">United States (US)</option>
                   <option value="CA">Canada</option>
-                  <option value="UK">United Kingdom</option>
-                  <option value="AU">Australia</option>
-                  <option value="IN">India</option>
                 </select>
               </div>
               <div class="col-12">
@@ -181,7 +179,7 @@
         </div>
 
         <!-- Order Summary Sidebar -->
-        <div class="col-xl-3 col-lg-4">
+        <div class="col-xl-4 col-lg-5">
           <div class="checkout-sidebar">
             <!-- Order Header -->
             <div class="bg-color-three rounded-8 p-24 text-center">
@@ -195,7 +193,7 @@
                 <span class="text-gray-900 fw-medium text-xl font-heading-two">Subtotal</span>
               </div>
 
-              <!-- Order Items List (From localStorage cart) -->
+              <!-- Order Items List -->
               <div 
                 v-for="(item, index) in cartItems" 
                 :key="item.id || index"
@@ -254,29 +252,78 @@
               </div>
             </div>
 
-            <!-- Payment Methods -->
+            <!-- Payment Methods - Only 2 Options -->
             <div class="mt-32">
-              <div class="payment-item" v-for="method in paymentMethods" :key="method.id">
+              <h6 class="text-lg mb-20 fw-semibold">Select Payment Method</h6>
+              
+              <!-- Cash on Delivery -->
+              <div class="payment-item mb-3">
                 <div class="form-check common-check common-radio py-16 mb-0">
                   <input 
                     class="form-check-input" 
                     type="radio" 
                     v-model="selectedPayment"
-                    :value="method.id"
-                    :id="`payment${method.id}`"
+                    value="cod"
+                    id="paymentCOD"
                   />
                   <label 
-                    class="form-check-label fw-semibold text-neutral-600" 
-                    :for="`payment${method.id}`"
+                    class="form-check-label fw-semibold text-neutral-600 d-flex align-items-center gap-2" 
+                    for="paymentCOD"
                   >
-                    {{ method.name }}
+                    <i class="ph ph-money text-main-600"></i>
+                    Cash on Delivery
                   </label>
                 </div>
                 <div 
-                  v-show="selectedPayment === method.id"
+                  v-show="selectedPayment === 'cod'"
                   class="payment-item__content px-16 py-24 rounded-8 bg-main-50 position-relative"
                 >   
-                  <p class="text-gray-800">{{ method.description }}</p>
+                  <p class="text-gray-800 mb-3">
+                    Pay in cash when your order is delivered. 
+                    <span class="text-danger-600 fw-bold">₹{{ total.toFixed(2) }}</span> to be paid upon delivery.
+                  </p>
+                  <p class="text-sm text-gray-600">
+                    <i class="ph ph-info text-xs me-1"></i>
+                    Delivery executive will collect payment at your doorstep.
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Online Payment (Razorpay) -->
+              <div class="payment-item mb-3">
+                <div class="form-check common-check common-radio py-16 mb-0">
+                  <input 
+                    class="form-check-input" 
+                    type="radio" 
+                    v-model="selectedPayment"
+                    value="online"
+                    id="paymentOnline"
+                  />
+                  <label 
+                    class="form-check-label fw-semibold text-neutral-600 d-flex align-items-center gap-2" 
+                    for="paymentOnline"
+                  >
+                    <i class="ph ph-credit-card text-main-600"></i>
+                    Online Payment
+                  </label>
+                </div>
+                <div 
+                  v-show="selectedPayment === 'online'"
+                  class="payment-item__content px-16 py-24 rounded-8 bg-main-50 position-relative"
+                >   
+                  <p class="text-gray-800 mb-3">Pay securely via Razorpay (UPI, Cards, Net Banking, Wallets)</p>
+                  <div class="mt-3">
+                    <small class="text-gray-600">
+                      <i class="ph ph-info text-xs me-1"></i>
+                      Payment amount: <strong>₹{{ total.toFixed(2) }}</strong>
+                    </small>
+                  </div>
+                  <div class="payment-options flex-align gap-2 mt-3">
+                    <span class="badge bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">UPI</span>
+                    <span class="badge bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Cards</span>
+                    <span class="badge bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">Net Banking</span>
+                    <span class="badge bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Wallets</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -285,7 +332,7 @@
             <div class="mt-32 pt-32 border-top border-gray-100">
               <p class="text-gray-500">
                 Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our 
-                <NuxtLink to="/privacy-policy" class="text-main-600 text-decoration-underline">
+                <NuxtLink to="/profile" class="text-main-600 text-decoration-underline">
                   privacy policy
                 </NuxtLink>.
               </p>
@@ -293,7 +340,7 @@
 
             <!-- Place Order Button -->
             <button 
-              @click="placeOrder"
+              @click="processOrder"
               :disabled="isSubmitting || !isFormValid"
               class="btn btn-main mt-40 py-18 w-100 rounded-8 mt-56"
               :class="{ 'disabled': isSubmitting || !isFormValid }"
@@ -302,9 +349,51 @@
                 <i class="ph ph-circle-notch ph-spin"></i> Processing...
               </span>
               <span v-else>
-                Place Order (₹{{ total.toFixed(2) }})
+                {{ selectedPayment === 'cod' ? 'Place Order (COD)' : `Pay ₹${total.toFixed(2)}` }}
               </span>
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Status Modal -->
+    <div v-if="showPaymentModal" class="payment-modal-overlay">
+      <div class="payment-modal">
+        <div class="modal-header">
+          <h3>Payment Status</h3>
+          <button @click="closePaymentModal" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div v-if="paymentStatus === 'success'" class="text-center">
+            <div class="success-icon mb-3">
+              <i class="ph ph-check-circle text-success-600 text-5xl"></i>
+            </div>
+            <h4 class="text-success-600 fw-bold mb-2">Payment Successful!</h4>
+            <p class="text-gray-600 mb-4">Your payment of ₹{{ total.toFixed(2) }} has been processed successfully.</p>
+            <p class="text-sm text-gray-500">Order ID: {{ currentOrderId }}</p>
+            <button @click="redirectToSuccess" class="btn btn-success mt-4">
+              Continue to Order Confirmation
+            </button>
+          </div>
+          
+          <div v-else-if="paymentStatus === 'failed'" class="text-center">
+            <div class="failed-icon mb-3">
+              <i class="ph ph-x-circle text-danger-600 text-5xl"></i>
+            </div>
+            <h4 class="text-danger-600 fw-bold mb-2">Payment Failed</h4>
+            <p class="text-gray-600 mb-4">{{ paymentErrorMessage || 'Payment could not be processed.' }}</p>
+            <button @click="closePaymentModal" class="btn btn-danger mt-2">
+              Try Again
+            </button>
+          </div>
+          
+          <div v-else class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <h4 class="text-primary fw-bold mb-2">Processing Payment</h4>
+            <p class="text-gray-600">Please wait while we process your payment...</p>
           </div>
         </div>
       </div>
@@ -318,8 +407,25 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
+// API endpoints
+const API_BASE = 'http://localhost:3004/common'
+const ORDER_CREATE_API = `${API_BASE}/order/create`
+const PAYMENT_CREATE_API = `${API_BASE}/payment/create`
+const PAYMENT_VERIFY_API = `${API_BASE}/payment/verify`
+
 // Cart items from localStorage
 const cartItems = ref([])
+
+// Payment related refs
+const showPaymentModal = ref(false)
+const isSubmitting = ref(false)
+const paymentStatus = ref(null)
+const paymentErrorMessage = ref('')
+const currentOrderId = ref(null)
+const currentPaymentId = ref(null)
+
+// Payment method
+const selectedPayment = ref('cod') // Default to COD
 
 // Load cart from localStorage
 const loadCartFromStorage = () => {
@@ -327,7 +433,6 @@ const loadCartFromStorage = () => {
     const cartData = localStorage.getItem('shopping_cart')
     if (cartData) {
       cartItems.value = JSON.parse(cartData)
-      console.log('Cart loaded in checkout:', cartItems.value)
     } else {
       cartItems.value = []
     }
@@ -342,7 +447,7 @@ const formData = reactive({
   firstName: '',
   lastName: '',
   businessName: '',
-  country: 'IN', // Default to India
+  country: 'IN',
   address1: '',
   address2: '',
   city: '',
@@ -356,47 +461,18 @@ const formData = reactive({
 // Form validation errors
 const errors = reactive({})
 
-// Payment methods
-const paymentMethods = ref([
-  {
-    id: 1,
-    name: 'Direct Bank Transfer',
-    description: 'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.'
-  },
-  {
-    id: 2,
-    name: 'UPI Payment',
-    description: 'Pay using any UPI app like Google Pay, PhonePe, Paytm. Scan the QR code or enter UPI ID.'
-  },
-  {
-    id: 3,
-    name: 'Cash on Delivery',
-    description: 'Pay with cash upon delivery. Additional fees may apply.'
-  },
-  {
-    id: 4,
-    name: 'Credit/Debit Card',
-    description: 'Pay securely using your credit or debit card. We accept Visa, MasterCard, American Express.'
-  }
-])
-
-const selectedPayment = ref(1) // Default to Direct Bank Transfer
-
-// Form submission state
-const isSubmitting = ref(false)
-
-// Calculate order totals from cart items
+// Calculate order totals
 const subtotal = computed(() => {
   if (cartItems.value.length === 0) return 0
   return cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 })
 
 const shippingCharge = computed(() => {
-  return subtotal.value > 500 ? 0 : 50 // Free shipping over ₹500
+  return subtotal.value > 500 ? 0 : 50
 })
 
 const tax = computed(() => {
-  return subtotal.value * 0.18 // 18% GST
+  return subtotal.value * 0.18
 })
 
 const total = computed(() => {
@@ -421,19 +497,16 @@ const isFormValid = computed(() => {
 
 // Validate form
 const validateForm = () => {
-  // Clear previous errors
   Object.keys(errors).forEach(key => delete errors[key])
-
+  
   let isValid = true
 
-  // Check if cart has items
   if (cartItems.value.length === 0) {
     alert('Your cart is empty. Please add items to cart before checkout.')
     router.push('/cart')
     return false
   }
 
-  // Required fields validation
   if (!formData.firstName.trim()) {
     errors.firstName = 'First name is required'
     isValid = false
@@ -468,9 +541,12 @@ const validateForm = () => {
   if (!formData.phone.trim()) {
     errors.phone = 'Phone number is required'
     isValid = false
-  } else if (!/^[0-9]{10}$/.test(formData.phone.replace(/\D/g, ''))) {
-    errors.phone = 'Please enter a valid 10-digit phone number'
-    isValid = false
+  } else {
+    const phoneDigits = formData.phone.replace(/\D/g, '')
+    if (phoneDigits.length !== 10) {
+      errors.phone = 'Please enter a valid 10-digit phone number'
+      isValid = false
+    }
   }
 
   // Email validation
@@ -485,76 +561,273 @@ const validateForm = () => {
   return isValid
 }
 
-// Handle form submission
-const handleSubmit = () => {
-  if (validateForm()) {
-    placeOrder()
+// Load Razorpay SDK
+const loadRazorpaySDK = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true)
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.onload = () => {
+      resolve(true)
+    }
+    script.onerror = () => {
+      console.error('Failed to load Razorpay SDK')
+      resolve(false)
+    }
+    document.body.appendChild(script)
+  })
+}
+
+// Create order in backend
+const createOrder = async () => {
+  try {
+    const response = await fetch(ORDER_CREATE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: Math.round(total.value), // Amount in rupees
+        customer: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          address: {
+            line1: formData.address1,
+            line2: formData.address2,
+            city: formData.city,
+            state: formData.state,
+            postal_code: formData.postCode,
+            country: formData.country
+          }
+        },
+        items: cartItems.value.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          color: item.color,
+          size: item.size
+        }))
+      })
+    })
+
+    if (!response.ok) throw new Error(`Failed to create order: ${response.statusText}`)
+    
+    const data = await response.json()
+    currentOrderId.value = data.orderId
+    return data
+    
+  } catch (error) {
+    console.error('Error creating order:', error)
+    throw error
   }
 }
 
-// Clear cart after successful order
+// Create payment in backend
+const createPayment = async (orderId) => {
+  try {
+    const response = await fetch(PAYMENT_CREATE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId,
+        amount: Math.round(total.value) // Auto use total amount
+      })
+    })
+
+    if (!response.ok) throw new Error(`Failed to create payment: ${response.statusText}`)
+    
+    const data = await response.json()
+    currentPaymentId.value = data.paymentId
+    return data
+    
+  } catch (error) {
+    console.error('Error creating payment:', error)
+    throw error
+  }
+}
+
+
+
+// Verify payment
+const verifyPayment = async (paymentData) => { 
+  try { 
+    const response = await fetch(PAYMENT_VERIFY_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(paymentData)
+    })
+  
+    if (!response.ok) throw new Error(`Payment verification failed: ${response.statusText}`)
+    
+    return await response.json()
+    
+  } catch (error) {
+    console.error('Error verifying payment:', error)
+    throw error
+  }
+}
+
+// Initialize Razorpay payment
+const initRazorpayPayment = async (paymentData) => {
+  try {
+    const sdkLoaded = await loadRazorpaySDK()
+    if (!sdkLoaded) throw new Error('Failed to load payment gateway')
+
+   const options = {
+  key: paymentData.key,
+  name: 'Kartmania',
+  description: `Order #${currentOrderId.value}`,
+  order_id: paymentData.razorpayOrderId,
+
+  handler: async (response) => {
+    await verifyPayment({
+      razorpay_order_id: response.razorpay_order_id,
+      razorpay_payment_id: response.razorpay_payment_id,
+      razorpay_signature: response.razorpay_signature
+    })
+    await handleSuccessfulPayment()
+  },
+
+  prefill: {
+    name: `${formData.firstName} ${formData.lastName}`,
+    email: formData.email,
+    contact: formData.phone
+  },
+
+  method: {
+    upi: true,
+    card: true,
+    netbanking: true,
+    wallet: true
+  },
+
+  theme: { color: '#3b82f6' }
+}
+
+    const razorpay = new window.Razorpay(options)
+    razorpay.open()
+    
+  } catch (error) {
+    console.error('Error initializing Razorpay:', error)
+    paymentStatus.value = 'failed'
+    paymentErrorMessage.value = error.message || 'Failed to initialize payment'
+    showPaymentModal.value = true
+    isSubmitting.value = false
+  }
+}
+
+// Handle successful payment/order
+const handleSuccessfulPayment = async () => {
+  try {
+    // Save order to localStorage
+    const orderData = {
+      orderId: currentOrderId.value,
+      customer: { ...formData },
+      items: cartItems.value,
+      paymentMethod: selectedPayment.value === 'cod' ? 'Cash on Delivery' : 'Online Payment',
+      subtotal: subtotal.value,
+      shipping: shippingCharge.value,
+      tax: tax.value,
+      total: total.value,
+      notes: formData.notes,
+      orderDate: new Date().toISOString(), 
+      status: 'confirmed',
+      paymentStatus: selectedPayment.value === 'cod' ? 'pending' : 'paid'
+    } 
+  
+    // Save to localStorage
+    const existingOrders = JSON.parse(localStorage.getItem('order_history') || '[]')
+    existingOrders.push(orderData)
+    localStorage.setItem('order_history', JSON.stringify(existingOrders)) 
+    
+    // Clear cart
+    clearCartAfterOrder()
+    
+    // Remove form data
+    localStorage.removeItem('checkoutFormData')
+    
+    // Show success modal
+    paymentStatus.value = 'success'
+    showPaymentModal.value = true
+    
+  } catch (error) {
+    console.error('Error handling successful payment:', error)
+    paymentStatus.value = 'failed'
+    paymentErrorMessage.value = 'Order placed but failed to save details'
+    showPaymentModal.value = true
+    isSubmitting.value = false
+  }
+}
+
+// Clear cart
 const clearCartAfterOrder = () => {
-  localStorage.removeItem('shopping_cart')
+  localStorage.removeItem('shopping_cart') 
   cartItems.value = []
 }
 
-// Place order function
-const placeOrder = async () => {
+// Main order processing function
+const processOrder = async () => {
   if (!validateForm()) {
     alert('Please fill in all required fields correctly.')
     return
   }
 
   isSubmitting.value = true
+  paymentStatus.value = 'pending'
 
   try {
-    // Prepare order data
-    const orderData = {
-      orderId: 'ORD' + Date.now(),
-      customer: { ...formData },
-      items: cartItems.value,
-      paymentMethod: paymentMethods.value.find(m => m.id === selectedPayment.value)?.name,
-      subtotal: subtotal.value,
-      shipping: shippingCharge.value,
-      tax: tax.value,
-      total: total.value,
-      notes: formData.notes,
-      orderDate: new Date().toISOString(),
-      status: 'pending'
+    // Create order first
+    const orderResult = await createOrder()
+    currentOrderId.value = orderResult.orderId
+    
+    if (selectedPayment.value === 'cod') {
+      // Cash on Delivery - directly complete order
+      await handleSuccessfulPayment()
+    } else {
+      // Online Payment - initialize Razorpay
+      const paymentResult = await createPayment(orderResult.orderId)
+      await initRazorpayPayment(paymentResult)
     }
-
-    // In a real app, you would send this to your backend API
-    console.log('Order Data:', orderData)
-    
-    // Save order to localStorage for order history
-    const existingOrders = JSON.parse(localStorage.getItem('order_history') || '[]')
-    existingOrders.push(orderData)
-    localStorage.setItem('order_history', JSON.stringify(existingOrders))
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
-    // Clear cart after successful order
-    clearCartAfterOrder()
-    
-    // Redirect to order confirmation page with order details
-    // router.push({
-    //   path: '/order-confirmation',
-    //   query: {
-    //     orderId: orderData.orderId,
-    //     total: orderData.total
-    //   }
-    // })
     
   } catch (error) {
-    console.error('Error placing order:', error)
-    alert('There was an error processing your order. Please try again.')
-  } finally {
+    console.error('Order processing error:', error)
+    paymentStatus.value = 'failed'
+    paymentErrorMessage.value = error.message || 'Failed to process order'
+    showPaymentModal.value = true
     isSubmitting.value = false
   }
 }
 
-// Pre-fill form from localStorage or user session if available
+// Close payment modal
+const closePaymentModal = () => {
+  showPaymentModal.value = false
+  if (paymentStatus.value === 'success') {
+    redirectToSuccess()
+  }
+}
+
+// Redirect to success page
+const redirectToSuccess = () => {
+  router.push({
+    path: '/order-confirmation',
+    query: {
+      orderId: currentOrderId.value,
+      total: total.value.toFixed(2),
+      status: 'success',
+      paymentMethod: selectedPayment.value === 'cod' ? 'COD' : 'Online'
+    }
+  })
+}
+
+// Handle form submission
+const handleSubmit = () => {
+  processOrder()
+}
+
+// Load user data
 const loadUserData = () => {
   const savedData = localStorage.getItem('checkoutFormData')
   if (savedData) {
@@ -562,30 +835,32 @@ const loadUserData = () => {
   }
 }
 
-// Save form data to localStorage on change
+// Save form data on change
 Object.keys(formData).forEach(key => {
   watch(() => formData[key], () => {
     localStorage.setItem('checkoutFormData', JSON.stringify(formData))
   })
 })
 
-// Load cart on component mount
+// Load data on mount
 onMounted(() => {
   loadCartFromStorage()
   loadUserData()
   
-  // Listen for storage changes (if cart is updated in another tab)
+  // Pre-load Razorpay SDK
+  loadRazorpaySDK()
+  
+  // Listen for storage changes
   if (typeof window !== 'undefined') {
     window.addEventListener('storage', (event) => {
       if (event.key === 'shopping_cart') {
-        console.log('Cart updated in another tab, reloading in checkout...')
         loadCartFromStorage()
       }
     })
   }
 })
 
-// Cleanup event listener
+// Cleanup
 onUnmounted(() => {
   if (typeof window !== 'undefined') {
     window.removeEventListener('storage', () => {})
@@ -595,6 +870,10 @@ onUnmounted(() => {
 
 <style scoped>
 /* Custom styles for checkout page */
+.up {
+  margin-top: 50px;
+}
+
 .common-input {
   width: 100%;
   padding: 12px 16px;
@@ -608,14 +887,6 @@ onUnmounted(() => {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.common-input.border-gray-100 {
-  border-color: #f3f4f6;
-}
-
-.common-input.border-gray-100:focus {
-  border-color: #3b82f6;
 }
 
 .min-h-120 {
@@ -634,6 +905,17 @@ onUnmounted(() => {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Payment options badges */
+.payment-options {
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
 }
 
 /* Form check/radio styles */
@@ -678,101 +960,122 @@ onUnmounted(() => {
   transform: none;
 }
 
-/* Error message styles */
-.text-danger-600 {
-  color: #dc2626;
-}
-
-/* Variant info styles */
-.variant-info {
+/* Modal styles */
+.payment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  color: #666;
+  justify-content: center;
+  z-index: 9999;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1199px) {
-  .pe-xl-5 {
-    padding-right: 0;
-  }
+.payment-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-@media (max-width: 991px) {
-  .col-xl-9,
-  .col-lg-8,
-  .col-xl-3,
-  .col-lg-4 {
-    width: 100%;
-  }
-  
-  .checkout-sidebar {
-    margin-top: 40px;
-  }
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-@media (max-width: 767px) {
-  .checkout {
-    padding: 40px 0;
-  }
-  
-  .border.border-gray-100.rounded-8.px-30.py-20.mb-40 {
-    padding: 16px;
-    margin-bottom: 30px;
-  }
-  
-  .border.border-gray-100.rounded-8.px-24.py-40.mt-24 {
-    padding: 20px;
-  }
-  
-  .w-144 {
-    width: 120px;
-  }
-  
-  .flex-between.gap-24 {
-    gap: 12px;
-  }
+.modal-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.5rem;
 }
 
-/* Typography */
-.text-lg {
-  font-size: 18px;
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #6b7280;
+  line-height: 1;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
 
-.text-xl {
-  font-size: 20px;
+.close-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
 }
 
-.text-md {
-  font-size: 16px;
+.modal-body {
+  padding: 20px 0;
 }
 
-.text-sm {
-  font-size: 14px;
+.success-icon,
+.failed-icon {
+  margin-bottom: 20px;
 }
 
-.text-xs {
-  font-size: 12px;
-}
-
-.fw-semibold {
+.btn-success {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
   font-weight: 600;
+  cursor: pointer;
 }
 
-.fw-bold {
-  font-weight: 700;
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.fw-normal {
-  font-weight: 400;
+.btn-success:hover {
+  background-color: #059669;
 }
 
-.fw-medium {
-  font-weight: 500;
+.btn-danger:hover {
+  background-color: #dc2626;
 }
 
-/* Flex utilities */
+/* Spinner */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.25em;
+  border-color: #3b82f6 transparent #3b82f6 transparent;
+  animation: spinner-border 0.75s linear infinite;
+}
+
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
+}
+
+/* Utility classes */
+.w-144 {
+  width: 144px;
+}
+
 .flex-align {
   display: flex;
   align-items: center;
@@ -784,46 +1087,78 @@ onUnmounted(() => {
   align-items: center;
 }
 
-/* Border radius */
-.rounded-8 {
-  border-radius: 8px;
+/* Responsive */
+@media (max-width: 767px) {
+  .up {
+    margin-top: 30px;
+  }
+  
+  .checkout {
+    padding: 30px 0;
+  }
+  
+  .payment-modal {
+    padding: 20px;
+    width: 95%;
+  }
+  
+  .w-144 {
+    width: 100px;
+  }
+  
+  .flex-between.gap-24 {
+    gap: 12px;
+  }
 }
 
 /* Colors */
-.text-gray-900 {
-  color: #111827;
+.text-success-600 { color: #059669; }
+.text-danger-600 { color: #dc2626; }
+.text-warning-600 { color: #d97706; }
+.text-main-600 { color: #3b82f6; }
+.text-gray-500 { color: #6b7280; }
+.text-gray-600 { color: #4b5563; }
+.text-gray-800 { color: #1f2937; }
+.text-gray-900 { color: #111827; }
+
+/* Background colors */
+.bg-main-50 { background-color: #eff6ff; }
+.bg-blue-100 { background-color: #dbeafe; }
+.bg-green-100 { background-color: #d1fae5; }
+.bg-purple-100 { background-color: #f3e8ff; }
+.bg-yellow-100 { background-color: #fef3c7; }
+
+/* Text colors */
+.text-blue-800 { color: #1e40af; }
+.text-green-800 { color: #065f46; }
+.text-purple-800 { color: #5b21b6; }
+.text-yellow-800 { color: #92400e; }
+
+/* Borders */
+.border-gray-100 { border-color: #f3f4f6; }
+.border-gray-200 { border-color: #e5e7eb; }
+
+/* Typography */
+.text-xs { font-size: 12px; }
+.text-sm { font-size: 14px; }
+.text-md { font-size: 16px; }
+.text-lg { font-size: 18px; }
+.text-xl { font-size: 20px; }
+.text-2xl { font-size: 24px; }
+.text-5xl { font-size: 48px; }
+
+.fw-normal { font-weight: 400; }
+.fw-medium { font-weight: 500; }
+.fw-semibold { font-weight: 600; }
+.fw-bold { font-weight: 700; }
+
+/* Animations */
+.ph-spin {
+  animation: spin 1s linear infinite;
 }
 
-.text-gray-800 {
-  color: #1f2937;
-}
-
-.text-gray-500 {
-  color: #6b7280;
-}
-
-.text-gray-200 {
-  color: #e5e7eb;
-}
-
-.text-neutral-600 {
-  color: #525252;
-}
-
-.text-main-600 {
-  color: #3b82f6;
-}
-
-.hover-text-main-600:hover {
-  color: #3b82f6;
-}
-
-/* Links */
-.text-decoration-underline {
-  text-decoration: underline;
-}
-
-.hover-text-decoration-underline:hover {
-  text-decoration: underline;
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 </style>

@@ -30,8 +30,8 @@
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="loading-container">
+    <!-- Loading State (only shown briefly) -->
+    <div v-if="loading && !showStaticFallback" class="loading-container">
       <div class="swiper-wrapper">
         <div class="swiper-slide" v-for="n in 6" :key="n">
           <div class="deal-card skeleton">
@@ -41,243 +41,63 @@
       </div>
     </div>
 
-    <!-- Error State -->
-    <div v-else-if="error" class="error-container">
-      <div class="alert alert-danger">
-        {{ error }}
-      </div>
-      <button @click="fetchOfferData" class="btn btn-main mt-3">
-        Retry
-      </button>
-    </div>
-
-    <!-- Swiper Container with API Data -->
-    <div v-else class="swiper-container-wrapper">
+    <!-- Swiper Container with Data (API or Static Fallback) -->
+    <div class="swiper-container-wrapper" :class="{ 'show-fallback': showStaticFallback }">
       <!-- Swiper Container -->
       <div class="swiper-container">
         <div ref="swiper" class="swiper">
           <div class="swiper-wrapper">
-            <!-- Deal 1: API ID 11 -->
-            <div v-if="offerId11" class="swiper-slide">
-                     <NuxtLink
-    to="/shop-all/--1"
-    class="deal-card"
-  >
-              <div class="deal-card" @click="handleDealClick(offerId11.id)">
-                <div class="deal-image-container">
+            <!-- All deals are now from displayDeals array -->
+            <div 
+              v-for="(deal, index) in displayDeals" 
+              :key="deal.id"
+              class="swiper-slide"
+            >
+              <NuxtLink
+                :to="deal.link"
+                class="deal-card"
+              >
+                <div class="deal-image-container" :class="{ 'bank-card': deal.type === 'bank' }">
+                  <!-- Bank Card -->
+                  <div v-if="deal.type === 'bank'" class="bank-offer-bg">
+                    <div class="bank-offer-overlay">
+                      <div class="bank-name">{{ deal.bankName }}</div>
+                      <div class="bank-offer">{{ deal.offer }}</div>
+                    </div>
+                  </div>
+                  
+                  <!-- Image Card -->
                   <img 
-                    :src="offerId11.image" 
-                    :alt="offerId11.title"
+                    v-else
+                    :src="deal.image" 
+                    :alt="deal.title"
                     class="deal-image"
                     loading="lazy"
-                    @error="handleImageError"
+                    @error="handleImageError($event, index)"
                   /> 
+                  
                   <!-- Overlay Gradient for Text Readability -->
                   <div class="image-overlay"></div>
                   
                   <!-- Top Text -->
                   <div class="deal-top-content">
-                    <div class="deal-title">{{ offerId11.title }}</div>
+                    <div class="deal-title">{{ deal.title }}</div>
                   </div>
                   
                   <!-- Bottom Content -->
                   <div class="deal-bottom-content">
-                    <div class="deal-price">
-                      <span class="current-price">₹1,299</span>
-                      <span class="original-price">₹2,599</span>
-                      <span class="discount-percent">50% off</span>
-                    </div>
-                    <!-- <div class="deal-offer">
-                      <span class="offer-tag">Delivery by 6:15am</span>
-                      <span class="rating">
-                        ★ 4.3 <span class="rating-count">(2.1k)</span>
-                      </span>
-                    </div> -->
-                  </div>
-                </div>
-              </div>
-               </NuxtLink>
-            </div> 
-
-            <!-- Deal 2: API ID 12 -->
-            <div v-if="offerId12" class="swiper-slide">
-                     <NuxtLink
-    to="/shop-all/--1"
-    class="deal-card"
-  >
-              <div class="deal-card" @click="handleDealClick(offerId12.id)">
-                <div class="deal-image-container">
-                  <img 
-                    :src="offerId12.image" 
-                    :alt="offerId12.title"
-                    class="deal-image"
-                    loading="lazy"
-                    @error="handleImageError"
-                  />
-                  <div class="image-overlay"></div>
-                  
-                  <div class="deal-top-content">
-                    <div class="deal-title">{{ offerId12.title }}</div>
-                  </div>
-                  
-                  <div class="deal-bottom-content">
-                    <div class="deal-price">
-                      <span class="current-price">From ₹499</span>
-                      <span class="original-price">₹999</span>
-                      <span class="discount-percent">50% off</span>
-                    </div>
-                    <!-- <div class="deal-offer">
-                      <span class="offer-tag">Delivery by 6:15am</span>
-                      <span class="rating">
-                        ★ 4.5 <span class="rating-count">(1.8k)</span>
-                      </span>
-                    </div> -->
-                  </div>
-                </div>
-              </div>
-              </NuxtLink> 
-            </div>
-
-            <!-- Additional Static Deals -->
-             
-            <div class="swiper-slide">
-              <NuxtLink
-    to="/shop-all/--1"
-    class="deal-card"
-  >
-              <div class="deal-card" @click="handleDealClick(3)">
-                <div class="deal-image-container bank-card">
-                  <div class="bank-offer-bg">
-                    <div class="bank-offer-overlay">
-                      <div class="bank-name">SBI Card</div>
-                      <div class="bank-offer">10% Instant Discount*</div>
-                    </div>
-                  </div>
-                  <div class="image-overlay"></div>
-                  
-                  <div class="deal-top-content">
-                    <div class="deal-title">Credit Card & EMI</div>
-                  </div>
-                  
-                  <div class="deal-bottom-content">
-                    <div class="deal-price bank-price">
-                      <span class="bank-benefit">No Cost EMI Available</span>
-                    </div>
-                    <!-- <div class="deal-offer">
-                      <span class="offer-tag">*T&C apply</span>
-                      <span class="rating">
-                        ★ 4.7 <span class="rating-count">(15k+)</span>
-                      </span>
-                    </div> -->
-                  </div>
-                </div>
-              </div>
-                </NuxtLink>
-
-            </div>
-
-            <div class="swiper-slide">
-  <NuxtLink
-    to="/shop-all/--1"
-    class="deal-card"
-  >
-    <div class="deal-image-container">
-      <img 
-        src="/assets/images/recommended/camera.webp" 
-        alt="OnePlus Nord 5"
-        class="deal-image"
-        loading="lazy"
-      />
-      
-      <div class="image-overlay"></div>
-
-      <div class="deal-top-content">
-        <div class="deal-title">Pixel - Latest Flagship</div>
-      </div>
-
-      <div class="deal-bottom-content">
-        <div class="deal-price">
-          <span class="current-price">₹29,999</span>
-          <span class="original-price">₹34,999</span>
-          <span class="discount-percent">14% off</span>
-        </div>
-      </div>
-    </div>
-  </NuxtLink>
-</div>
-
-
-            <div class="swiper-slide">
-                <NuxtLink
-    to="/shop-all/--1"
-    class="deal-card"
-  >
-              <div class="deal-card" @click="handleDealClick(5)">
-                <div class="deal-image-container">
-                  <img 
-                    src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=500&fit=crop&auto=format" 
-                    alt="Mobile Phones"
-                    class="deal-image"
-                    loading="lazy"
-                  />
-                  <div class="image-overlay"></div>
-                  
-                  <div class="deal-top-content">
-                    <div class="deal-title">Latest Smartphones</div>
-                  </div>
-                  
-                  <div class="deal-bottom-content">
-                    <div class="deal-price">
-                      <span class="current-price">From ₹19,999</span>
-                      <span class="original-price">₹24,999</span>
-                      <span class="discount-percent">20% off</span>
-                    </div>
-                    <!-- <div class="deal-offer">
-                      <span class="offer-tag">Exchange Available</span>
-                      <span class="rating">
-                        ★ 4.4 <span class="rating-count">(12k+)</span>
-                      </span>
-                    </div> -->
-                  </div>
-                </div>
-              </div>
-              </NuxtLink>
-            </div>
-
-            <div class="swiper-slide">
-                 <NuxtLink
-    to="/shop-all/--1"
-    class="deal-card"
-  >
-              <div class="deal-card" @click="handleDealClick(6)">
-                <div class="deal-image-container">
-                  <img 
-                    src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=400&h=500&fit=crop&auto=format" 
-                    alt="Electronics"
-                    class="deal-image"
-                    loading="lazy"
-                  />
-                  <div class="image-overlay"></div>
-                  
-                  <div class="deal-top-content">
-                    <div class="deal-title">Electronics Collection</div>
-                  </div>
-                  
-                  <div class="deal-bottom-content">
-                    <div class="deal-price">
-                      <span class="current-price">From ₹1,499</span>
-                      <span class="original-price">₹2,999</span>
-                      <span class="discount-percent">50% off</span>
-                    </div>
-                    <div class="deal-offer">
-                      <span class="offer-tag">Festive Special</span>
-                      <span class="rating">
-                        ★ 4.6 <span class="rating-count">(8.5k)</span>
-                      </span>
+                    <div class="deal-price" :class="{ 'bank-price': deal.type === 'bank' }">
+                      <template v-if="deal.type === 'bank'">
+                        <span class="bank-benefit">{{ deal.priceText }}</span>
+                      </template>
+                      <template v-else>
+                        <span class="current-price">{{ deal.currentPrice }}</span>
+                        <span class="original-price" v-if="deal.originalPrice">{{ deal.originalPrice }}</span>
+                        <span class="discount-percent" v-if="deal.discount">{{ deal.discount }}</span>
+                      </template>
                     </div>
                   </div>
                 </div>
-              </div>
               </NuxtLink>
             </div>
           </div>
@@ -298,7 +118,8 @@ import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/mousewheel'
 import 'swiper/css/free-mode'
-  const config = useRuntimeConfig()
+
+const config = useRuntimeConfig()
 const API_URL_MEDIA = config.public.api.media
 
 // Interfaces
@@ -313,10 +134,81 @@ interface OfferData {
   updatedAt: string
 }
 
+// Static fallback deals (always available)
+const staticDeals = [
+  {
+    id: 11,
+    title: "Premium Headphones",
+    description: "Noise cancelling headphones with premium sound",
+    image: "/assets/images/recommended/headphones.webp",
+    currentPrice: "₹1,299",
+    originalPrice: "₹2,599",
+    discount: "50% off",
+    link: "/shop-all/--1",
+    type: "product"
+  },
+  {  
+    
+    id: 12,
+    title: "shoes for style",
+    description: "Latest shoes for smart",
+    image: "/assets/images/recommended/shoe.webp",
+    currentPrice: "From ₹499",
+    originalPrice: "₹999",
+    discount: "50% off",
+    link: "/shop-all/--1",
+    type: "product"
+  },
+  {
+    id: 13,
+    title: "Credit Card & EMI",
+    description: "Bank offers and EMI options",
+    bankName: "SBI Card",
+    offer: "10% Instant Discount*",
+    priceText: "No Cost EMI Available",
+    link: "/shop-all/--1",
+    type: "bank"
+  },
+  {
+    id: 14,
+    title: "Latest Smartphones",
+    description: "Flagship smartphones with latest features",
+    image: "/assets/images/recommended/camera.webp",
+    currentPrice: "₹29,999",
+    originalPrice: "₹34,999",
+    discount: "14% off",
+    link: "/shop-all/--1",
+    type: "product"
+  },
+  {
+    id: 15,
+    title: "Electronics",
+    description: "High performance laptops and computers",
+    image: "/assets/images/nowcategory/electronics1.jpg",
+    currentPrice: "From ₹19,999",
+    originalPrice: "₹24,999",
+    discount: "20% off",
+    link: "/shop-all/--1",
+    type: "product"
+  },
+  {
+    id: 16,
+    title: "Fashion Collection",
+    description: "Wide range of electronic products",
+    image: "/assets/images/recommended/triple-jean.jpg",
+    currentPrice: "From ₹1,499",
+    originalPrice: "₹2,999",
+    discount: "50% off",
+    link: "/shop-all/--1", 
+    type: "product"
+  }
+]
+
 // Reactive state
 const offersData = ref<OfferData[]>([])
-const loading = ref(true)
+const loading = ref(false) // Start with false since we have static fallback
 const error = ref<string | null>(null)
+const showStaticFallback = ref(false) // Control when to show static banners
 const swiper = ref<HTMLElement | null>(null)
 let swiperInstance: Swiper | null = null
 
@@ -325,8 +217,9 @@ const fetchOfferData = async () => {
   try {
     loading.value = true
     error.value = null
+    showStaticFallback.value = false
     
-    const response = await fetch(API_URL_MEDIA)
+    const response = await fetch(API_URL_MEDIA, { signal: AbortSignal.timeout(5000) })
     
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`)
@@ -334,47 +227,71 @@ const fetchOfferData = async () => {
     
     const result = await response.json() as { data?: OfferData[] }
     if (result.data && Array.isArray(result.data)) {
-      offersData.value = result.data.filter((offer: OfferData) => !offer.isDeleted)
+      const validOffers = result.data.filter((offer: OfferData) => !offer.isDeleted)
+      
+      if (validOffers.length > 0) {
+        offersData.value = validOffers
+        showStaticFallback.value = false
+      } else {
+        // API returned empty data, use fallback
+        showStaticFallback.value = true
+        console.log('API returned empty data, using static fallback')
+      }
+    } else {
+      // Invalid API response, use fallback
+      showStaticFallback.value = true
     }
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to fetch offer data'
-    console.error('Error fetching offer data:', err)
+    console.warn('API fetch failed, using static fallback:', err)
+    showStaticFallback.value = true
+    error.value = null // Don't show error to user
   } finally {
     loading.value = false
   }
 }
 
-// Get ID 11 data
-const offerId11 = computed(() => {
-  return offersData.value.find(item => item.id === 11)
-})
-
-// Get ID 12 data
-const offerId12 = computed(() => {
-  return offersData.value.find(item => item.id === 12)
+// Display deals (API or static fallback)
+const displayDeals = computed(() => {
+  if (!showStaticFallback.value && offersData.value.length > 0) {
+    // Use API data if available
+    return offersData.value.slice(0, 6).map(offer => ({
+      id: offer.id,
+      title: offer.title || `Deal ${offer.id}`,
+      description: offer.description || 'Special offer',
+      image: offer.image || staticDeals[offer.id % staticDeals.length]?.image || '/assets/images/recommended/default.jpg',
+      currentPrice: '₹1,299',
+      originalPrice: '₹2,599',
+      discount: '50% off',
+      link: '/shop-all/--1',
+      type: 'product'
+    }))
+  }
+  
+  // Use static fallback data
+  return staticDeals
 })
 
 // Handle image loading errors
-const handleImageError = (event: Event) => {
+const handleImageError = (event: Event, index: number) => {
   const img = event.target as HTMLImageElement
-  img.src = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=500&fit=crop&auto=format'
+  // Use local fallback image
+  const fallbackImages = [
+    '/assets/images/recommended/headphone.jpg',
+    '/assets/images/recommended/watch.jpg',
+    '/assets/images/recommended/camera.webp',
+    '/assets/images/recommended/laptop.jpg',
+    '/assets/images/recommended/electronics.jpg'
+  ]
+  img.src = fallbackImages[index % fallbackImages.length] || '/assets/images/recommended/default.jpg'
 }
 
-// Handle deal click
-const handleDealClick = (dealId: number) => {
-  console.log('Deal clicked:', dealId)
-  // Navigate to deal page
-  // router.push(`/deal/${dealId}`)
-}
-
-// Initialize Swiper
 // Initialize Swiper
 const initSwiper = () => {
   if (!swiper.value) return
   
   swiperInstance = new Swiper(swiper.value, {
     modules: [Navigation, Mousewheel, FreeMode],
-    slidesPerView: 'auto', // इससे slides auto width लेंगे
+    slidesPerView: 'auto',
     spaceBetween: 20,
     freeMode: {
       enabled: true,
@@ -394,12 +311,9 @@ const initSwiper = () => {
     touchRatio: 1,
     grabCursor: true,
     
-    // Removed invalid options 'calculateHeight', 'calculateWidth' and 'setWrapperSize'
-    // These are not part of SwiperOptions; control sizing via CSS or call swiper.update() if needed.
-    
     breakpoints: {
       320: {
-        slidesPerView: 'auto', // हर breakpoint पर auto रखें
+        slidesPerView: 'auto',
         spaceBetween: 16,
       },
       480: {
@@ -430,14 +344,48 @@ const initSwiper = () => {
   })
 }
 
-// Fetch data on component mount
-onMounted(async () => {
+// Initialize component
+const initComponent = async () => {
+  // Show static fallback immediately for better UX
+  showStaticFallback.value = true
+  
+  // Try to fetch API data in background
   await fetchOfferData()
   
   // Initialize Swiper after data is loaded
   setTimeout(() => {
     initSwiper()
   }, 100)
+}
+
+// Fetch data on component mount
+onMounted(() => {
+  initComponent()
+  
+  // Set timeout to fallback if API is taking too long
+  const fallbackTimeout = setTimeout(() => {
+    if (loading.value) {
+      showStaticFallback.value = true
+      loading.value = false
+    }
+  }, 2000)
+  
+  // Cleanup timeout
+  return () => clearTimeout(fallbackTimeout)
+})
+
+// Background retry of API (if using static fallback)
+onMounted(() => {
+  const retryInterval = setInterval(() => {
+    if (!showStaticFallback.value) {
+      clearInterval(retryInterval)
+      return
+    }
+    // Retry API in background every 30 seconds
+    fetchOfferData()
+  }, 30000)
+  
+  return () => clearInterval(retryInterval)
 })
 
 // Cleanup Swiper on unmount
@@ -465,7 +413,6 @@ onUnmounted(() => {
 .deals-header {
   padding: 0 20px 20px;
   border-bottom: 1px solid #e0e0e0;
-  /* margin-bottom: 24px; */
 }
 
 .header-main {
@@ -583,16 +530,15 @@ onUnmounted(() => {
   animation: loading 1.5s infinite;
 }
 
-/* Error State */
-.error-container {
-  text-align: center;
-  padding: 40px 20px;
-}
-
 /* Swiper Container Wrapper */
 .swiper-container-wrapper {
   position: relative;
   padding: 0 20px;
+  transition: opacity 0.3s ease;
+}
+
+.swiper-container-wrapper.show-fallback {
+  opacity: 1;
 }
 
 .swiper-container {
@@ -752,37 +698,6 @@ onUnmounted(() => {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Deal Offer Footer */
-.deal-offer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.offer-tag {
-  font-size: 12px;
-  color: white;
-  font-weight: 500;
-  background: rgba(0, 113, 133, 0.8);
-  padding: 4px 10px;
-  border-radius: 20px;
-  backdrop-filter: blur(4px);
-}
-
-.rating {
-  font-size: 12px;
-  color: white;
-  font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.rating-count {
-  color: rgba(255, 255, 255, 0.8);
-}
-
 /* Bank Offer Specific */
 .bank-offer-bg {
   position: absolute;
@@ -848,13 +763,14 @@ onUnmounted(() => {
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .kart-deals-section {
-    margin:0;
+    margin: 0;
     padding: 0;
   }
+  
   .swiper {
-  overflow: visible !important;
-  /* padding: 10px 0 30px; */
-}
+    overflow: visible !important;
+  }
+  
   .deals-header {
     padding: 0 16px 16px;
   }
@@ -953,6 +869,5 @@ onUnmounted(() => {
 /* Momentum scroll styles */
 .swiper-free-mode > .swiper-wrapper {
   transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-} 
-
+}
 </style>

@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
- const config = useRuntimeConfig()
-const graphql = config.public.api.graphql
-const API_URL_CATEGORY = config.public.api.categories
+
 export const useRecommendStore = defineStore('recommend', () => {
+  const config = useRuntimeConfig()
+  const graphql = config.public.api?.graphql || null
+  const API_URL_CATEGORY = config.public.api?.categories || null
+
   // State
   const products = ref([])
   const categories = ref([])
@@ -14,23 +16,343 @@ export const useRecommendStore = defineStore('recommend', () => {
     lastPage: 1,
     total: 0,
     perPage: 12
-  }) 
-  // Cache for instant switching
+  })
+  
+  // New flag to track if we're using fallback
+  const usingFallbackData = ref(false)
+  
+  // Cache
   const productsCache = ref({})
   const categoryCache = ref(null)
   const lastFetchTime = ref({})
   const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+  // ==================== ENHANCED FALLBACK DATA ====================
+  const FALLBACK_PRODUCTS = [
+    {
+      groupId: 'fallback-1',
+      name: 'Wireless Headphones',
+      category: { 
+        name: 'Electronics', 
+        id: '10',
+        image: '/assets/images/recommended/headphones.webp'
+      },
+      mainProduct: {
+        id: 'fallback-1',
+        name: 'Wireless Headphones',
+        price: 2499,
+        discountValue: 15,
+        stock: 50,
+        popularity: 85,
+        images: [{
+          id: 'img-1',
+          isPrimary: true,
+          imageUrl: '/assets/images/recommended/headphones.webp'
+        }],
+        reviews: [
+          { rating: 4.5, review: 'Great sound quality!' },
+          { rating: 5, review: 'Excellent battery life' }
+        ],
+        attributes: [
+          { id: 'attr-1', color: 'Black', size: null }
+        ],
+        description: 'Noise cancelling wireless headphones with 30hr battery life.',
+        createdAt: '2024-01-15T10:30:00Z'
+      },
+      variants: []
+    },
+    {
+      groupId: 'fallback-2',
+      name: 'Sports Sneakers',
+      category: { 
+        name: 'Footwear', 
+        id: '7',
+        image: '/assets/images/recommended/highheels.png'
+      },
+      mainProduct: {
+        id: 'fallback-2',
+        name: 'Sports Sneakers',
+        price: 2999,
+        discountValue: 20,
+        stock: 30,
+        popularity: 90,
+        images: [{
+          id: 'img-2',
+          isPrimary: true,
+          imageUrl: '/assets/images/recommended/highheels.png'
+        }],
+        reviews: [
+          { rating: 4, review: 'Very comfortable' },
+          { rating: 5, review: 'Perfect for running' }
+        ],
+        attributes: [
+          { id: 'attr-2', color: 'Blue', size: '42' }
+        ],
+        description: 'Lightweight running shoes with cushion support.',
+        createdAt: '2024-02-10T14:20:00Z'
+      },
+      variants: []
+    },
+    {
+      groupId: 'fallback-3',
+      name: 'Casual T-Shirt',
+      category: { 
+        name: 'Fashion', 
+        id: '1',
+        image: '/assets/images/recommended/women_wear.png'
+      },
+      mainProduct: {
+        id: 'fallback-3',
+        name: 'Casual T-Shirt',
+        price: 799,
+        discountValue: 10,
+        stock: 100,
+        popularity: 75,
+        images: [{
+          id: 'img-3',
+          isPrimary: true,
+          imageUrl: '/assets/images/recommended/women_wear.png'
+        }],
+        reviews: [
+          { rating: 4, review: 'Good quality fabric' },
+          { rating: 3.5, review: 'Nice fit' }
+        ],
+        attributes: [
+          { id: 'attr-3', color: 'White', size: 'M' }
+        ],
+        description: 'Comfortable cotton t-shirt for daily wear.',
+        createdAt: '2024-01-20T09:15:00Z'
+      },
+      variants: []
+    },
+    {
+      groupId: 'fallback-4',
+      name: 'Smart Watch',
+      category: { 
+        name: 'Electronics', 
+        id: '10',
+        image: '/assets/images/recommended/camera.webp'
+      },
+      mainProduct: {
+        id: 'fallback-4',
+        name: 'Smart Watch',
+        price: 5999,
+        discountValue: 25,
+        stock: 20,
+        popularity: 95,
+        images: [{
+          id: 'img-4',
+          isPrimary: true,
+          imageUrl: '/assets/images/recommended/camera.webp'
+        }],
+        reviews: [
+          { rating: 5, review: 'Best smartwatch ever!' },
+          { rating: 4.5, review: 'Great features' }
+        ],
+        attributes: [
+          { id: 'attr-4', color: 'Silver', size: null }
+        ],
+        description: 'Advanced smartwatch with health monitoring features.',
+        createdAt: '2024-02-05T11:45:00Z'
+      },
+      variants: []
+    },
+    {
+      groupId: 'fallback-5',
+      name: 'Backpack',
+      category: { 
+        name: 'Accessories', 
+        id: '5',
+        image: '/assets/images/recommended/women purse.webp'
+      },
+      mainProduct: {
+        id: 'fallback-5',
+        name: 'Backpack',
+        price: 1299,
+        discountValue: 0,
+        stock: 40,
+        popularity: 65,
+        images: [{
+          id: 'img-5',
+          isPrimary: true,
+          imageUrl: '/assets/images/recommended/women purse.webp'
+        }],
+        reviews: [
+          { rating: 4, review: 'Durable and spacious' },
+          { rating: 3.5, review: 'Good for laptop' }
+        ],
+        attributes: [
+          { id: 'attr-5', color: 'Navy', size: null }
+        ],
+        description: 'Durable backpack with laptop compartment.',
+        createdAt: '2024-01-25T16:30:00Z'
+      },
+      variants: []
+    },
+    {
+      groupId: 'fallback-6',
+      name: 'Perfume',
+      category: { 
+        name: 'Personal Care', 
+        id: '8',
+        image: '/assets/images/recommended/mens-collection.webp'
+      },
+      mainProduct: {
+        id: 'fallback-6',
+        name: 'Perfume',
+        price: 1599,
+        discountValue: 30,
+        stock: 25,
+        popularity: 80,
+        images: [{
+          id: 'img-6',
+          isPrimary: true,
+          imageUrl: '/assets/images/recommended/mens-collection.webp'
+        }],
+        reviews: [
+          { rating: 4.5, review: 'Long lasting fragrance' },
+          { rating: 4, review: 'Nice packaging' }
+        ],
+        attributes: [
+          { id: 'attr-6', color: 'Clear', size: null }
+        ],
+        description: 'Premium fragrance with long lasting scent.',
+        createdAt: '2024-02-12T13:20:00Z'
+      },
+      variants: []
+    }
+  ]
+
+  const FALLBACK_CATEGORIES = [
+    { 
+      id: '1', 
+      name: 'Fashion', 
+      productCount: 16, 
+      hasProducts: true,
+      image: '/assets/images/recommended/women_wear.png',
+      fallbackImage: '/assets/images/recommended/women_wear.png'
+    },
+    { 
+      id: '5', 
+      name: 'Accessories', 
+      productCount: 11, 
+      hasProducts: true,
+      image: '/assets/images/recommended/women purse.webp',
+      fallbackImage: '/assets/images/recommended/women purse.webp'
+    },
+    { 
+      id: '7', 
+      name: 'Footwear', 
+      productCount: 9, 
+      hasProducts: true,
+      image: '/assets/images/recommended/highheels.png',
+      fallbackImage: '/assets/images/recommended/highheels.png'
+    },
+    { 
+      id: '10', 
+      name: 'Electronics', 
+      productCount: 8, 
+      hasProducts: true,
+      image: '/assets/images/recommended/camera.webp',
+      fallbackImage: '/assets/images/recommended/camera.webp'
+    },
+    { 
+      id: '8', 
+      name: 'Personal Care', 
+      productCount: 6, 
+      hasProducts: true,
+      image: '/assets/images/recommended/mens-collection.webp',
+      fallbackImage: '/assets/images/recommended/mens-collection.webp'
+    },
+    { 
+      id: '12', 
+      name: 'Men', 
+      productCount: 12, 
+      hasProducts: true,
+      image: '/assets/images/recommended/mens-collection.webp',
+      fallbackImage: '/assets/images/recommended/mens-collection.webp'
+    },
+    { 
+      id: '6', 
+      name: 'Women', 
+      productCount: 14, 
+      hasProducts: true,
+      image: '/assets/images/recommended/women-collection.webp',
+      fallbackImage: '/assets/images/recommended/women-collection.webp'
+    },
+    { 
+      id: '3', 
+      name: 'Mobile', 
+      productCount: 0, 
+      hasProducts: false,
+      image: '/assets/images/recommended/camera.webp',
+      fallbackImage: '/assets/images/recommended/camera.webp'
+    },
+    { 
+      id: '13', 
+      name: 'Kitchen', 
+      productCount: 0, 
+      hasProducts: false,
+      image: '/assets/images/recommended/camera.webp',
+      fallbackImage: '/assets/images/recommended/camera.webp'
+    },
+    { 
+      id: '11', 
+      name: 'Skin care', 
+      productCount: 0, 
+      hasProducts: false,
+      image: '/assets/images/recommended/women-collection.webp',
+      fallbackImage: '/assets/images/recommended/women-collection.webp'
+    }
+  ]
+
+  // ==================== FALLBACK IMAGES ====================
+  const getFallbackImages = (index = 0) => {
+    const fallbackImages = [
+      '/assets/images/flashsale/camera.webp',
+      '/assets/images/flashsale/earbuds.jpg',
+      '/assets/images/flashsale/jean.jpg',
+      '/assets/images/flashsale/jeans-and-tshirt.jpg',
+      '/assets/images/flashsale/mobile.jpg',
+      '/assets/images/flashsale/sandal-women.jpg',
+      '/assets/images/buysection/sneaker.jpg',
+      '/assets/images/buysection/women-kurti.jpg'
+    ]
+    return fallbackImages[index % fallbackImages.length]
+  }
+
+  const getCategoryFallbackImage = (categoryName) => {
+    const categoryImages = {
+      'Electronics': '/assets/images/recommended/camera.webp',
+      'Mobile': '/assets/images/recommended/camera.webp',
+      'Women': '/assets/images/recommended/women-collection.webp',
+      'Men': '/assets/images/recommended/mens-collection.webp',
+      'Footwear': '/assets/images/recommended/highheels.png',
+      'Fashion': '/assets/images/recommended/women_wear.png',
+      'Accessories': '/assets/images/recommended/women purse.webp',
+      'Personal Care': '/assets/images/recommended/mens-collection.webp',
+      'Kitchen': '/assets/images/recommended/camera.webp',
+      'Skin care': '/assets/images/recommended/women-collection.webp'
+    }
+    return categoryImages[categoryName] || '/assets/images/recommended/camera.webp'
+  }
 
   // Computed
   const hasProducts = computed(() => products.value.length > 0)
   const hasCategories = computed(() => categories.value.length > 0)
   
   const getAllCategories = computed(() => {
+    if (usingFallbackData.value || categories.value.length === 0) {
+      return FALLBACK_CATEGORIES
+    }
     return categories.value
   })
   
   const getCategoriesWithProducts = computed(() => {
-    return categories.value.filter(cat => (cat.productCount || 0) > 0)
+    const cats = usingFallbackData.value || categories.value.length === 0 
+      ? FALLBACK_CATEGORIES 
+      : categories.value
+    return cats.filter(cat => (cat.productCount || 0) > 0)
   })
 
   // GraphQL query
@@ -115,8 +437,6 @@ export const useRecommendStore = defineStore('recommend', () => {
     }
     lastFetchTime.value[cacheKey] = Date.now()
     
-    // Also save to localStorage for persistence
-
     try {
       localStorage.setItem(`products_cache_${cacheKey}`, JSON.stringify({
         products: data,
@@ -128,307 +448,301 @@ export const useRecommendStore = defineStore('recommend', () => {
     }
   }
 
-  // Load from localStorage on init
-  const loadCacheFromStorage = () => {
+  // Main fetch function with enhanced fallback
+  const fetchProducts = async (filters = {}, forceRefresh = false) => {
     try {
-      const keys = Object.keys(localStorage)
-      keys.forEach(key => {
-        if (key.startsWith('products_cache_')) {
-          const data = JSON.parse(localStorage.getItem(key))
-          const cacheKey = key.replace('products_cache_', '')
-          if (data && (Date.now() - data.timestamp) < CACHE_DURATION) {
-            productsCache.value[cacheKey] = data
-            lastFetchTime.value[cacheKey] = data.timestamp
-          }
-        }
-      })
-    } catch (e) {
-      console.warn('LocalStorage load failed:', e) 
-    }
-  }
+      isLoading.value = true
+      error.value = null
 
-// Main fetch function with caching
-const fetchProducts = async (filters = {}, forceRefresh = false) => {
-  try {
-    isLoading.value = true
-    error.value = null
+      const { page = 1, limit = 10, category = null, sortBy = 'popularity' } = filters
+      const cacheKey = `products_${category || 'all'}_${sortBy}_${page}_${limit}`
 
-    const { page = 1, limit = 10, category = null, sortBy = 'popularity' } = filters
-    const cacheKey = `products_${category || 'all'}_${sortBy}_${page}_${limit}`
-
-    // DEBUG: Log what we're fetching
-    console.log(' DEBUG fetchProducts:', { 
-      category, 
-      isNull: category === null,
-      isUndefined: category === undefined,
-      filters 
-    })
-
-    // Check cache if not forcing refresh
-
-    if (!forceRefresh) {
-      const cached = getFromCache(cacheKey)
-      if (cached) {
-        console.log(` Using cached data for: ${cacheKey}`)
-        products.value = cached.products
-        pagination.value = cached.pagination
+      // Check if API endpoint is available
+      if (!graphql) {
+        console.log('GraphQL endpoint not configured, using fallback products')
+        usingFallbackData.value = true
+        useFallbackProducts(category, limit)
         isLoading.value = false
-        return cached.products
+        return products.value
       }
-    }
 
-    console.log(` Fetching products with filters:`, { page, limit, category, sortBy })
-
-    const response = await fetch(graphql, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      }, 
-      body: JSON.stringify({
-        query: PRODUCT_FILTER_QUERY,
-        variables: { 
-          page,
-          limit, 
-          category,
-          sortBy
-        } 
-      })
-    })
-  
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const result = await response.json()
-
-    console.log(' GraphQL Response:', {
-      hasData: !!result.data,
-      hasProductFilter: !!result.data?.productFilter,
-      dataLength: result.data?.productFilter?.data?.length || 0,
-      firstProductCategory: result.data?.productFilter?.data?.[0]?.category?.name
-    })
-
-    if (result.errors) {
-      console.error('GraphQL errors:', result.errors)
-      throw new Error(result.errors[0]?.message || 'GraphQL error')
-    }
-
-    if (result.data?.productFilter) {
-      const { data, pagination: paginationData } = result.data.productFilter
-      
-      // DEBUG: Check what we got
-      console.log(` Products fetched for "${category || 'all'}": ${data?.length || 0} items`)
-      if (data && data.length > 0) {
-        console.log('First 3 products categories:', data.slice(0, 3).map(p => p.category?.name))
+      // Check cache if not forcing refresh
+      if (!forceRefresh) {
+        const cached = getFromCache(cacheKey)
+        if (cached) {
+          console.log(` Using cached data for: ${cacheKey}`)
+          products.value = cached.products
+          pagination.value = cached.pagination
+          isLoading.value = false
+          return cached.products
+        }
       }
-      
-      products.value = data || []
-      pagination.value = paginationData
-      
-      // Save to cache
-      saveToCache(cacheKey, data, paginationData)
-      
-    } else {
-      products.value = []
-      console.warn('No productFilter data in response')
-    }
 
-    return products.value
-  } catch (err) {
-    error.value = err.message
-    console.error(' Error fetching products:', err)
+      console.log(` Fetching products with filters:`, { page, limit, category, sortBy })
+
+      let response;
+      try {
+        response = await fetch(graphql, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }, 
+          body: JSON.stringify({
+            query: PRODUCT_FILTER_QUERY,
+            variables: { 
+              page,
+              limit, 
+              category,
+              sortBy
+            } 
+          }),
+          timeout: 10000 // 10 second timeout
+        })
+      } catch (fetchError) {
+        console.error('Network error fetching products:', fetchError)
+        throw new Error('Network error: Unable to fetch products')
+      }
     
-    // Try to show cached data on error
-    const cacheKey = `products_${filters.category || 'all'}_${filters.sortBy || 'popularity'}_${filters.page || 1}_${filters.limit || 12}`
-    const cached = getFromCache(cacheKey)
-    if (cached) {
-      console.log(` Showing cached data on error for: ${cacheKey}`)
-      products.value = cached.products
-      pagination.value = cached.pagination
-    } else {
-      products.value = []
-    }
-    
-    return products.value
-  } finally {
-    isLoading.value = false
-  }
-}
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
-  // Fetch categories with caching
-const fetchCategories = async (forceRefresh = false) => {
-  try {
-    // Check cache first
-    if (!forceRefresh && categoryCache.value && isCacheValid('categories')) {
-      console.log('Using cached categories')
-      categories.value = categoryCache.value
-      return categories.value
-    }
+      const result = await response.json()
 
-    isLoading.value = true
-    error.value = null
+      if (result.errors) {
+        console.error('GraphQL errors:', result.errors)
+        throw new Error(result.errors[0]?.message || 'GraphQL error')
+      }
 
-    console.log('Fetching categories from API...', API_URL_CATEGORY)
-    const response = await fetch(API_URL_CATEGORY)
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
+      // Check if we got valid data
+      if (result.data?.productFilter?.data && Array.isArray(result.data.productFilter.data)) {
+        const { data, pagination: paginationData } = result.data.productFilter
+        
+        // Check if data is empty
+        if (data.length === 0) {
+          console.warn('API returned empty products array, using fallback')
+          usingFallbackData.value = true
+          useFallbackProducts(category, limit)
+        } else {
+          console.log(` Products fetched for "${category || 'all'}": ${data.length} items`)
+          
+          // Reset fallback flag since API succeeded
+          usingFallbackData.value = false
+          
+          // Fix image URLs if needed
+          const processedData = data.map(product => {
+            // Fix image URLs
+            const fixImageUrl = (url) => {
+              if (url && !url.startsWith('http')) {
+                if (url.startsWith('/')) {
+                  return `https://kartmania-api.vibrantick.org${url}`
+                } else {
+                  return `https://kartmania-api.vibrantick.org/${url}`
+                }
+              }
+              return url
+            }
 
-    const result = await response.json()
-    console.log('DEBUG: Categories API Response:', {
-      rawResponse: result,
-      hasData: !!result.data,
-      isArray: Array.isArray(result.data),
-      length: result.data?.length || 0
-    })
+            // Fix main product images
+            if (product.mainProduct?.images) {
+              product.mainProduct.images = product.mainProduct.images.map(img => ({
+                ...img,
+                imageUrl: fixImageUrl(img.imageUrl)
+              }))
+            }
 
-    if (result.data && Array.isArray(result.data)) {
-      // Process categories properly 
-      const allCategories = result.data
-        .map(category => {
-          // DEBUG: Log each category
-          console.log('Processing category:', {
-            id: category.id,
-            name: category.name,
-            productCount: category._count?.products,
-            hasProducts: (category._count?.products || 0) > 0
+            // Fix variant images
+            if (product.variants) {
+              product.variants = product.variants.map(variant => ({
+                ...variant,
+                images: variant.images?.map(img => ({
+                  ...img,
+                  imageUrl: fixImageUrl(img.imageUrl)
+                })) || []
+              }))
+            }
+
+            return product
           })
           
-          return {
-            id: category.id.toString(), // Make sure id is string
-            name: category.name,
+          products.value = processedData
+          pagination.value = paginationData
+          
+          // Save to cache
+          saveToCache(cacheKey, processedData, paginationData)
+        }
+      } else {
+        console.warn('No valid productFilter data in response, using fallback')
+        usingFallbackData.value = true
+        useFallbackProducts(category, limit)
+      }
+
+      return products.value
+    } catch (err) {
+      error.value = err.message
+      console.error(' Error fetching products:', err)
+      
+      // Set fallback flag
+      usingFallbackData.value = true
+      
+      // Use fallback products on error
+      const { category = null, limit = 10 } = filters
+      useFallbackProducts(category, limit)
+      
+      return products.value
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Enhanced fallback products function
+  const useFallbackProducts = (category = null, limit = 10) => {
+    console.log(' Using fallback products for category:', category)
+    
+    let filteredProducts = [...FALLBACK_PRODUCTS]
+    
+    if (category) {
+      // Filter by category
+      filteredProducts = FALLBACK_PRODUCTS.filter(p => 
+        p.category?.name?.toLowerCase() === category.toLowerCase()
+      )
+      
+      // If no products for category, show all
+      if (filteredProducts.length === 0) {
+        console.log(`No fallback products for category "${category}", showing all`)
+        filteredProducts = FALLBACK_PRODUCTS
+      }
+    }
+    
+    // Apply limit
+    filteredProducts = filteredProducts.slice(0, limit)
+    
+    products.value = filteredProducts
+    
+    pagination.value = {
+      currentPage: 1,
+      lastPage: Math.ceil(FALLBACK_PRODUCTS.length / limit),
+      total: FALLBACK_PRODUCTS.length,
+      perPage: limit
+    }
+    
+    console.log(`Showing ${filteredProducts.length} fallback products`)
+  }
+
+  // Fetch categories with enhanced fallback
+  const fetchCategories = async (forceRefresh = false) => {
+    try {
+      // Check if API endpoint is available
+      if (!API_URL_CATEGORY) {
+        console.log('Categories API endpoint not configured, using fallback')
+        usingFallbackData.value = true
+        useFallbackCategories()
+        return categories.value
+      }
+
+      // Check cache first
+      if (!forceRefresh && categoryCache.value && isCacheValid('categories')) {
+        console.log('Using cached categories')
+        categories.value = categoryCache.value
+        usingFallbackData.value = false
+        return categories.value
+      }
+
+      isLoading.value = true
+      error.value = null
+
+      console.log('Fetching categories from API...', API_URL_CATEGORY)
+      
+      let response;
+      try {
+        response = await fetch(API_URL_CATEGORY, { timeout: 10000 })
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+      } catch (fetchError) {
+        console.error('Network error fetching categories:', fetchError)
+        throw new Error('Network error: Unable to fetch categories')
+      }
+
+      const result = await response.json()
+
+      // Check if we got valid data
+      if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+        const allCategories = result.data
+          .map(category => ({
+            id: category.id?.toString() || Math.random().toString(36).substr(2, 9),
+            name: category.name || 'Unnamed Category',
             productCount: category._count?.products || 0,
             image: category.image,
             logo: category.logo,
-            hasProducts: (category._count?.products || 0) > 0
-          }
-        })
-        .filter(category => {
-          // Filter out categories without proper data
-          const isValid = category.name && category.id
-          if (!isValid) {
-            console.warn('Invalid category filtered out:', category)
-          }
-          return isValid 
-        })
-        .sort((a, b) => {
-          // Sort by product count descending
-          return b.productCount - a.productCount
-        })
+            hasProducts: (category._count?.products || 0) > 0,
+            fallbackImage: getCategoryFallbackImage(category.name)
+          }))
+          .filter(category => category.name && category.id)
+          .sort((a, b) => b.productCount - a.productCount)
 
-      console.log('Processed categories:', allCategories)
-      
-      categories.value = allCategories
-      categoryCache.value = allCategories
-      lastFetchTime.value['categories'] = Date.now()
-      
-      console.log(`Categories fetched: ${allCategories.length} items`)
-    } else {
-      console.warn('No categories data in response, using fallback')
-      categories.value = getFallbackCategories()
-    }
+        console.log('Processed categories:', allCategories.length)
+        
+        // Reset fallback flag
+        usingFallbackData.value = false
+        
+        categories.value = allCategories
+        categoryCache.value = allCategories
+        lastFetchTime.value['categories'] = Date.now()
+        
+        console.log(`Categories fetched: ${allCategories.length} items`)
+      } else {
+        console.warn('No valid categories data in response, using fallback')
+        usingFallbackData.value = true
+        useFallbackCategories()
+      }
 
-    return categories.value
-  } catch (err) {
-    error.value = err.message
-    console.error('Error fetching categories:', err)
-    categories.value = getFallbackCategories()
-    return categories.value
-  } finally {
-    isLoading.value = false
-  }
-}
-
-  // Prefetch all categories' products 
-  const prefetchAllCategoryProducts = async () => {
-    try {
-      console.log(' Starting background prefetch of all categories...')
+      return categories.value
+    } catch (err) {
+      error.value = err.message
+      console.error('Error fetching categories:', err)
       
-      // Get categories first
-      await fetchCategories()
+      // Set fallback flag
+      usingFallbackData.value = true
       
-      // Prefetch products for each category (non-blocking)
-      const prefetchPromises = categories.value.map(async (category) => {
-        try {
-          // Don't wait for each to complete - do them in parallel 
-          fetchProducts({
-            page: 1,
-            limit: 10,
-            category: category.name,
-            sortBy: 'popularity'
-          }).catch(e => console.warn(`Prefetch failed for ${category.name}:`, e))
-          
-          // Small delay to not overload server
-          await new Promise(resolve => setTimeout(resolve, 100))
-        } catch (e) {
-          // Silent fail for prefetch
-        }
-      })
-      
-      // Also prefetch 'all' products
-      fetchProducts({
-        page: 1,
-        limit: 10,
-        category: null,
-        sortBy: 'popularity'
-      }).catch(e => console.warn('Prefetch failed for all:', e))
-      
-      console.log(' Background prefetch initiated for all categories')
-      
-    } catch (error) {
-      console.warn('Background prefetch failed:', error)
+      useFallbackCategories()
+      return categories.value
+    } finally {
+      isLoading.value = false
     }
   }
-  
-  // Get cached products for instant switching
-const getCachedProducts = (categoryName) => {
-  const cacheKey = `products_${categoryName || 'all'}_popularity_1_12`
-  const cached = getFromCache(cacheKey)
-  return cached ? cached.products : null
-}
-  // Set products directly (for instant switching)
-const setProductsDirect = (categoryName) => {
-  const cachedProducts = getCachedProducts(categoryName)
-  if (cachedProducts) {
-    products.value = cachedProducts
-    console.log(` Instantly showing cached products for: ${categoryName || 'all'}`)
-    return true
-  }
-  return false
-}
-  // Quick category switch with fallback
-const switchCategory = async (categoryName) => {
-  const category = categoryName === 'all' ? null : categoryName
-  
-  // First try to show cached data instantly
-  if (setProductsDirect(categoryName)) {
-    return { instant: true, data: products.value }
-  }
-  
-  // If no cache, fetch fresh data
-  const data = await fetchProducts({
-    page: 1,
-    limit: 10,
-    category: category,
-    sortBy: 'popularity'
-  })
-  
-  return {
-    instant: false,
-    data: data
-  }
-}
 
-  // Rest of the store functions (getters, helpers) remain the same
+  // Use fallback categories
+  const useFallbackCategories = () => {
+    console.log(' Using fallback categories')
+    categories.value = FALLBACK_CATEGORIES
+    categoryCache.value = FALLBACK_CATEGORIES
+    lastFetchTime.value['categories'] = Date.now()
+  }
+
+  // ==================== PRODUCT GETTERS WITH FALLBACK ====================
   const getProductName = (product) => {
-    return product?.name || product?.mainProduct?.name || 'Unnamed Product'
+    if (!product) return 'Product Name'
+    
+    // Check if using fallback data
+    if (usingFallbackData.value) {
+      return product.name || product.mainProduct?.name || 'Unnamed Product'
+    }
+    
+    return product.name || product.mainProduct?.name || 'Unnamed Product'
   }
 
-  const getProductBrand = (product) => {
-    return product?.brand || product?.mainProduct?.brand || 'Unknown Brand'
-  }
+  const getProductImage = (product, index = 0) => {
+    if (!product) return getFallbackImages(index)
+    
+    // If using fallback data, return fallback image
+    if (usingFallbackData.value) {
+      return product.mainProduct?.images?.[0]?.imageUrl || 
+             getCategoryFallbackImage(product.category?.name) ||
+             getFallbackImages(index)
+    }
 
-  const getProductImage = (product) => {
+    // Try API image first
     const primaryImage = product?.mainProduct?.images?.find(img => img.isPrimary)
     if (primaryImage?.imageUrl) {
       if (primaryImage.imageUrl.startsWith('http')) {
@@ -456,28 +770,63 @@ const switchCategory = async (categoryName) => {
       }
     }
 
-    return 'https://via.placeholder.com/300x200?text=Product+Image'
+    // Use fallback image based on product index or category
+    const categoryName = product?.category?.name || ''
+    if (categoryName) {
+      return getCategoryFallbackImage(categoryName)
+    }
+    
+    // Default fallback images
+    return getFallbackImages(index)
   }
 
   const getOriginalPrice = (product) => {
-    const price = product?.mainProduct?.price || 0
+    if (!product) return 0
+    
+    if (usingFallbackData.value) {
+      return product.mainProduct?.price || 0
+    }
+    
+    const price = product?.mainProduct?.price || product?.price || 0
     return parseFloat(price) || 0
   }
 
   const getDiscountedPrice = (product) => {
     const originalPrice = getOriginalPrice(product)
-    const discountValue = product?.mainProduct?.discountValue || 0
+    
+    if (usingFallbackData.value) {
+      const discountValue = product.mainProduct?.discountValue || 0
+      if (discountValue > 0 && discountValue <= 100) {
+        const discounted = originalPrice - (originalPrice * discountValue / 100)
+        return Math.max(0, Math.round(discounted))
+      }
+      return originalPrice
+    }
+    
+    const discountValue = product?.mainProduct?.discountValue || product?.discountValue || 0
     
     if (discountValue > 0 && discountValue <= 100) {
       const discounted = originalPrice - (originalPrice * discountValue / 100)
-      return Math.max(0, discounted)
+      return Math.max(0, Math.round(discounted))
     }
     return originalPrice
   }
 
   const getProductRating = (product) => {
+    if (!product) return 4.0
+    
+    if (usingFallbackData.value) {
+      const reviews = product.mainProduct?.reviews || []
+      if (reviews.length > 0) {
+        const totalRating = reviews.reduce((sum, review) => sum + (parseFloat(review.rating) || 0), 0)
+        const average = totalRating / reviews.length
+        return parseFloat(average.toFixed(1))
+      }
+      return 4.0 + Math.random() * 0.5
+    }
+    
     const reviews = product?.mainProduct?.reviews || []
-    if (reviews.length === 0) return 4.0
+    if (reviews.length === 0) return 4.0 + Math.random() * 0.5
     
     const totalRating = reviews.reduce((sum, review) => sum + (parseFloat(review.rating) || 0), 0)
     const average = totalRating / reviews.length
@@ -485,11 +834,23 @@ const switchCategory = async (categoryName) => {
   }
 
   const getReviewCount = (product) => {
-    return product?.mainProduct?.reviews?.length || 0
+    if (!product) return Math.floor(Math.random() * 100) + 5
+    
+    if (usingFallbackData.value) {
+      return product.mainProduct?.reviews?.length || Math.floor(Math.random() * 100) + 5
+    }
+    
+    return product?.mainProduct?.reviews?.length || Math.floor(Math.random() * 100) + 5
   }
 
   const getProductStock = (product) => {
-    return product?.mainProduct?.stock || 0
+    if (!product) return Math.floor(Math.random() * 50) + 10
+    
+    if (usingFallbackData.value) {
+      return product.mainProduct?.stock || Math.floor(Math.random() * 50) + 10
+    }
+    
+    return product?.mainProduct?.stock || product?.stock || Math.floor(Math.random() * 50) + 10
   }
 
   const hasDiscount = (product) => {
@@ -510,45 +871,43 @@ const switchCategory = async (categoryName) => {
   }
 
   const isBestSeller = (product) => {
-    const popularity = product?.mainProduct?.popularity || 0
+    if (!product) return false
+    
+    if (usingFallbackData.value) {
+      const popularity = product.mainProduct?.popularity || Math.floor(Math.random() * 100)
+      return popularity > 80
+    }
+    
+    const popularity = product?.mainProduct?.popularity || product?.popularity || Math.floor(Math.random() * 100)
     return popularity > 80
   }
 
-  const getFallbackCategories = () => {
-    return [
-      { id: 'all', name: 'All', productCount: 27, hasProducts: true },
-      { id: '6', name: 'Women', productCount: 11, hasProducts: true },
-      { id: '12', name: 'Men', productCount: 16, hasProducts: true },
-      { id: '3', name: 'Mobile', productCount: 0, hasProducts: false },
-      { id: '10', name: 'Electronic', productCount: 0, hasProducts: false },
-      { id: '13', name: 'Kitchen', productCount: 0, hasProducts: false },
-      { id: '11', name: 'Skin care', productCount: 0, hasProducts: false }
-    ]
-  }
-
-  // Initialize store with prefetching
+  // Initialize
   const initialize = async () => {
     try {
-      // Load cache from localStorage
-      loadCacheFromStorage()
-      
-      // Fetch categories
+      // Fetch categories first
       await fetchCategories()
-      
-      // Start background prefetching
-      setTimeout(() => {
-        prefetchAllCategoryProducts()
-      }, 0)
       
       // Load initial products
       await fetchProducts({ sortBy: 'popularity' })
       
-      return { success: true }
+      return { 
+        success: true, 
+        usingFallback: usingFallbackData.value 
+      }
     } catch (err) {
       console.error('Initialize failed:', err)
-      return { success: false, error: err.message }
+      return { 
+        success: false, 
+        error: err.message,
+        usingFallback: true 
+      }
     }
-  } 
+  }
+
+  // New getter to check if using fallback
+  const isUsingFallback = computed(() => usingFallbackData.value)
+
   return {
     // State
     products,
@@ -556,24 +915,21 @@ const switchCategory = async (categoryName) => {
     isLoading,
     error,
     pagination,
+    usingFallbackData,
     
     // Computed
     hasProducts,
     hasCategories,
     getAllCategories,
     getCategoriesWithProducts,
+    isUsingFallback,
 
     // Actions
     fetchProducts,
     fetchCategories,
-    prefetchAllCategoryProducts,
-    getCachedProducts,
-    setProductsDirect,
-    switchCategory,
     
     // Product Getters
     getProductName,
-    getProductBrand,
     getProductImage,
     getOriginalPrice,
     getDiscountedPrice,

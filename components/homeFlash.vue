@@ -28,101 +28,103 @@
       </div>
 
       <!-- Content -->
-      <div v-else>
-        <!-- Swiper Products Slider -->
-        <div ref="swiperContainer" class="product-swiper">
-          <div class="swiper-wrapper">
-            <div 
-              v-for="(product, index) in displayProducts" 
-              :key="product.id"
-              class="swiper-slide"
-            >
-              <div class="product-card"> 
-                <button 
-                  class="add-cart-btn"
-                  @click="addToCart(product)"
-                >
-                  Add <i class="ph ph-shopping-cart"></i> 
-                </button>
+      <div v-else class="flash-sales-content">
+        <!-- Swiper Container -->
+        <div class="swiper-container-wrapper">
+          <div ref="swiperContainer" class="product-swiper">
+            <div class="swiper-wrapper">
+              <div 
+                v-for="(product, index) in displayProducts" 
+                :key="product.id"
+                class="swiper-slide"
+              >
+                <div class="product-card"> 
+                  <button 
+                    class="add-cart-btn"
+                    @click="addToCart(product)"
+                  >
+                    Add <i class="ph ph-shopping-cart"></i> 
+                  </button>
 
-                <NuxtLink 
-                  :to="`/product/${product.id}`" 
-                  class="product-image-container"
-                >
-                  <img
-                    :src="getProductImage(product)"
-                    :alt="product.name"
-                    class="product-image"
-                    @error="handleImageError($event, index)"
-                    loading="lazy"
-                    width="280"
-                    height="210"
-                  />
-                </NuxtLink>
-                
-                <div class="product-content">
-                  <div class="price-review-row">
-                    <div class="price-section">
-                      <span class="current-price">
-                        ₹{{ calculateDiscountedPrice(product) }}
-                        <span class="per-unit">/Qty</span>
-                      </span>
-                      <span class="original-price" v-if="activeOffer?.discountValue">
-                        ₹{{ product.price }}
-                      </span>
+                  <NuxtLink 
+                    :to="`/shop-all/--${product.id}`" 
+                    class="product-image-container"
+                  >
+                    <img
+                      :src="getProductImage(product)"
+                      :alt="product.name"
+                      class="product-image"
+                      @error="handleImageError($event, index)" 
+                      loading="lazy"
+                      width="280"
+                      height="210"
+                    />
+                  </NuxtLink> 
+                  
+                  <div class="product-content">
+                    <div class="price-review-row">
+                      <div class="price-section">
+                        <span class="current-price">
+                          ₹{{ calculateDiscountedPrice(product) }}
+                          <span class="per-unit">/Qty</span>
+                        </span>
+                        <span class="original-price" v-if="activeOffer?.discountValue">
+                          ₹{{ product.price }}
+                        </span>
+                      </div>
+
+                      <div class="review-section">
+                        <span class="rating">4.8</span>
+                        <i class="ph-fill ph-star rating-star"></i>
+                        <span class="review-count">(17k)</span>
+                      </div>
                     </div>
 
-                    <div class="review-section">
-                      <span class="rating">4.8</span>
-                      <i class="ph-fill ph-star rating-star"></i>
-                      <span class="review-count">(17k)</span>
-                    </div>
-                  </div>
+                    <h6 class="product-title">
+                      <NuxtLink  
+                        :to="`/product/${product.id}`" 
+                        class="product-link"
+                      >
+                        {{ product.name }}
+                      </NuxtLink>
+                    </h6>
 
-                  <h6 class="product-title">
-                    <NuxtLink  
-                      :to="`/product/${product.id}`" 
-                      class="product-link"
-                    >
-                      {{ product.name }}
-                    </NuxtLink>
-                  </h6>
-
-                  <!-- Progress Bar -->
-                  <div class="progress-section">
-                    <div class="progress-info">
-                      <span>Sold: {{ getRandomSoldPercentage() }}%</span>
-                      <span>Available: {{ getRandomAvailable() }}</span>
-                    </div>
-                    <div class="progress-bar">
-                      <div 
-                        class="progress-fill" 
-                        :style="{ width: getRandomSoldPercentage() + '%' }"
-                      ></div>
+                    <!-- Progress Bar -->
+                    <div class="progress-section">
+                      <div class="progress-info">
+                        <span>Sold: {{ getRandomSoldPercentage() }}%</span>
+                        <span>Available: {{ getRandomAvailable() }}</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div 
+                          class="progress-fill" 
+                          :style="{ width: getRandomSoldPercentage() + '%' }"
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Navigation Buttons -->
-        <div class="navigation-buttons" v-if="displayProducts.length > 0">
-          <button
-            type="button"
-            class="nav-btn prev-btn"
-            @click="slidePrev"
-          >
-            <i class="ph ph-caret-left"></i>
-          </button>
-          <button
-            type="button"
-            class="nav-btn next-btn"
-            @click="slideNext"
-          >
-            <i class="ph ph-caret-right"></i>
-          </button>
+          <!-- Navigation Buttons -->
+          <div class="navigation-buttons" v-if="displayProducts.length > 0">
+            <button
+              type="button"
+              class="nav-btn prev-btn"
+              @click="slidePrev"
+            >
+              <i class="ph ph-caret-left"></i>
+            </button>
+            <button
+              type="button"
+              class="nav-btn next-btn"
+              @click="slideNext"
+            >
+              <i class="ph ph-caret-right"></i>
+            </button>
+          </div>
         </div>
 
         <!-- No Products -->
@@ -137,35 +139,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
+
 const config = useRuntimeConfig()
 const API_URL = config.public.api.offers
-
-// Types
-const Product = {
-  id: Number,
-  name: String,
-  price: String,
-  sku: String,
-  images: Array,
-  product: Object // From API structure
-}
-
-const Offer = {
-  id: Number,
-  name: String,
-  discountValue: Number,
-  endDate: String,
-  products: Array,
-  images: Array
-}
 
 // Refs
 const swiperInstance = ref(null)
 const swiperContainer = ref(null)
 const loading = ref(true)
 const activeOffer = ref(null)
-const apiData = ref([])
 
 // Static products for fallback
 const staticProducts = [
@@ -316,15 +299,13 @@ const handleImageError = (event, index) => {
     "/assets/images/thumbs/product-img3.png"
   ]
   img.src = fallbackImages[index % fallbackImages.length] 
-    img.onerror = null 
-
+  img.onerror = null 
 }  
 
 const addToCart = (product) => {
   // Implement cart logic
   const productData = product.product || product
   console.log('Adding to cart:', productData.name, productData.id)
-  // Add your cart logic here
 }
 
 // Computed property for display products
@@ -356,9 +337,7 @@ const fetchOffers = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 10000, // Increased timeout
-      retry: 3,
-      retryDelay: 2000,
+      timeout: 5000,
     })
     
     console.log('API Response:', response)
@@ -379,7 +358,6 @@ const fetchOffers = async () => {
   } catch (error) {
     console.error('Error fetching offers:', error)
     console.log('Using static products for flash sales')
-    // Silently fallback to static products
   } finally {
     loading.value = false
   }
@@ -395,41 +373,76 @@ const initSwiper = async () => {
     
     const Swiper = SwiperModule.default
     
-  swiperInstance.value = new Swiper(swiperContainer.value, {
-  modules: [Navigation, Autoplay],
-
-  loop: displayProducts.value.length >= 8, // 🔑 important
-  slidesPerView: 6,
-  spaceBetween: 16,
-
-  navigation: {
-    nextEl: '.next-btn',
-    prevEl: '.prev-btn',
-  },
-
-  breakpoints: {
-    320: {
-      slidesPerView: 1,
-      spaceBetween: 10
-    },
-    480: {
-      slidesPerView: 2,
-      spaceBetween: 12
-    },
-    768: {
-      slidesPerView: 3,
-      spaceBetween: 14
-    },
-    1024: {
-      slidesPerView: 4,
-      spaceBetween: 16
-    },
-    1200: {
+    swiperInstance.value = new Swiper(swiperContainer.value, {
+      modules: [Navigation, Autoplay],
+      loop: displayProducts.value.length > 4,
       slidesPerView: 5,
-      spaceBetween: 16
-    }
-  }
-})
+      spaceBetween: 16,
+      centeredSlides: false,
+      grabCursor: true,
+      speed: 600,
+      
+      navigation: {
+        nextEl: '.next-btn',
+        prevEl: '.prev-btn',
+        disabledClass: 'nav-btn-disabled'
+      },
+      
+      autoplay: {
+        delay: 3000,
+        disableOnInteraction: true,
+        pauseOnMouseEnter: true
+      },
+      
+      breakpoints: {
+        320: {
+          slidesPerView: 1,
+          spaceBetween: 12
+        },
+        400: {
+          slidesPerView: 1.5,
+          spaceBetween: 12
+        },
+        480: {
+          slidesPerView: 2,
+          spaceBetween: 12
+        },
+        576: {
+          slidesPerView: 2.5,
+          spaceBetween: 14
+        },
+        640: {
+          slidesPerView: 3,
+          spaceBetween: 14
+        },
+        768: {
+          slidesPerView: 3,
+          spaceBetween: 16
+        },
+        900: {
+          slidesPerView: 4,
+          spaceBetween: 16
+        },
+        1024: {
+          slidesPerView: 4,
+          spaceBetween: 16
+        },
+        1200: {
+          slidesPerView: 5,
+          spaceBetween: 16
+        },
+        1400: {
+          slidesPerView: 5,
+          spaceBetween: 16
+        }
+      },
+      
+      on: {
+        init: function() {
+          console.log('Swiper initialized successfully')
+        }
+      }
+    })
 
   } catch (error) {
     console.error('Error initializing Swiper:', error)
@@ -448,13 +461,14 @@ const slidePrev = () => {
 onMounted(async () => {
   await fetchOffers()
   await nextTick()
-  if (displayProducts.value.length > 0) {
-    initSwiper()
-  }
+  initSwiper()
 })
 
 onUnmounted(() => {
-  swiperInstance.value?.destroy()
+  if (swiperInstance.value) {
+    swiperInstance.value.destroy(true, true)
+    swiperInstance.value = null
+  }
 })
 </script>
 
@@ -465,8 +479,8 @@ onUnmounted(() => {
 }
 
 .container-lg {
-  /* max-width: 1200px;
-  margin: 0 auto; */
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 0 16px;
 }
 
@@ -552,23 +566,35 @@ h5 {
   to { transform: rotate(360deg); }
 }
 
+/* Flash Sales Content */
+.flash-sales-content {
+  position: relative;
+}
+
+/* Swiper Container Wrapper */
+.swiper-container-wrapper {
+  position: relative;
+  padding: 0 40px;
+  overflow: hidden;
+}
+
 /* Swiper */
 .product-swiper {
-  max-width: 1600px;
-  overflow: visible;
-  position: relative; 
+  width: 100%;
+  overflow: hidden;
 }
 
 .swiper-wrapper {
   display: flex;
-  align-items: stretch;
+  transition-timing-function: ease-out;
+  box-sizing: border-box;
 }
 
 .swiper-slide {
   height: auto;
   display: flex;
-  flex-shrink: 0; 
-  width: auto;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
 }
 
 /* Product Card */
@@ -581,8 +607,10 @@ h5 {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
+  min-width: 0;
   position: relative;
-  min-width: 0; /* Prevents flexbox overflow issues */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .product-card:hover {
@@ -631,6 +659,10 @@ h5 {
   border-bottom: 1px solid #f1f5f9;
   background: #f8fafc;
   flex-shrink: 0;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-image {
@@ -651,7 +683,8 @@ h5 {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0; /* Prevents overflow */
+  min-height: 0;
+  overflow: hidden;
 }
 
 .price-review-row {
@@ -714,6 +747,7 @@ h5 {
 .product-title {
   margin: 0 0 16px 0;
   flex-shrink: 0;
+  line-height: 1.4;
 }
 
 .product-link {
@@ -726,7 +760,7 @@ h5 {
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.5;
-  min-height: 48px;
+  max-height: 3em;
 }
 
 .product-link:hover {
@@ -743,9 +777,6 @@ h5 {
   display: flex;
   justify-content: space-between;
   margin-bottom: 6px;
-}
-
-.progress-info span {
   font-size: 12px;
   color: #64748b;
 }
@@ -766,10 +797,15 @@ h5 {
 
 /* Navigation Buttons */
 .navigation-buttons {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 20px;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .nav-btn {
@@ -784,6 +820,8 @@ h5 {
   cursor: pointer;
   color: #64748b;
   transition: all 0.3s ease;
+  pointer-events: all;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .nav-btn:hover {
@@ -793,11 +831,19 @@ h5 {
   transform: scale(1.1);
 }
 
+.nav-btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
   color: #64748b;
+  background: white;
+  border-radius: 16px;
+  border: 1px dashed #e2e8f0;
 }
 
 .empty-state i {
@@ -834,6 +880,14 @@ h5 {
     gap: 12px;
   }
   
+  .swiper-container-wrapper {
+    padding: 0 30px;
+  }
+  
+  .product-image-container {
+    min-height: 160px;
+  }
+  
   .product-image {
     height: 160px;
     padding: 16px;
@@ -849,17 +903,26 @@ h5 {
   
   .product-link {
     font-size: 14px;
-    min-height: 42px;
+    max-height: 2.8em;
   }
   
-  .navigation-buttons {
-    justify-content: center;
+  .nav-btn {
+    width: 36px;
+    height: 36px;
   }
 }
 
 @media (max-width: 480px) {
   .flash-sales {
     padding: 32px 0;
+  }
+  
+  .swiper-container-wrapper {
+    padding: 0 20px;
+  }
+  
+  .product-image-container {
+    min-height: 140px;
   }
   
   .product-image {
@@ -873,13 +936,24 @@ h5 {
   }
   
   .nav-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     font-size: 14px;
   }
   
   .product-link {
-    min-height: 40px;
+    font-size: 13px;
+    max-height: 2.6em;
   }
+}
+
+/* Fix for Swiper layout */
+:deep(.swiper-slide) {
+  height: auto !important;
+}
+
+:deep(.swiper-slide > *) {
+  height: 100% !important;
+  width: 100% !important;
 }
 </style>

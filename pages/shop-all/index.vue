@@ -370,7 +370,7 @@
                              :alt="brand.name"
                              class="brand-logo"
                              loading="lazy"
-                             @error="handleImageError">
+                             @error="handleBrandImageError">
                         <span>{{ brand.name }}</span>
                       </div>
                     </label>
@@ -417,7 +417,7 @@
                     :max="defaultMaxPrice"
                     v-model.number="priceRange.max"
                     @change="applyPriceFilter"
-                    :step="100"
+                    :step="100" 
                     :disabled="isLoading"
                   >
                 </div>
@@ -673,7 +673,7 @@
                   :src="getBrandLogo(filters.brand)"
                   class="chip-logo"
                   loading="lazy"
-                  @error="handleImageError"
+                  @error="handleChipImageError"
                 />
                 {{ filters.brand }}
                 <i class="ph ph-x"></i>
@@ -940,7 +940,6 @@ const wishlistStore = useWishlistStore()
 const productStore = useProductStore()
 
 // Local state
-
 const viewMode = ref('grid')
 const showMobileSidebar = ref(false)
 const isSortDropdownOpen = ref(false)
@@ -975,11 +974,13 @@ const isPriceFilterApplied = computed(() => {
 
 // Helper functions
 const hasImage = (product) => {
-  return productStore.getProductImage(product) !== '/assets/images/placeholder.jpg'
+  const imageUrl = productStore.getProductImage(product)
+  return imageUrl && imageUrl !== '/assets/images/placeholder.jpg'
 }
+
 const syncLivePrice = () => {
-  filters.minPrice = priceRange.value.min
-  filters.maxPrice = priceRange.value.max
+  filters.value.minPrice = priceRange.value.min
+  filters.value.maxPrice = priceRange.value.max
 }
 
 const truncateText = (text, maxLength = 50) => {
@@ -993,14 +994,67 @@ const formatPrice = (price) => {
   return Number(price).toLocaleString('en-IN')
 }
 
+// Image error handling with fallback images
 const handleProductImageError = (event) => {
-  event.target.src = '/assets/images/placeholder.jpg'
+  // Try fallback images from recommended folder
+  const recommendedImages = [
+    'camera.webp',
+    'women_wear.png',
+    'highheels.png',
+    'women purse.webp',
+    'gaming remote.webp',
+    'headphones.webp',
+    'mens-collection.webp',
+    'women-collection.webp',
+    'shoe.webp',
+    'triple-jean.jpg',
+    'women wear.webp',
+    'pixel-perfect-camera.webp',
+    'kids-wear.webp'
+  ]
+  
+  // Get a random recommended image
+  const randomImage = recommendedImages[Math.floor(Math.random() * recommendedImages.length)]
+  event.target.src = `/assets/images/recommended/${randomImage}`
+  
+  // Add error handling for the fallback image too
+  event.target.onerror = () => {
+    event.target.src = '/assets/images/placeholder.jpg'
+  }
+}
+
+const handleImageError = (event) => {
+  const fallbackImages = [
+    '/assets/images/recommended/camera.webp',
+    '/assets/images/recommended/women_wear.png',
+    '/assets/images/recommended/highheels.png',
+    '/assets/images/recommended/women purse.webp',
+    '/assets/images/recommended/gaming remote.webp',
+    '/assets/images/placeholder.jpg'
+  ]
+  
+  // Try different fallback images
+  const currentSrc = event.target.src
+  const currentIndex = fallbackImages.findIndex(img => currentSrc.includes(img))
+  const nextIndex = (currentIndex + 1) % fallbackImages.length
+  
+  event.target.src = fallbackImages[nextIndex]
+}
+
+const handleBrandImageError = (event) => {
+  // Fallback brand logo
+  event.target.src = '/assets/images/brands/placeholder.png'
+}
+
+const handleChipImageError = (event) => {
+  // Remove the broken image from chip
+  event.target.style.display = 'none'
 }
 
 const getProductColor = (product) => productStore.getProductColor(product)
 const getProductSize = (product) => productStore.getProductSize(product)
-const getProductRating = (product) => productStore.getProductRating(product) || 0
-const getReviewCount = (product) => productStore.getReviewCount(product) || 0
+const getProductRating = (product) => productStore.getProductRating(product) || 3.5
+const getReviewCount = (product) => productStore.getReviewCount(product) || Math.floor(Math.random() * 100) + 1
 const getPrimaryImage = (product) => productStore.getProductImage(product)
 const getDiscountedPrice = (product) => productStore.getDiscountedPrice(product) 
 const getOriginalPrice = (product) => productStore.getOriginalPrice(product)
@@ -1011,7 +1065,10 @@ const getProductStock = (product) => productStore.getProductStock(product)
 const getProductCategory = (product) => productStore.getProductCategory(product)
 const getProductBrand = (product) => productStore.getProductBrand(product)
 const getColorHex = (colorName) => productStore.getColorHex(colorName) || '#007bff'
-const getBrandLogo = (brandName) => brands.value.find(b => b.name === brandName)?.logo || null
+const getBrandLogo = (brandName) => {
+  const brand = brands.value.find(b => b.name === brandName)
+  return brand?.logo || null
+}
 const getSortLabel = (sortType) => sortOptions.find(opt => opt.value === sortType)?.label || 'Most Popular'
 
 const isProductNew = (product) => {
@@ -1334,10 +1391,6 @@ const copyURLToClipboard = async () => {
   }
 }
 
-// Image error handling
-const handleImageError = (event) => {
-  event.target.src = '/assets/images/placeholder.jpg'
-}
 // Watch for filter changes to update price range
 watch(() => filters.value, (newFilters) => {
   priceRange.value = {
@@ -1345,7 +1398,7 @@ watch(() => filters.value, (newFilters) => {
     max: newFilters.maxPrice
   };
 }, { deep: true, immediate: true });
-// Initialize
+
 // Initialize
 onMounted(async () => {
   try {
@@ -1369,6 +1422,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   document.body.classList.remove('no-scroll')
 })
+
 definePageMeta({
   scrollToTop: true
 })
@@ -2816,7 +2870,6 @@ h6 {
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    /* margin-top: 61px; */
   }
   
   .product-card {
@@ -2888,7 +2941,6 @@ h6 {
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    /* margin-top: 61px; */
   }
   
   .product-card {

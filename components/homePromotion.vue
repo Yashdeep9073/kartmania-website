@@ -2,22 +2,22 @@
 <template>
   <section class="promotional-banner pb-40 pt-10 pt-md-60 pt-lg-80">
     <div class="container container-lg px-3 px-md-4">
-      <div v-if="loading" class="text-center py-60 py-md-80">
+      <div v-if="loading && showStaticFallback === false" class="text-center py-60 py-md-80">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
       </div>
 
-      <div v-else-if="error" class="text-center py-60 py-md-80">
+      <div v-else-if="error && showStaticFallback === false" class="text-center py-60 py-md-80">
         <div class="alert alert-danger px-3 px-md-4 py-3">
           {{ error }}
         </div>
       </div>
 
       <div v-else class="row gy-3 gy-md-4">
-
+        <!-- Static Fallback Banners (always available) -->
         <div
-          v-for="(banner, index) in visibleBanners"
+          v-for="(banner, index) in staticBanners"
           :key="banner.id"
           :class="getColumnClasses(index)"
         >
@@ -33,21 +33,9 @@
                 {{ banner.title }}
               </h6>
 
-              <!-- Price display if description contains price -->
-              <div v-if="hasPrice(banner.description)" class="d-flex align-items-end gap-2 gap-md-4 gap-lg-8 mb-2 mb-md-3 mb-lg-4">
+              <div class="d-flex align-items-end gap-2 gap-md-4 gap-lg-8 mb-2 mb-md-3 mb-lg-4">
                 <span class="text-heading fst-italic text-xs text-md-sm text-lg-base">Starting at</span>
-                <h6 class="text-danger-600 mb-0 text-sm text-md-base text-lg-xl">{{ extractPrice(banner.description) }}</h6>
-              </div>
-
-              <!-- Show description if not a price -->
-              <div v-else-if="banner.description && banner.description !== 'This is testing'" class="text-heading text-xs text-md-sm text-lg-base mb-3 mb-md-4 mb-lg-8">
-                {{ banner.description }}
-              </div>
-
-              <!-- Fallback default text if no proper description -->
-              <div v-else class="d-flex align-items-end gap-2 gap-md-4 gap-lg-8 mb-2 mb-md-3 mb-lg-4">
-                <span class="text-heading fst-italic text-xs text-md-sm text-lg-base">Starting at</span>
-                <h6 class="text-danger-600 mb-0 text-sm text-md-base text-lg-xl">₹ 100</h6>
+                <h6 class="text-danger-600 mb-0 text-sm text-md-base text-lg-xl">{{ banner.price }}</h6>
               </div>
   
               <NuxtLink to="/shop-all" class="btn btn-main d-inline-flex align-items-center rounded-pill gap-2 gap-md-4 gap-lg-8 mt-3 mt-md-4 mt-lg-6 px-3 px-md-4 py-2 py-md-2 py-lg-3 text-xs text-md-sm text-lg-base">
@@ -59,38 +47,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Fallback static banners if API has less than required items -->
-        <template v-if="promotionalBanners.length < requiredBanners">
-          <div
-            v-for="n in (requiredBanners - promotionalBanners.length)"
-            :key="'fallback-' + n"
-            :class="getFallbackColumnClasses(n)"
-          >
-            <div class="promotional-banner-item position-relative rounded-16 rounded-md-20 rounded-lg-24 overflow-hidden z-1 py-32 py-md-40 py-lg-52 ps-20 ps-md-30 ps-lg-40 pe-16 pe-md-20 pe-lg-24 h-100">
-              <img
-                :src="`/assets/images/thumbs/promotional-banner-img${n + promotionalBanners.length}.png`"
-                :alt="`Fallback Banner ${n}`"
-                class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover z-n1"
-              > 
-              <div class="promotional-banner-item__content">
-                <h6 class="promotional-banner-item__title fw-bold mb-2 mb-md-3 mb-lg-4 text-base text-md-lg text-lg-2xl">
-                  {{ getFallbackTitle(n + promotionalBanners.length) }}
-                </h6>
-                <div class="d-flex align-items-end gap-2 gap-md-4 gap-lg-8 mb-2 mb-md-3 mb-lg-4">
-                  <span class="text-heading fst-italic text-xs text-md-sm text-lg-base">Starting at</span>
-                  <h6 class="text-danger-600 mb-0 text-sm text-md-base text-lg-xl">$60.99</h6>
-                </div>
-                <NuxtLink to="/shop" class="btn btn-main d-inline-flex align-items-center rounded-pill gap-2 gap-md-4 gap-lg-8 mt-3 mt-md-4 mt-lg-6 px-3 px-md-4 py-2 py-md-2 py-lg-3 text-xs text-md-sm text-lg-base">
-                  Shop Now
-                  <span class="icon d-flex text-sm text-md-base text-lg-xl">
-                    <i class="ph ph-arrow-right"></i>
-                  </span>
-                </NuxtLink>
-              </div>
-            </div>
-          </div>
-        </template>
       </div>
     </div>
   </section>
@@ -98,8 +54,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+
 const config = useRuntimeConfig() 
 const API_URL = config.public.api.offers 
+
 interface BannerData {
   id: number
   title: string
@@ -111,6 +69,14 @@ interface BannerData {
   updatedAt: string
 }
 
+interface StaticBanner {
+  id: number
+  title: string
+  description: string
+  image: string
+  price: string
+}
+
 interface ApiResponse {
   message: string
   data: BannerData[]
@@ -118,11 +84,55 @@ interface ApiResponse {
 
 // Reactive state
 const promotionalBanners = ref<BannerData[]>([])
-const loading = ref(true)
+const loading = ref(false) // Start with false since we have static fallback
 const error = ref<string | null>(null)
+const showStaticFallback = ref(false) // Control when to show static banners
+
+// Static banners data (always available)
+const staticBanners = ref<StaticBanner[]>([
+  {
+    id: 1,
+    title: 'Everyday Fresh Meat',
+    description: 'Fresh meat delivered daily',
+    image: '/assets/images/thumbs/promotional-banner-img1.png',
+    price: '₹ 299'
+  },
+  {
+    id: 2,
+    title: 'Daily Fresh Vegetables',
+    description: 'Organic vegetables at your doorstep',
+    image: '/assets/images/thumbs/promotional-banner-img2.png',
+    price: '₹ 149'
+  },
+  {
+    id: 3,
+    title: 'Everyday Fresh Milk',
+    description: 'Pure and fresh dairy products',
+    image: '/assets/images/thumbs/promotional-banner-img3.png',
+    price: '₹ 49'
+  },
+  {
+    id: 4,
+    title: 'Everyday Fresh Fruits',
+    description: 'Seasonal fruits from local farms',
+    image: '/assets/images/thumbs/promotional-banner-img4.png',
+    price: '₹ 199'
+  }
+])
 
 // Responsive breakpoints
 const screenWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
+
+// Determine required banners based on screen size
+const requiredBanners = computed(() => {
+  if (screenWidth.value < 768) return 2 // Mobile: 2 banners
+  return 4 // Tablet/Desktop: 4 banners
+})
+
+// Get visible static banners based on screen size
+const visibleStaticBanners = computed(() => {
+  return staticBanners.value.slice(0, requiredBanners.value)
+})
 
 // Update screen width on resize
 if (typeof window !== 'undefined') {
@@ -133,113 +143,100 @@ if (typeof window !== 'undefined') {
   })
 }
 
-// Determine required banners based on screen size
-const requiredBanners = computed(() => {
-  if (screenWidth.value < 768) return 2 // Mobile: 2 banners
-  return 4 // Tablet/Desktop: 4 banners
-})
-
-// Get visible banners (limit based on screen size)
-const visibleBanners = computed(() => {
-  return promotionalBanners.value.slice(0, requiredBanners.value)
-})
-
 // Get column classes based on index and screen size
 const getColumnClasses = (index: number): string => {
   return 'col-12 col-md-6 col-lg-3'
 }
 
-
-// Get fallback column classes
-const getFallbackColumnClasses = (index: number): string => {
-  return 'col-12 col-md-6 col-lg-3'
-}
-
-// Fetch banner data
+// Fetch banner data from API
 const fetchPromotionalBanners = async () => {
   try {
     loading.value = true
     error.value = null
+    showStaticFallback.value = false
 
     const result: ApiResponse = await $fetch(API_URL, {
       method: 'GET',
-
       params: {
         offerType: 'FLASH_SALE',
         isActive: true
       },
-
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 10000,
-      retry: 3,
-      retryDelay: 2000,
+      timeout: 5000, // Reduced timeout for faster fallback
+      retry: 1, // Only retry once
     })
 
     if (result?.data && Array.isArray(result.data)) {
-      promotionalBanners.value = result.data
-        .filter(  
-          banner =>
-            banner.category === 'HEROSECTION' && 
-            !banner.isDeleted
+      const validBanners = result.data
+        .filter(banner => 
+          banner.category === 'HEROSECTION' && 
+          !banner.isDeleted &&
+          banner.image && 
+          banner.title
         )
         .sort((a, b) => a.id - b.id)
+
+      if (validBanners.length >= requiredBanners.value) {
+        promotionalBanners.value = validBanners
+      } else {
+        // If API has insufficient data, use static banners
+        showStaticFallback.value = true
+      }
+    } else {
+      // If API returns unexpected format, use static banners
+      showStaticFallback.value = true
     }
 
   } catch (err: any) {
-    error.value =
-      err?.data?.message ||
-      err?.message ||
-      'Failed to fetch banner data'
-
-    console.error('Error fetching promotional banners:', err)
+    console.warn('API fetch failed, using static banners:', err)
+    
+    // Always show static banners on any error
+    showStaticFallback.value = true
+    error.value = 'Using featured products'
+    
   } finally {
     loading.value = false
   }
 }
 
-
-// Helper function to check if description contains price
-const hasPrice = (description: string): boolean => {
-  return description.includes('₹') || description.includes('$')
-}
-
-// Extract price from description
-const extractPrice = (description: string): string => {
-  // Extract price pattern like ₹ 100 or $60.99
-  const priceMatch = description.match(/(₹|\$)\s*[\d,.]+/)
-  return priceMatch ? priceMatch[0] : description
-}
-
-// Fallback titles for static banners
-const getFallbackTitle = (index: number): string => {
-  const titles = [
-    'Everyday Fresh Meat',
-    'Daily Fresh Vegetables',
-    'Everyday Fresh Milk',
-    'Everyday Fresh Fruits'
-  ]
-  return titles[index - 1] || 'Fresh Products'
-}
-
 // Fetch data on component mount
 onMounted(() => {
+  // Try to fetch from API, but immediately show static banners if fails
   fetchPromotionalBanners()
+  
+  // Set a timeout to show static banners if API is taking too long
+  setTimeout(() => {
+    if (loading.value) {
+      showStaticFallback.value = true
+      loading.value = false
+    }
+  }, 3000) // Show static after 3 seconds if API is slow
 })
 
-// Optional: Auto-refresh every 5 minutes
+// Optional: Retry API in background (but keep showing static banners)
 onMounted(() => {
-  const interval = setInterval(fetchPromotionalBanners, 5 * 60 * 1000)
-  return () => clearInterval(interval)
+  const retryInterval = setInterval(() => {
+    if (!showStaticFallback.value) {
+      clearInterval(retryInterval)
+      return
+    }
+    // Retry API in background every 30 seconds
+    fetchPromotionalBanners().then(() => {
+      // If API succeeds now, update banners
+      if (promotionalBanners.value.length >= requiredBanners.value) {
+        showStaticFallback.value = false
+      }
+    })
+  }, 30000)
+  
+  return () => clearInterval(retryInterval)
 })
 </script>
 
 <style scoped>
-/* .promotional-banner {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  padding:0px 5px;
-} */
+/* Keep all your existing styles */
 .promotional-banner-item {
   background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
   backdrop-filter: blur(10px);
@@ -249,6 +246,7 @@ onMounted(() => {
   overflow: hidden;
   padding: 10px;
 }
+
 .promotional-banner-item::before {
   content: '';
   position: absolute;
@@ -294,6 +292,7 @@ onMounted(() => {
 .promotional-banner-item:hover img {
   transform: scale(1.05);
 }
+
 .btn-main {
   background: linear-gradient(135deg, #0266c3, #04b370);
   border: none;
@@ -355,10 +354,6 @@ onMounted(() => {
 
 /* Small Mobile (<576px) */
 @media (max-width: 575px) {
-  /* .promotional-banner {
-    padding-top: 32px !important;
-  } */
-
   .promotional-banner-item {
     margin-bottom: 12px;
   }
@@ -385,10 +380,6 @@ onMounted(() => {
 
 /* Extra Small Mobile (<400px) */
 @media (max-width: 399px) {
-  /* .promotional-banner {
-    padding-top: 24px !important;
-  } */
-  
   .container-lg {
     padding-left: 12px !important;
     padding-right: 12px !important;
@@ -431,5 +422,5 @@ onMounted(() => {
   .btn-main {
     min-height: 44px;
   }
-}
-</style>
+} 
+</style> 

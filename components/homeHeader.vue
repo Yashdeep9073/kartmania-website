@@ -37,27 +37,50 @@
               @mouseleave="closeCategoryDropdown"
             >
               <div class="category-grid">
-                <a
-                  v-for="category in limitedCategories"
-                  :key="category.id"
-                  :href="getCategoryLink(category)"
-                  class="category-card"
-                  @click.prevent="handleCategoryDropdownClick(category)"
-                >
-                  <span class="category-card-icon">
-                    <img 
-                      :src="getCategoryImage(category)" 
-                      :alt="category.name" 
-                      class="category-card-image"
-                      @error="handleImageError"
-                    />
-                  </span>
-                  <span class="category-card-name">{{ category.name }}</span>
-                </a>
+                <template v-if="categories.length > 0">
+                  <a
+                    v-for="category in limitedCategories"
+                    :key="category.id"
+                    :href="getCategoryLink(category)"
+                    class="category-card"
+                    @click.prevent="handleCategoryDropdownClick(category)"
+                  >
+                    <span class="category-card-icon">
+                      <img 
+                        :src="getCategoryImage(category)" 
+                        :alt="category.name" 
+                        class="category-card-image"
+                        @error="handleImageError"
+                      />
+                    </span>
+                    <span class="category-card-name">{{ category.name }}</span>
+                  </a>
+                </template>
+                
+                <!-- Fallback Categories when API fails -->
+                <template v-else>
+                  <a
+                    v-for="category in limitedFallbackCategories"
+                    :key="category.id"
+                    :href="getFallbackCategoryLink(category)"
+                    class="category-card"
+                    @click.prevent="handleFallbackCategoryClick(category)"
+                  >
+                    <span class="category-card-icon">
+                      <img 
+                        :src="category.image" 
+                        :alt="category.name" 
+                        class="category-card-image"
+                        @error="handleImageError"
+                      />
+                    </span>
+                    <span class="category-card-name">{{ category.name }}</span>
+                  </a>
+                </template>
               </div>
               
               <!-- View All Button (Optional) -->
-              <div v-if="categories.length > 9" class="view-all-container">
+              <div v-if="categories.length > 9 || fallbackCategories.length > 0" class="view-all-container">
                 <NuxtLink 
                   to="/shop-all" 
                   class="view-all-button"
@@ -73,8 +96,6 @@
           </div>
           
           <!-- Logo -->
-
-         
           <div class="logo"> 
             <NuxtLink to="/" class="logo-link" aria-label="Market Pro Home">
               <img  
@@ -85,43 +106,36 @@
               >
             </NuxtLink>
           </div>
-          
-          
         </div>
-         <div class="mobile-search-triggeres" @click="openMobileSearch">
+        
+        <div class="mobile-search-triggeres" @click="openMobileSearch">
           <div class="mobile-search-placeholderes">
             <i class="search-icones"></i>
             <span>Search products...</span>
           </div>
         </div>
-          <div class="mobile-search-triggeress" @click="openMobileSearch">
+        
+        <div class="mobile-search-triggeress" @click="openMobileSearch">
           <div class="mobile-search-placeholderess">
             <i class="search-icones"></i>
             <span>Search products...</span>
           </div>
         </div>
-         <div class="mobile-search-wrapperr" @click="openMobileSearch">
-    <!-- Search Icon -->
-    <span class="icon left">
-      <i class="ph ph-magnifying-glass"></i>
-    </span>
-
-    <!-- Placeholder -->
-    <span class="placeholderr">
-      Search...
-    </span>
-
-    <!-- Scan Icon -->
-    <!-- <span class="icon right">
-      <i class="ph ph-scan"></i>
-    </span> -->
-  </div>
+        
+        <div class="mobile-search-wrapperr" @click="openMobileSearch">
+          <span class="icon left">
+            <i class="ph ph-magnifying-glass"></i>
+          </span>
+          <span class="placeholderr">
+            Search...
+          </span>
+        </div>
 
         <!-- Desktop Navigation -->
         <nav class="desktop-nav" aria-label="Main navigation" v-if="!isMobile">
           <ul class="nav-list">
             <li 
-              v-for="category in visibleCategories"
+              v-for="category in visibleCategoriesWithFallback"
               :key="category.id"
               class="nav-item"
               @mouseenter="handleCategoryHover(category)"
@@ -184,10 +198,43 @@
                     </div>
                   </template>
                   
+                  <!-- Fallback Categories Mega Menu -->
+                  <template v-else-if="category.subCategoriesFallback && category.subCategoriesFallback.length > 0">
+                    <div class="mega-grid">
+                      <template v-for="subCategory in category.subCategoriesFallback" :key="subCategory.id">
+                        <div class="mega-column">
+                          <!-- Sub Category -->
+                          <NuxtLink
+                            :to="subCategory.link || getFallbackCategoryLink(category)"
+                            class="subcategory-title"
+                            @click="handleSubCategoryClick"
+                          >
+                            {{subCategory.name}}
+                          </NuxtLink>
+
+                          <!-- Sub Sub Categories -->
+                          <div
+                            v-if="subCategory.subSubCategories?.length"
+                            class="subsubcategory-list"
+                          >
+                            <NuxtLink
+                              v-for="subSubCategory in subCategory.subSubCategories"
+                              :key="subSubCategory.id"
+                              :to="subSubCategory.link || getFallbackCategoryLink(category)"
+                              class="subsubcategory-item"
+                              @click="handleSubCategoryClick"
+                            >
+                              {{subSubCategory.name}}
+                            </NuxtLink>
+                          </div>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                  
                   <!-- Static Categories for Men (Equal Width Grid) -->
                   <template v-else-if="category.name.toLowerCase() === 'men'">
                     <div class="mega-grid static-categories">
-                      <!-- Column structure remains the same -->
                       <div class="mega-column">
                         <h5 class="section-title">Topwear</h5>
                         <div class="category-items">
@@ -198,10 +245,194 @@
                           >
                             T-Shirts
                           </NuxtLink>
-                          <!-- Other items... -->
+                          <NuxtLink 
+                            to="/shop-all?category=Shirts" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Shirts
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Kurtas" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Kurtas
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Sweatshirts" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Sweatshirts
+                          </NuxtLink>
                         </div>
                       </div>
-                      <!-- More columns... -->
+                      <div class="mega-column">
+                        <h5 class="section-title">Bottomwear</h5>
+                        <div class="category-items">
+                          <NuxtLink 
+                            to="/shop-all?category=Jeans" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Jeans
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Trousers" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Trousers
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Shorts" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Shorts
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Track Pants" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Track Pants
+                          </NuxtLink>
+                        </div>
+                      </div>
+                      <div class="mega-column">
+                        <h5 class="section-title">Footwear</h5>
+                        <div class="category-items">
+                          <NuxtLink 
+                            to="/shop-all?category=Casual Shoes" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Casual Shoes
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Sports Shoes" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Sports Shoes
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Sandals" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Sandals
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Slippers" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Slippers
+                          </NuxtLink>
+                        </div>
+                      </div>
+                      <div class="mega-column">
+                        <h5 class="section-title">Accessories</h5>
+                        <div class="category-items">
+                          <NuxtLink 
+                            to="/shop-all?category=Watches" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Watches
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Sunglasses" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Sunglasses
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Belts" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Belts
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Wallets" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Wallets
+                          </NuxtLink>
+                        </div>
+                      </div>
+                      <div class="mega-column">
+                        <h5 class="section-title">Winterwear</h5>
+                        <div class="category-items">
+                          <NuxtLink 
+                            to="/shop-all?category=Jackets" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Jackets
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Sweaters" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Sweaters
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Thermals" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Thermals
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Gloves" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Gloves
+                          </NuxtLink>
+                        </div>
+                      </div>
+                      <div class="mega-column">
+                        <h5 class="section-title">Sports</h5>
+                        <div class="category-items">
+                          <NuxtLink 
+                            to="/shop-all?category=Activewear" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Activewear
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Gym Wear" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Gym Wear
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Swimwear" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Swimwear
+                          </NuxtLink>
+                          <NuxtLink 
+                            to="/shop-all?category=Sports Accessories" 
+                            class="subcategory-item"
+                            @click="handleSubCategoryClick"
+                          >
+                            Sports Accessories
+                          </NuxtLink>
+                        </div>
+                      </div>
                     </div>
                   </template>
                 </div>
@@ -351,22 +582,44 @@
 
         <!-- Mobile Navigation -->
         <div class="mobile-nav">
-          <NuxtLink 
-            v-for="category in categories" 
-            :key="category.id"
-            :to="getCategoryLink(category)"
-            class="mobile-nav-item"
-            @click="handleMobileCategoryClick"
-          > 
-            <div class="mobile-nav-icon">
-              <img
-                :src="getCategoryImage(category)"
-                :alt="category.name"
-                @error="handleImageError"
-              >
-            </div>
-            <span>{{ category.name }}</span>
-          </NuxtLink>
+          <template v-if="categories.length > 0">
+            <NuxtLink 
+              v-for="category in categories" 
+              :key="category.id"
+              :to="getCategoryLink(category)"
+              class="mobile-nav-item"
+              @click="handleMobileCategoryClick"
+            > 
+              <div class="mobile-nav-icon">
+                <img
+                  :src="getCategoryImage(category)"
+                  :alt="category.name"
+                  @error="handleImageError"
+                >
+              </div>
+              <span>{{ category.name }}</span>
+            </NuxtLink>
+          </template>
+          
+          <!-- Fallback Categories for Mobile -->
+          <template v-else>
+            <NuxtLink 
+              v-for="category in limitedFallbackCategories"
+              :key="category.id"
+              :to="getFallbackCategoryLink(category)"
+              class="mobile-nav-item"
+              @click="handleMobileCategoryClick"
+            > 
+              <div class="mobile-nav-icon">
+                <img
+                  :src="category.image"
+                  :alt="category.name"
+                  @error="handleImageError"
+                >
+              </div>
+              <span>{{ category.name }}</span>
+            </NuxtLink>
+          </template>
         </div>
       </div>
     </div>
@@ -610,6 +863,362 @@ const mobileSearchController = ref(null)
 const showCategoryDropdown = ref(false)
 const keepCategoryDropdownOpen = ref(false)
 
+// ==================== FALLBACK CATEGORIES ====================
+const fallbackCategories = ref([
+  {
+    id: 1,
+    name: 'Electronics',
+    image: '/assets/images/categories/electronics.png',
+    link: '/shop-all?category=Electronics',
+    subCategoriesFallback: [
+      {
+        id: 101,
+        name: 'Mobiles',
+        link: '/shop-all?category=Mobiles',
+        subSubCategories: [
+          { id: 1001, name: 'Smartphones', link: '/shop-all?category=Smartphones' },
+          { id: 1002, name: 'Feature Phones', link: '/shop-all?category=Feature Phones' },
+          { id: 1003, name: 'Tablets', link: '/shop-all?category=Tablets' }
+        ]
+      },
+      {
+        id: 102,
+        name: 'Laptops',
+        link: '/shop-all?category=Laptops',
+        subSubCategories: [
+          { id: 1004, name: 'Gaming Laptops', link: '/shop-all?category=Gaming Laptops' },
+          { id: 1005, name: 'Ultrabooks', link: '/shop-all?category=Ultrabooks' },
+          { id: 1006, name: 'Business Laptops', link: '/shop-all?category=Business Laptops' }
+        ]
+      },
+      {
+        id: 103,
+        name: 'TVs',
+        link: '/shop-all?category=TVs',
+        subSubCategories: [
+          { id: 1007, name: 'Smart TVs', link: '/shop-all?category=Smart TVs' },
+          { id: 1008, name: 'LED TVs', link: '/shop-all?category=LED TVs' },
+          { id: 1009, name: 'OLED TVs', link: '/shop-all?category=OLED TVs' }
+        ]
+      },
+      {
+        id: 104,
+        name: 'Audio',
+        link: '/shop-all?category=Audio',
+        subSubCategories: [
+          { id: 1010, name: 'Headphones', link: '/shop-all?category=Headphones' },
+          { id: 1011, name: 'Speakers', link: '/shop-all?category=Speakers' },
+          { id: 1012, name: 'Earphones', link: '/shop-all?category=Earphones' }
+        ]
+      },
+      {
+        id: 105,
+        name: 'Cameras',
+        link: '/shop-all?category=Cameras',
+        subSubCategories: [
+          { id: 1013, name: 'DSLR', link: '/shop-all?category=DSLR' },
+          { id: 1014, name: 'Mirrorless', link: '/shop-all?category=Mirrorless' },
+          { id: 1015, name: 'Action Cameras', link: '/shop-all?category=Action Cameras' }
+        ]
+      },
+      {
+        id: 106,
+        name: 'Wearables',
+        link: '/shop-all?category=Wearables',
+        subSubCategories: [
+          { id: 1016, name: 'Smart Watches', link: '/shop-all?category=Smart Watches' },
+          { id: 1017, name: 'Fitness Bands', link: '/shop-all?category=Fitness Bands' },
+          { id: 1018, name: 'VR Headsets', link: '/shop-all?category=VR Headsets' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: 'Fashion',
+    image: '/assets/images/categories/fashion.png',
+    link: '/shop-all?category=Fashion',
+    subCategoriesFallback: [
+      {
+        id: 201,
+        name: 'Men',
+        link: '/shop-all?category=Men',
+        subSubCategories: [
+          { id: 2001, name: 'T-Shirts', link: '/shop-all?category=T-Shirts' },
+          { id: 2002, name: 'Shirts', link: '/shop-all?category=Shirts' },
+          { id: 2003, name: 'Jeans', link: '/shop-all?category=Jeans' },
+          { id: 2004, name: 'Footwear', link: '/shop-all?category=Footwear' }
+        ]
+      },
+      {
+        id: 202,
+        name: 'Women',
+        link: '/shop-all?category=Women',
+        subSubCategories: [
+          { id: 2005, name: 'Dresses', link: '/shop-all?category=Dresses' },
+          { id: 2006, name: 'Tops', link: '/shop-all?category=Tops' },
+          { id: 2007, name: 'Jeans', link: '/shop-all?category=Jeans' },
+          { id: 2008, name: 'Footwear', link: '/shop-all?category=Footwear' }
+        ]
+      },
+      {
+        id: 203,
+        name: 'Kids',
+        link: '/shop-all?category=Kids',
+        subSubCategories: [
+          { id: 2009, name: 'Boys Clothing', link: '/shop-all?category=Boys Clothing' },
+          { id: 2010, name: 'Girls Clothing', link: '/shop-all?category=Girls Clothing' },
+          { id: 2011, name: 'Toys', link: '/shop-all?category=Toys' }
+        ]
+      },
+      {
+        id: 204,
+        name: 'Accessories',
+        link: '/shop-all?category=Accessories',
+        subSubCategories: [
+          { id: 2012, name: 'Watches', link: '/shop-all?category=Watches' },
+          { id: 2013, name: 'Sunglasses', link: '/shop-all?category=Sunglasses' },
+          { id: 2014, name: 'Bags', link: '/shop-all?category=Bags' },
+          { id: 2015, name: 'Jewellery', link: '/shop-all?category=Jewellery' }
+        ]
+      },
+      {
+        id: 205,
+        name: 'Ethnic Wear',
+        link: '/shop-all?category=Ethnic Wear',
+        subSubCategories: [
+          { id: 2016, name: 'Kurtas', link: '/shop-all?category=Kurtas' },
+          { id: 2017, name: 'Sarees', link: '/shop-all?category=Sarees' },
+          { id: 2018, name: 'Lehengas', link: '/shop-all?category=Lehengas' }
+        ]
+      },
+      {
+        id: 206,
+        name: 'Winter Wear',
+        link: '/shop-all?category=Winter Wear',
+        subSubCategories: [
+          { id: 2019, name: 'Jackets', link: '/shop-all?category=Jackets' },
+          { id: 2020, name: 'Sweaters', link: '/shop-all?category=Sweaters' },
+          { id: 2021, name: 'Thermals', link: '/shop-all?category=Thermals' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: 'Home & Kitchen',
+    image: '/assets/images/categories/home-kitchen.png',
+    link: '/shop-all?category=Home%20%26%20Kitchen',
+    subCategoriesFallback: [
+      {
+        id: 301,
+        name: 'Furniture',
+        link: '/shop-all?category=Furniture',
+        subSubCategories: [
+          { id: 3001, name: 'Sofas', link: '/shop-all?category=Sofas' },
+          { id: 3002, name: 'Beds', link: '/shop-all?category=Beds' },
+          { id: 3003, name: 'Dining Tables', link: '/shop-all?category=Dining Tables' },
+          { id: 3004, name: 'Wardrobes', link: '/shop-all?category=Wardrobes' }
+        ]
+      },
+      {
+        id: 302,
+        name: 'Kitchen Appliances',
+        link: '/shop-all?category=Kitchen Appliances',
+        subSubCategories: [
+          { id: 3005, name: 'Mixer Grinder', link: '/shop-all?category=Mixer Grinder' },
+          { id: 3006, name: 'Cookware', link: '/shop-all?category=Cookware' },
+          { id: 3007, name: 'Microwave', link: '/shop-all?category=Microwave' },
+          { id: 3008, name: 'Refrigerator', link: '/shop-all?category=Refrigerator' }
+        ]
+      },
+      {
+        id: 303,
+        name: 'Home Decor',
+        link: '/shop-all?category=Home Decor',
+        subSubCategories: [
+          { id: 3009, name: 'Wall Art', link: '/shop-all?category=Wall Art' },
+          { id: 3010, name: 'Curtains', link: '/shop-all?category=Curtains' },
+          { id: 3011, name: 'Cushions', link: '/shop-all?category=Cushions' },
+          { id: 3012, name: 'Lighting', link: '/shop-all?category=Lighting' }
+        ]
+      },
+      {
+        id: 304,
+        name: 'Bed & Bath',
+        link: '/shop-all?category=Bed & Bath',
+        subSubCategories: [
+          { id: 3013, name: 'Bed Sheets', link: '/shop-all?category=Bed Sheets' },
+          { id: 3014, name: 'Towels', link: '/shop-all?category=Towels' },
+          { id: 3015, name: 'Mattresses', link: '/shop-all?category=Mattresses' }
+        ]
+      },
+      {
+        id: 305,
+        name: 'Home Appliances',
+        link: '/shop-all?category=Home Appliances',
+        subSubCategories: [
+          { id: 3016, name: 'Air Conditioner', link: '/shop-all?category=Air Conditioner' },
+          { id: 3017, name: 'Washing Machine', link: '/shop-all?category=Washing Machine' },
+          { id: 3018, name: 'Vacuum Cleaner', link: '/shop-all?category=Vacuum Cleaner' }
+        ]
+      },
+      {
+        id: 306,
+        name: 'Storage',
+        link: '/shop-all?category=Storage',
+        subSubCategories: [
+          { id: 3019, name: 'Containers', link: '/shop-all?category=Containers' },
+          { id: 3020, name: 'Organizers', link: '/shop-all?category=Organizers' },
+          { id: 3021, name: 'Shelves', link: '/shop-all?category=Shelves' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 4,
+    name: 'Beauty',
+    image: '/assets/images/categories/beauty.png',
+    link: '/shop-all?category=Beauty',
+    subCategoriesFallback: [
+      {
+        id: 401,
+        name: 'Skincare',
+        link: '/shop-all?category=Skincare',
+        subSubCategories: [
+          { id: 4001, name: 'Face Wash', link: '/shop-all?category=Face Wash' },
+          { id: 4002, name: 'Moisturizer', link: '/shop-all?category=Moisturizer' },
+          { id: 4003, name: 'Serums', link: '/shop-all?category=Serums' },
+          { id: 4004, name: 'Sunscreen', link: '/shop-all?category=Sunscreen' }
+        ]
+      },
+      {
+        id: 402,
+        name: 'Makeup',
+        link: '/shop-all?category=Makeup',
+        subSubCategories: [
+          { id: 4005, name: 'Lipstick', link: '/shop-all?category=Lipstick' },
+          { id: 4006, name: 'Foundation', link: '/shop-all?category=Foundation' },
+          { id: 4007, name: 'Eyeshadow', link: '/shop-all?category=Eyeshadow' },
+          { id: 4008, name: 'Mascara', link: '/shop-all?category=Mascara' }
+        ]
+      },
+      {
+        id: 403,
+        name: 'Haircare',
+        link: '/shop-all?category=Haircare',
+        subSubCategories: [
+          { id: 4009, name: 'Shampoo', link: '/shop-all?category=Shampoo' },
+          { id: 4010, name: 'Conditioner', link: '/shop-all?category=Conditioner' },
+          { id: 4011, name: 'Hair Oil', link: '/shop-all?category=Hair Oil' },
+          { id: 4012, name: 'Hair Color', link: '/shop-all?category=Hair Color' }
+        ]
+      },
+      {
+        id: 404,
+        name: 'Fragrances',
+        link: '/shop-all?category=Fragrances',
+        subSubCategories: [
+          { id: 4013, name: 'Perfumes', link: '/shop-all?category=Perfumes' },
+          { id: 4014, name: 'Body Sprays', link: '/shop-all?category=Body Sprays' },
+          { id: 4015, name: 'Deodorants', link: '/shop-all?category=Deodorants' }
+        ]
+      },
+      {
+        id: 405,
+        name: 'Personal Care',
+        link: '/shop-all?category=Personal Care',
+        subSubCategories: [
+          { id: 4016, name: 'Body Wash', link: '/shop-all?category=Body Wash' },
+          { id: 4017, name: 'Soaps', link: '/shop-all?category=Soaps' },
+          { id: 4018, name: 'Razors', link: '/shop-all?category=Razors' }
+        ]
+      },
+      {
+        id: 406,
+        name: 'Tools & Appliances',
+        link: '/shop-all?category=Beauty Tools',
+        subSubCategories: [
+          { id: 4019, name: 'Hair Dryer', link: '/shop-all?category=Hair Dryer' },
+          { id: 4020, name: 'Straightener', link: '/shop-all?category=Straightener' },
+          { id: 4021, name: 'Trimmers', link: '/shop-all?category=Trimmers' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 5,
+    name: 'Sports',
+    image: '/assets/images/categories/sports.png',
+    link: '/shop-all?category=Sports',
+    subCategoriesFallback: [
+      {
+        id: 501,
+        name: 'Fitness Equipment',
+        link: '/shop-all?category=Fitness Equipment',
+        subSubCategories: [
+          { id: 5001, name: 'Treadmills', link: '/shop-all?category=Treadmills' },
+          { id: 5002, name: 'Exercise Bikes', link: '/shop-all?category=Exercise Bikes' },
+          { id: 5003, name: 'Dumbbells', link: '/shop-all?category=Dumbbells' },
+          { id: 5004, name: 'Yoga Mats', link: '/shop-all?category=Yoga Mats' }
+        ]
+      },
+      {
+        id: 502,
+        name: 'Team Sports',
+        link: '/shop-all?category=Team Sports',
+        subSubCategories: [
+          { id: 5005, name: 'Cricket', link: '/shop-all?category=Cricket' },
+          { id: 5006, name: 'Football', link: '/shop-all?category=Football' },
+          { id: 5007, name: 'Basketball', link: '/shop-all?category=Basketball' },
+          { id: 5008, name: 'Volleyball', link: '/shop-all?category=Volleyball' }
+        ]
+      },
+      {
+        id: 503,
+        name: 'Outdoor Sports',
+        link: '/shop-all?category=Outdoor Sports',
+        subSubCategories: [
+          { id: 5009, name: 'Cycling', link: '/shop-all?category=Cycling' },
+          { id: 5010, name: 'Camping', link: '/shop-all?category=Camping' },
+          { id: 5011, name: 'Hiking', link: '/shop-all?category=Hiking' },
+          { id: 5012, name: 'Swimming', link: '/shop-all?category=Swimming' }
+        ]
+      },
+      {
+        id: 504,
+        name: 'Racquet Sports',
+        link: '/shop-all?category=Racquet Sports',
+        subSubCategories: [
+          { id: 5013, name: 'Badminton', link: '/shop-all?category=Badminton' },
+          { id: 5014, name: 'Tennis', link: '/shop-all?category=Tennis' },
+          { id: 5015, name: 'Table Tennis', link: '/shop-all?category=Table Tennis' }
+        ]
+      },
+      {
+        id: 505,
+        name: 'Sports Apparel',
+        link: '/shop-all?category=Sports Apparel',
+        subSubCategories: [
+          { id: 5016, name: 'Sports Shoes', link: '/shop-all?category=Sports Shoes' },
+          { id: 5017, name: 'Tracksuits', link: '/shop-all?category=Tracksuits' },
+          { id: 5018, name: 'T-Shirts', link: '/shop-all?category=Sports T-Shirts' }
+        ]
+      },
+      {
+        id: 506,
+        name: 'Accessories',
+        link: '/shop-all?category=Sports Accessories',
+        subSubCategories: [
+          { id: 5019, name: 'Fitness Trackers', link: '/shop-all?category=Fitness Trackers' },
+          { id: 5020, name: 'Water Bottles', link: '/shop-all?category=Water Bottles' },
+          { id: 5021, name: 'Gym Bags', link: '/shop-all?category=Gym Bags' }
+        ]
+      }
+    ]
+  }
+])
+
 // ==================== BOTTOM NAV STATE ====================
 const activeTab = ref('home')
 
@@ -684,10 +1293,26 @@ const desktopTabs = [
 const visibleCategories = computed(() => {
   return categories.value.slice(0, 6) // Limit to 6 categories for better UX
 })
+
+const visibleCategoriesWithFallback = computed(() => {
+  if (categories.value.length > 0) {
+    return categories.value.slice(0, 6)
+  } else {
+    return fallbackCategories.value.slice(0, 6)
+  }
+})
+
 const limitedCategories = computed(() => {
-  // Only show first 9 categories
-  return categories.value.slice(0, 9);
-});
+  if (categories.value.length > 0) {
+    return categories.value.slice(0, 9)
+  } else {
+    return fallbackCategories.value.slice(0, 9)
+  }
+})
+
+const limitedFallbackCategories = computed(() => {
+  return fallbackCategories.value.slice(0, 9)
+})
 
 // Utility Functions
 const debounce = (fn, delay) => {
@@ -698,16 +1323,16 @@ const debounce = (fn, delay) => {
   }
 }
 
-const throttle = (fn, limit) => {
+const throttle = (fn, limit) => { 
   let inThrottle
-  return function(...args) {
+  return function(...args) {  
     if (!inThrottle) {
       fn.apply(this, args)
-      inThrottle = true
-      setTimeout(() => inThrottle = false, limit)
+      inThrottle = true 
+      setTimeout(() => inThrottle = false, limit)   
     }
   }
-}
+}  
 
 // ==================== CART SYSTEM ====================
 const cartManager = {
@@ -764,16 +1389,18 @@ const updateActiveTabFromRoute = () => {
     activeTab.value = 'account'
   }
 }
-// watch(
-//   () => store.isOpen,
-//   (isOpen) => {
-//     if (isOpen) {  
-//       openMobileSearch()
-//     } else {
-//       closeMobileSearch()
-//     }
-//   }
-// ) 
+
+// ==================== FALLBACK CATEGORY FUNCTIONS ====================
+const getFallbackCategoryLink = (category) => {
+  return category.link || `/shop-all?category=${encodeURIComponent(category.name)}`
+}
+
+const handleFallbackCategoryClick = (category) => {
+  showCategoryDropdown.value = false
+  keepCategoryDropdownOpen.value = false
+  router.push(getFallbackCategoryLink(category))
+}
+
 // ==================== MOBILE SEARCH FUNCTIONS ====================
 const openMobileSearch = () => {
   showMobileSearchModal.value = true
@@ -805,7 +1432,7 @@ const clearMobileSearch = () => {
   mobileSearchResults.value = []
 }
 
-const loadRecentSearches = () => {
+const loadRecentSearches = () =>  {
   const saved = localStorage.getItem('recentSearches')
   if (saved) {
     try {
@@ -950,12 +1577,12 @@ const initialize = () => {
 const handleResize = throttle(() => {
   isMobile.value = window.innerWidth < 1024
   if (isMobile.value) {
-    showCategoryDropdown.value = false
+    showCategoryDropdown.value = false 
     keepCategoryDropdownOpen.value = false
   }
-}, 200)
+}, 200) 
 
-// ==================== CART EVENT SYSTEM ====================
+// ==================== CART EVENT SYSTEM ==================== 
 const setupCartSystem = () => {
   // Storage event
   const handleStorage = (e) => {
@@ -1017,7 +1644,7 @@ const fetchCategories = async () => {
     categories.value = data.data || []
   } catch (error) {
     console.error('Failed to fetch categories:', error)
-    categories.value = []
+    categories.value = [] // API fails, use fallback categories
   }
 }
 
@@ -1042,10 +1669,14 @@ const getCategoryName = (category) => {
 
 const hasSubCategories = (category) => {
   return (category.subCategories?.length > 0) || 
+         (category.subCategoriesFallback?.length > 0) ||
          ['men', 'women'].includes(category.name.toLowerCase())
 }
 
 const getCategoryLink = (category) => {
+  if (category.link) {
+    return category.link
+  }
   return `/shop-all?category=${encodeURIComponent(category.name)}`
 }
 
@@ -1056,16 +1687,23 @@ const isActiveCategory = (category) => {
 const getCategoryImage = (category) => {
   return category.logo || category.image || '/assets/images/category-placeholder.png'
 }  
+
 const getBannerTitle = (category) => {
   const name = category.name
   if (name.includes('Men')) return "MEN'S COLLECTION" 
   if (name.includes('Women')) return "WOMEN'S FASHION"  
-  return "EXCLUSIVE COLLECTION"
+  return `${name.toUpperCase()} COLLECTION`
 }
+
 const getBannerSubtitle = (category) => {
   const name = category.name
   if (name.includes('Men')) return 'Trending styles for men'
   if (name.includes('Women')) return 'Latest fashion trends'
+  if (name.includes('Electronics')) return 'Latest gadgets & devices'
+  if (name.includes('Fashion')) return 'Trendy outfits & accessories'
+  if (name.includes('Home')) return 'Home essentials & decor'
+  if (name.includes('Beauty')) return 'Beauty products & care'
+  if (name.includes('Sports')) return 'Sports gear & equipment'
   return 'Shop the best products'
 }
 
@@ -1089,6 +1727,7 @@ const closeCategoryDropdown = () => {
     }
   }, 10)
 }
+
 const onCategoryBlur = () => {
   setTimeout(() => {
     if (!keepCategoryDropdownOpen.value) {
@@ -1103,27 +1742,43 @@ const handleCategoryDropdownClick = (category) => {
   router.push(getCategoryLink(category))
 }
 
-// ==================== MENU MANAGEMENT ====================
-const handleCategoryHover = throttle((category) => {
-  if (categoryMenuTimeout.value) clearTimeout(categoryMenuTimeout.value)
+// ==================== MENU MANAGEMENT - FIXED HOVER ISSUE ====================
+const handleCategoryHover = (category) => {
+  // Clear any existing timeout
+  if (categoryMenuTimeout.value) {
+    clearTimeout(categoryMenuTimeout.value)
+    categoryMenuTimeout.value = null
+  }
+  
+  // If this category has subcategories, show menu immediately
   if (hasSubCategories(category)) {
     activeCategoryMenu.value = category.id
   }
-}, 10)
+}
 
-const handleCategoryLeave = throttle(() => {
+const handleCategoryLeave = () => {
+  // Set timeout to close menu after leaving
   categoryMenuTimeout.value = setTimeout(() => {
     activeCategoryMenu.value = null
-  }, 200)
-}, 100)
+    categoryMenuTimeout.value = null
+  }, 150) // Reduced from 200ms to 150ms for faster response
+}
 
 const keepMenuOpen = () => {
-  if (categoryMenuTimeout.value) clearTimeout(categoryMenuTimeout.value)
+  // Clear timeout when mouse enters mega menu
+  if (categoryMenuTimeout.value) {
+    clearTimeout(categoryMenuTimeout.value)
+    categoryMenuTimeout.value = null
+  }
 }
 
 const closeCategoryMenu = () => {
-  if (categoryMenuTimeout.value) clearTimeout(categoryMenuTimeout.value)
+  // Close menu when leaving mega menu
+  if (categoryMenuTimeout.value) {
+    clearTimeout(categoryMenuTimeout.value)
+  }
   activeCategoryMenu.value = null
+  categoryMenuTimeout.value = null
 }
 
 const closeAllMenus = () => {

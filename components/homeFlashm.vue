@@ -2,15 +2,29 @@
 <template>
   <section class="flash-sales pt-60 pt-md-80 overflow-hidden">
     <div class="container container-lg">
-      <!-- <h3>Hurry up!!</h3> -->
-      <!-- Loading State -->
-      <div v-if="loading" class="row gy-4 arrow-style-two">
-        <!-- Loading skeletons... (same as before) -->
+      <!-- Loading State (only shown briefly) -->
+      <div v-if="loading && !showStaticFallback" class="row gy-4 arrow-style-two">
+        <!-- Loading skeletons... -->
+        <div class="col-lg-6">
+          <div class="flash-sales-item rounded-16 overflow-hidden z-1 position-relative flex-align flex-0 justify-content-between gap-8 ps-56-px h-100">
+            <div class="skeleton-image position-absolute top-0 start-0 w-100 h-100"></div>
+            <div class="flash-sales-item__content ms-sm-auto p-4">
+              <div class="skeleton-title mb-3"></div>
+              <div class="skeleton-text mb-4"></div>
+              <div class="countdown mb-4">
+                <ul class="countdown-list flex-align flex-wrap gap-2">
+                  <li v-for="n in 4" :key="n" class="countdown-list__item skeleton-timer"></li>
+                </ul>
+              </div>
+              <div class="skeleton-btn mt-3"></div>
+            </div>
+          </div>
+        </div>
       </div>
       
-      <!-- Error State -->
-      <div v-else-if="error" class="text-center py-60 py-md-80">
-        <div class="alert alert-danger">
+      <!-- Error State (briefly shown before fallback) -->
+      <div v-else-if="error && !showStaticFallback" class="text-center py-20 py-md-40">
+        <div class="alert alert-danger d-inline-block">
           {{ error }}
         </div>
         <button @click="fetchFlashSales" class="btn btn-main mt-3">
@@ -18,7 +32,7 @@
         </button> 
       </div>
       
-      <!-- Success State -->
+      <!-- Main Content (API or Static) -->
       <div v-else>
         <!-- Desktop View (2 cards) -->
         <div class="desktop-view d-none d-lg-block">
@@ -157,13 +171,34 @@ import { Autoplay, Pagination } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/autoplay'
 import 'swiper/css/pagination'
+
 const config = useRuntimeConfig() 
 const API_URL = config.public.api.media
+
 // Register Swiper modules
 const SwiperAutoplay = Autoplay
 const SwiperPagination = Pagination
+
 // Track dark/light image per ad (by id)
 const imageToneMap = ref<Record<number, boolean>>({}) 
+
+// Static fallback data (always available)
+const staticFallbackData = ref([
+  {
+    id: 8,
+    title: 'X-Connect Smart Television',
+    description: 'Time remaining until the end of the offer.',
+    image: '/assets/images/bg/flash-sale-bg1.png',
+    category: 'ADVERTISEMENT'
+  },
+  {
+    id: 10,
+    title: 'Vegetables Combo Box',
+    description: 'Time remaining until the end of the offer.',
+    image: '/assets/images/bg/flash-sale-bg2.png',
+    category: 'ADVERTISEMENT'
+  }
+])
 
 // Detect brightness
 const detectImageBrightness = (src: string): Promise<boolean> => {
@@ -231,14 +266,15 @@ interface CountdownTimer {
   interval?: ReturnType<typeof setInterval>
 }
 
-// Typed time units constant so template gets a proper literal type
+// Typed time units constant
 const timeUnits = ['days', 'hours', 'minutes', 'seconds'] as const
 type TimeUnit = (typeof timeUnits)[number]
 
 // Reactive state
 const flashSales = ref<AdvertisementData[]>([])
-const loading = ref(true)
+const loading = ref(false) // Start with false since we have static fallback
 const error = ref<string | null>(null)
+const showStaticFallback = ref(false) // Control when to show static banners
 
 // Countdown timers for dynamic items
 const countdowns = ref<CountdownTimer[]>([
@@ -246,57 +282,29 @@ const countdowns = ref<CountdownTimer[]>([
   { days: 1, hours: 6, minutes: 15, seconds: 20 }
 ])
 
-
-// Get items to display (max 2)
+// Get items to display (max 2) - prioritizes API data, falls back to static
 const displayItems = computed(() => {
-  if (flashSales.value.length >= 2) {
+  // If API data is available and valid, use it
+  if (flashSales.value.length >= 2 && !showStaticFallback.value) {
     return flashSales.value.slice(0, 2)
   }
   
-  // If less than 2 items, create fallback items
-  const fallbackItems: AdvertisementData[] = [...flashSales.value]
-  
-  // Add fallback items to reach 2
-  const fallbackData: Partial<AdvertisementData>[] = [
-    {
-      id: 999,
-      title: 'Vegetables Combo Box',
-      description: 'Time remaining until the end of the offer.',
-      image: '/assets/images/bg/flash-sale-bg2.png',
-      category: 'FALLBACK'
-    },
-    {
-      id: 998,
-      title: 'X-Connect Smart Television',
-      description: 'Time remaining until the end of the offer.',
-      image: '/assets/images/bg/flash-sale-bg1.png',
-      category: 'FALLBACK'
-    }
-  ]
-  
-  for (let i = flashSales.value.length; i < 2; i++) {
-    const fallbackIndex = i - flashSales.value.length
-    fallbackItems.push({
-      id: fallbackData[fallbackIndex]?.id || 999 + fallbackIndex,
-      title: fallbackData[fallbackIndex]?.title || 'Flash Sale',
-      description: fallbackData[fallbackIndex]?.description || 'Time remaining until the end of the offer.',
-      image: fallbackData[fallbackIndex]?.image || '/assets/images/bg/flash-sale-bg1.png',
-      category: 'FALLBACK',
-      isDeleted: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    })
-  }
-  
-  return fallbackItems
+  // Otherwise use static fallback data
+  return staticFallbackData.value.map(item => ({
+    ...item,
+    isDeleted: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }))
 })
 
-// Fetch advertisement data
+// Fetch advertisement data from API
 const fetchFlashSales = async () => {
   try {
     loading.value = true
     error.value = null
-    
+    showStaticFallback.value = false
+
     const response = await fetch(API_URL)
     
     if (!response.ok) {
@@ -307,26 +315,39 @@ const fetchFlashSales = async () => {
     
     if (result.data && Array.isArray(result.data)) {
       // Filter only ADVERTISEMENT category items (IDs 8 and 10)
-      flashSales.value = result.data.filter((ad: AdvertisementData) => 
+      const apiData = result.data.filter((ad: AdvertisementData) => 
         ad.category === 'ADVERTISEMENT' && !ad.isDeleted
       )
       
       // Sort by ID to maintain order (8, 10)
-      flashSales.value.sort((a, b) => a.id - b.id)
+      apiData.sort((a, b) => a.id - b.id)
+      
+      // If we have valid data, use it
+      if (apiData.length >= 2) {
+        flashSales.value = apiData
+        showStaticFallback.value = false
+        
+        // Detect brightness for each image
+        for (const ad of flashSales.value) {
+          if (ad.image) {
+            imageToneMap.value[ad.id] = await detectImageBrightness(ad.image)
+          }
+        }
+      } else {
+        // Insufficient data from API, use static fallback
+        showStaticFallback.value = true
+      }
+    } else {
+      // Invalid API response, use static fallback
+      showStaticFallback.value = true
     }
   } catch (err) {
+    console.warn('API fetch failed, using static fallback:', err)
     error.value = err instanceof Error ? err.message : 'Failed to fetch flash sale data'
-    console.error('Error fetching flash sales:', err)
+    showStaticFallback.value = true
   } finally {
     loading.value = false
   }
-  // Detect brightness for each image
-for (const ad of flashSales.value) {
-  if (ad.image) {
-    imageToneMap.value[ad.id] = await detectImageBrightness(ad.image)
-  }
-}
-
 }
 
 // Get description with fallback
@@ -353,7 +374,7 @@ const formatTime = (time: number): string => {
   return time < 10 ? `0${time}` : time.toString()
 }
 
-// Update countdown function (accepts index so reset values can vary per item)
+// Update countdown function
 const updateCountdown = (countdown: CountdownTimer, idx: number) => {
   if (countdown.seconds > 0) {
     countdown.seconds--
@@ -398,10 +419,46 @@ const startCountdowns = () => {
   })
 }
 
-// Fetch data on component mount
-onMounted(async () => {
+// Initialize component
+const initComponent = async () => {
+  // Show static fallback immediately for better UX
+  showStaticFallback.value = true
+  
+  // Try to fetch API data in background
   await fetchFlashSales()
+  
+  // Start countdowns regardless of API success
   startCountdowns()
+}
+
+// Fetch data on component mount
+onMounted(() => {
+  initComponent()
+  
+  // Set timeout to fallback if API is taking too long
+  const fallbackTimeout = setTimeout(() => {
+    if (loading.value) {
+      showStaticFallback.value = true
+      loading.value = false
+    }
+  }, 2000)
+  
+  // Cleanup timeout
+  return () => clearTimeout(fallbackTimeout)
+})
+
+// Background retry of API (if using static fallback)
+onMounted(() => {
+  const retryInterval = setInterval(() => {
+    if (!showStaticFallback.value) {
+      clearInterval(retryInterval)
+      return
+    }
+    // Retry API in background every 30 seconds
+    fetchFlashSales()
+  }, 30000)
+  
+  return () => clearInterval(retryInterval)
 })
 
 // Cleanup timers on unmount
@@ -443,10 +500,6 @@ onUnmounted(() => {
 .dark-image p {
   color: #fff !important;
 }
-
-/* .dark-image .text-neutral-500 {
-  color: rgba(255, 255, 255, 0.85) !important;
-} */
 
 /* Light image → default */
 .light-image {
@@ -568,7 +621,6 @@ onUnmounted(() => {
 /* Swiper Styles */
 .flash-sales-swiper {
   width: 100%;
-  /* padding-bottom: 40px; */
 }
 
 :deep(.swiper-pagination) {
@@ -610,7 +662,7 @@ onUnmounted(() => {
   width: 60%;
   background: #e0e0e0;
   border-radius: 4px;
-  animation: loading 15s infinite;
+  animation: loading 1.5s infinite;
 }
 
 .skeleton-timer {
@@ -650,10 +702,6 @@ onUnmounted(() => {
 
 /* Mobile (< 768px) */
 @media (max-width: 767px) {
-  /* .flash-sales {
-    padding-top: 40px !important;
-  }
-   */
   .flash-sales-item {
     min-height: 220px;
   }

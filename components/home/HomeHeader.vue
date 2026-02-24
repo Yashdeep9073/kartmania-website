@@ -1291,7 +1291,7 @@ const desktopTabs = [
 
 // Computed
 const visibleCategories = computed(() => {
-  return categories.value.slice(0, 6) // Limit to 6 categories for better UX
+  return categories.value.slice(0, 6)
 })
 
 const visibleCategoriesWithFallback = computed(() => {
@@ -1406,7 +1406,6 @@ const openMobileSearch = () => {
   showMobileSearchModal.value = true
   document.body.style.overflow = 'hidden'
   loadRecentSearches()
-  // Focus input after modal opens
   setTimeout(() => {
     if (mobileSearchInput.value) {
       mobileSearchInput.value.focus()
@@ -1481,7 +1480,6 @@ const performMobileSearch = debounce(async (searchTerm) => {
     return
   }
 
-  // Abort previous request if exists
   if (mobileSearchController.value) {
     mobileSearchController.value.abort()
   }
@@ -1511,7 +1509,6 @@ const performMobileSearch = debounce(async (searchTerm) => {
     mobileSearchResults.value = filtered.slice(0, 8)
   } catch (error) {
     if (error.name !== 'AbortError') {
-      console.error('Mobile search failed:', error)
       mobileSearchResults.value = []
     }
   } finally {
@@ -1557,20 +1554,15 @@ const initialize = () => {
   isMobile.value = window.innerWidth < 1024
   window.addEventListener('resize', handleResize)
   
-  // Fetch data
   fetchLogo()
   fetchCategories()
   
-  // Setup cart system
   setupCartSystem()
   
-  // Initialize counts
   cartManager.updateCounts()
   
-  // Load recent searches
   loadRecentSearches()
   
-  // Update active tab based on current route
   updateActiveTabFromRoute()
 }
 
@@ -1584,44 +1576,35 @@ const handleResize = throttle(() => {
 
 // ==================== CART EVENT SYSTEM ==================== 
 const setupCartSystem = () => {
-  // Storage event
   const handleStorage = (e) => {
     if (e.key === 'shopping_cart' || e.key === 'wishlist') {
       cartManager.updateCounts()
     }
   }
 
-  // Custom events
   const handleCartEvent = () => cartManager.updateCounts()
   const handleWishlistEvent = () => wishlistCount.value = cartManager.calculateWishlistCount()
 
-  // Polling
   let lastCart = ''
   let lastWishlist = ''
   
   const poll = () => {
-    const currentCart = JSON.stringify(cartManager.getCart())
-    const currentWishlist = JSON.stringify(cartManager.getWishlist())
+    const currentCart = localStorage.getItem('shopping_cart')
+    const currentWishlist = localStorage.getItem('wishlist')
     
-    if (currentCart !== lastCart) {
-      lastCart = currentCart
+    if (currentCart !== lastCart || currentWishlist !== lastWishlist) {
       cartManager.updateCounts()
-    }
-    
-    if (currentWishlist !== lastWishlist) {
+      lastCart = currentCart
       lastWishlist = currentWishlist
-      wishlistCount.value = cartManager.getWishlist().length
     }
   }
 
-  // Setup
   window.addEventListener('storage', handleStorage) 
   window.addEventListener('cart-updated', handleCartEvent)
   window.addEventListener('wishlist-updated', handleWishlistEvent)
   
   const interval = setInterval(poll, 1000)
 
-  // Return cleanup
   return () => {
     window.removeEventListener('storage', handleStorage)
     window.removeEventListener('cart-updated', handleCartEvent)
@@ -1634,7 +1617,7 @@ const setupCartSystem = () => {
 const fetchCategories = async () => {
   try {
     const response = await fetch(
-      'https://api.pranzo.in/common/product-category/read',
+      import.meta.env.VITE_API_CATEGORIES,
       { signal: AbortSignal.timeout(5000) }
     )
     
@@ -1643,24 +1626,12 @@ const fetchCategories = async () => {
     const data = await response.json()
     categories.value = data.data || []
   } catch (error) {
-    console.error('Failed to fetch categories:', error)
-    categories.value = [] // API fails, use fallback categories
+    categories.value = []
   }
 }
 
 const fetchLogo = async () => {
-  try {
-    // const response = await fetch('https://kartmania-api.vibrantick.org/common/media/read')
-    // if (response.ok) {
-    //   const result = await response.json()
-    //   const logoData = result.data?.find(item => item.id === 13 && item.category === 'LOGO')
-    //   if (logoData) {
-    //     logoImage.value = logoData.image
-    //   }
-    // }
-  } catch (error) {
-    console.error('Error fetching logo:', error)
-  }
+  // Logo fetching disabled
 }
 
 const getCategoryName = (category) => {
@@ -1712,7 +1683,6 @@ const toggleCategoryDropdown = () => {
   showCategoryDropdown.value = !showCategoryDropdown.value
   keepCategoryDropdownOpen.value = showCategoryDropdown.value
   
-  // Close other dropdowns when this opens
   if (showCategoryDropdown.value) {
     showSearchDropdown.value = false
     activeCategoryMenu.value = null
@@ -1744,28 +1714,24 @@ const handleCategoryDropdownClick = (category) => {
 
 // ==================== MENU MANAGEMENT - FIXED HOVER ISSUE ====================
 const handleCategoryHover = (category) => {
-  // Clear any existing timeout
   if (categoryMenuTimeout.value) {
     clearTimeout(categoryMenuTimeout.value)
     categoryMenuTimeout.value = null
   }
   
-  // If this category has subcategories, show menu immediately
   if (hasSubCategories(category)) {
     activeCategoryMenu.value = category.id
   }
 }
 
 const handleCategoryLeave = () => {
-  // Set timeout to close menu after leaving
   categoryMenuTimeout.value = setTimeout(() => {
     activeCategoryMenu.value = null
     categoryMenuTimeout.value = null
-  }, 150) // Reduced from 200ms to 150ms for faster response
+  }, 150)
 }
 
 const keepMenuOpen = () => {
-  // Clear timeout when mouse enters mega menu
   if (categoryMenuTimeout.value) {
     clearTimeout(categoryMenuTimeout.value)
     categoryMenuTimeout.value = null
@@ -1773,7 +1739,6 @@ const keepMenuOpen = () => {
 }
 
 const closeCategoryMenu = () => {
-  // Close menu when leaving mega menu
   if (categoryMenuTimeout.value) {
     clearTimeout(categoryMenuTimeout.value)
   }
@@ -1846,8 +1811,9 @@ const performSearch = debounce(async (query) => {
 
   searchLoading.value = true
   try {
+    const config = useRuntimeConfig()
     const response = await fetch(
-      'https://kartmania-api.vibrantick.org/common/product/read',
+      `${config.public.apiBase}/common/product/read`,
       { signal: AbortSignal.timeout(3000) }
     )
     
@@ -1867,7 +1833,6 @@ const performSearch = debounce(async (query) => {
     showSearchDropdown.value = true
   } catch (error) {
     if (error.name !== 'AbortError') {
-      console.error('Search failed:', error)
       searchResults.value = []
     }
   } finally {

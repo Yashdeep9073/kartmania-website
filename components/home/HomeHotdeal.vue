@@ -50,7 +50,7 @@
               <div v-for="product in products" :key="product.id" class="col-6 col-md-4 col-lg-4 col-xl-3">
                 <div class="product-card border rounded-16 overflow-hidden h-100">
                   <div class="product-image-container">
-                    <NuxtLink :to="`/product/${product.id}`" class="product-link">
+                    <NuxtLink :to="`/shop/shop-all/--${product.id}`" class="product-link">
                       <img :src="product.images?.[0]?.imageUrl || '/assets/images/thumbs/product-img26.png'" :alt="product.name" class="product-img w-100" />
                       <div class="product-overlay">
                         <button class="quick-view-btn">
@@ -61,7 +61,7 @@
                   </div>
                   <div class="product-content p-16">
                     <h6 class="mb-6 product-title">
-                      <NuxtLink :to="`/product/${product.id}`" class="product-name-link">
+                      <NuxtLink :to="`/shop/shop-all/--${product.id}`" class="product-name-link">
                         {{ product.name }}
                       </NuxtLink>
                     </h6>                  

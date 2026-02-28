@@ -93,7 +93,7 @@ const handleImageError = (e: Event) => {
         />
 
         <NuxtLink
-          :to="`/shop/shop-all?offer=${festivalOffer?.slug ?? 'all'}`"
+          :to="`/shop-all?offer=${festivalOffer?.slug ?? 'all'}`"
           class="shop-link"
         >
           <button class="shop-btn">

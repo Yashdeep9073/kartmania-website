@@ -1,4 +1,3 @@
-// router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -9,22 +8,15 @@ const router = createRouter({
       name: 'Home',
       component: () => import('@/pages/index.vue')
     },
+
+    // ✅ IMPORTANT: Add this route
     {
-      path: '/product/:id',
-      name: 'ProductDetail',
-      component: () => import('@/pages/shop/shop-all/[slug].vue'),
-      props: (route) => ({ 
-        slug: route.params.id 
-      })
+      path: '/shop-all/:slug/:groupId',
+      name: 'ShopProductDetail',
+      component: () => import('@/pages/shop-all/[slug]/[groupId].vue'),
+      props: true
     },
-    {
-      path: '/product/:id-:slug',
-      name: 'ProductDetailWithSlug',
-      component: () => import('@/pages/shop/shop-all/[slug].vue'),
-      props: (route) => ({ 
-        slug: route.params.slug 
-      })
-    },
+
     {
       path: '/cart',
       name: 'Cart',
@@ -45,15 +37,15 @@ const router = createRouter({
       name: 'Terms',
       component: () => import('@/pages/terms.vue')
     },
-    {
-      path: '/shop',
-      redirect: '/shop/shop-all'
-    },
+
+    // keep this AFTER product route
     {
       path: '/shop/:pathMatch(.*)*',
       name: 'ShopPages',
-      component: () => import('@/pages/shop/shop-all/index.vue')
+      component: () => import('@/pages/shop-all/index.vue')
     },
+
+    // wildcard LAST
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',

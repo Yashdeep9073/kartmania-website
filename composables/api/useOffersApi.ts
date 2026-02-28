@@ -1,6 +1,6 @@
 import { ref, watchEffect } from 'vue'
 import type { OffersApiResponse, Offer, OfferType } from '~/types/offers'
-import { useApiEndpoints } from "~/utlis/endpoints"
+import { useApiEndpoints } from "~/utils/endpoints"
 
 export interface FetchOffersParams {
   offerType?: OfferType

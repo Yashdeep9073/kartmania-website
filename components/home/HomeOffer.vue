@@ -296,7 +296,7 @@ const displayDeals = computed(() => {
         currentPrice: '',
         originalPrice: '',
         discount: '',
-        link: `/shop/shop-all/--1`,
+        link: `/shop-all/--1`,
         type: 'bank',
         bankName: offer.name || '',
         offer: offer.discountType === 'PERCENTAGE' ? `${offer.discountValue}% Instant Discount*` : `₹${offer.discountValue} Instant Discount*`,

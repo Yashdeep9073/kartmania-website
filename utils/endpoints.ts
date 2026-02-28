@@ -32,12 +32,18 @@ export const useApiEndpoints = () => {
       single: (id: number | string) =>
         `${base}/common/product/read/${id}`,
 
-      
+      group: {
+        list: (params?: Record<string, any>) =>
+          withQuery(`${base}/common/product/read/group/style`, params),
+
+        single: (groupId: number | string) =>
+          `${base}/common/product/read/group/style/${groupId}`,
+      },
     },
     media: {
       list: (params?: Record<string, any>) =>
         withQuery(`${base}/common/media/read`, params),
     },
-    
+
   }
 }

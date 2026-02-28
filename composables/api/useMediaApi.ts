@@ -2,7 +2,7 @@ import type {
   FetchMediaParams,
   MediaApiResponse
 } from "~/types/media"
-import { useApiEndpoints } from "~/utlis/endpoints"
+import { useApiEndpoints } from "~/utils/endpoints"
 
 export const useMediaApi = () => {
   const api = useApiEndpoints()

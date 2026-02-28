@@ -22,7 +22,7 @@
           <div v-if="currentBanner" class="content" :key="currentBanner.title">
             <span class="subtitle">{{ currentBanner.description }}</span>
             <h1 class="title">{{ currentBanner.title }}</h1>
-            <NuxtLink to="/shop/shop-all">
+            <NuxtLink to="/shop-all">
               <button class="shop-btn">Shop Now</button>
             </NuxtLink>
           </div>

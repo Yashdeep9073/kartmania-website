@@ -2,7 +2,7 @@
   <section class="wheel-categories-section">
     <div class="section-header">
       <!-- <h4 class="section-title">Top Categories</h4>
-      <NuxtLink to="/shop/shop-all" class="view-all">
+      <NuxtLink to="/shop-all" class="view-all">
         View All
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -106,7 +106,7 @@ const fetchCategories = async () => {
 onMounted(fetchCategories)
 
 const getCategoryLink = (category) => {
-  return `/shop/shop-all?category=${encodeURIComponent(category.name)}`
+  return `/shop-all?category=${encodeURIComponent(category.name)}`
 }
 </script>
 

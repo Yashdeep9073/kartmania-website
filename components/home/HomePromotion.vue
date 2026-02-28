@@ -46,7 +46,7 @@
                 <h6 class="text-danger-600 mb-0 text-sm text-md-base text-lg-xl">{{ banner.price }}</h6>
               </div>
   
-              <NuxtLink :to="banner.slug ? `/shop/shop-all?offer=${banner.slug}` : (banner.category ? `/shop/shop-all?category=${banner.category}` : '/shop/shop-all')" class="btn btn-main d-inline-flex align-items-center rounded-pill gap-2 gap-md-4 gap-lg-8 mt-3 mt-md-4 mt-lg-6 px-3 px-md-4 py-2 py-md-2 py-lg-3 text-xs text-md-sm text-lg-base">
+              <NuxtLink :to="banner.slug ? `/shop-all?offer=${banner.slug}` : (banner.category ? `/shop-all?category=${banner.category}` : '/shop-all')" class="btn btn-main d-inline-flex align-items-center rounded-pill gap-2 gap-md-4 gap-lg-8 mt-3 mt-md-4 mt-lg-6 px-3 px-md-4 py-2 py-md-2 py-lg-3 text-xs text-md-sm text-lg-base">
                 Shop Now
                 <span class="icon d-flex text-sm text-md-base text-lg-xl">
                   <i class="ph ph-arrow-right p-5"></i>

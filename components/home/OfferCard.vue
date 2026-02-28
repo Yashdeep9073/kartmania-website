@@ -54,7 +54,7 @@
 
       <!-- Action Button -->
       <NuxtLink
-        to="/shop/shop-all"
+        to="/shop-all"
         class="offer-btn btn-block"
         :class="`btn-${theme}`"
       >

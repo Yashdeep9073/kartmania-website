@@ -46,7 +46,7 @@
                     Add <i class="ph ph-shopping-cart"></i>
                   </button>
 
-                  <NuxtLink :to="`/shop/shop-all/--${product.id}`" class="product-image-container">
+                  <NuxtLink :to="`/shop-all/--${product.id}`" class="product-image-container">
                     <img :src="getProductImage(product)" :alt="product.name" class="product-image"
                       @error="handleImageError($event)" loading="lazy" width="280" height="210" />
                   </NuxtLink>
@@ -71,7 +71,7 @@
                     </div>
 
                     <h6 class="product-title">
-                      <NuxtLink :to="`/shop/shop-all/--${product.id}`" class="product-link">
+                      <NuxtLink :to="`/shop-all/--${product.id}`" class="product-link">
                         {{ product.name }}
                       </NuxtLink>
                     </h6>

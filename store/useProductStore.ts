@@ -80,9 +80,9 @@ export const useProductStore = defineStore('productStore', () => {
   }
 
   const API_URL_CATEGORIES = config.public.api?.categories || null
-  
+
   const fetchCategoriesWithNestedData = async () => {
-    try {      
+    try {
       // If API URL is not available, return empty data
       if (!API_URL_CATEGORIES) {
         state.value.categories = []
@@ -93,19 +93,19 @@ export const useProductStore = defineStore('productStore', () => {
           totalProductsCount: 0
         }
       }
-      
-      const response = await fetch(API_URL_CATEGORIES)  
-      
+
+      const response = await fetch(API_URL_CATEGORIES)
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
-      const data = await response.json()      
-      
+
+      const data = await response.json()
+
       if (data.data && Array.isArray(data.data)) {
         state.value.categories = data.data
-        state.value.categoryTree = buildCategoryTree(data.data) 
-        
+        state.value.categoryTree = buildCategoryTree(data.data)
+
         const totalProducts = data.data.reduce((sum, category) => {
           return sum + (category._count?.products || 0)
         }, 0)
@@ -157,7 +157,7 @@ export const useProductStore = defineStore('productStore', () => {
 
   const availableColors = computed(() => {
     const colorList = colors.value
-    
+
     return colorList.map(color => ({
       name: typeof color === 'string' ? color : color.name || color.color,
       hex: getColorHex(typeof color === 'string' ? color : color.name || color.color)
@@ -166,7 +166,7 @@ export const useProductStore = defineStore('productStore', () => {
 
   const availableSizes = computed(() => {
     const sizeList = sizes.value
-    
+
     return sizeList.map(size => {
       if (typeof size === 'object') {
         return {
@@ -180,10 +180,10 @@ export const useProductStore = defineStore('productStore', () => {
       }
     })
   })
-  
+
   const availableBrands = computed(() => {
     const brandList = brands.value
-    
+
     return brandList.map(brand => {
       if (typeof brand === 'object') {
         return {
@@ -225,11 +225,11 @@ export const useProductStore = defineStore('productStore', () => {
     const brands = ['TechCorp', 'FashionHub', 'HomeStyle', 'SportPro', 'BookWorld', 'ToyLand']
     const colors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Yellow', 'Pink', 'Gray', 'Purple', 'Orange']
     const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
-    
+
     for (let i = 1; i <= 100; i++) {
       const price = Math.floor(Math.random() * 20000) + 500
       const discountValue = Math.random() > 0.7 ? Math.floor(Math.random() * 50) + 10 : 0
-      
+
       mockProducts.push({
         groupId: `product-${i}`,
         name: `Product ${i} - ${categories[i % categories.length]}`,
@@ -291,16 +291,16 @@ export const useProductStore = defineStore('productStore', () => {
         }
       })
     }
-    
+
     return mockProducts
   }
 
   // ==================== API ENDPOINTS ====================
 
   const API_ENDPOINTS = {
-    categories: config.public.api?.categories || null,  
-    colors: config.public.api?.colors || null,  
-    sizes: config.public.api?.sizes || null, 
+    categories: config.public.api?.categories || null,
+    colors: config.public.api?.colors || null,
+    sizes: config.public.api?.sizes || null,
     brands: config.public.api?.brands || null,
     graphql: config.public.api?.graphql || 'https://your-new-api-url.com/graphql'
   }
@@ -309,22 +309,22 @@ export const useProductStore = defineStore('productStore', () => {
 
   const getProductColor = (product) => {
     const attributes = product.mainProduct?.attributes
-    
+
     if (!attributes || !Array.isArray(attributes)) return null
-    
+
     // Find first attribute with non-null color
     const colorAttr = attributes.find(attr => attr && attr.color !== null && attr.color !== undefined && attr.color !== '')
     if (colorAttr?.color) return colorAttr.color
-    
+
     // Fallback: try to extract from product name or use default
     return null // or return a default color like 'Black'
   }
 
   const getProductSize = (product) => {
     const attributes = product.mainProduct?.attributes
-    
+
     if (!attributes || !Array.isArray(attributes)) return null
-    
+
     // Find first attribute with non-null size
     const sizeAttr = attributes.find(attr => attr && attr.size !== null && attr.size !== undefined && attr.size !== '')
     return sizeAttr?.size || null
@@ -332,9 +332,9 @@ export const useProductStore = defineStore('productStore', () => {
 
   const getProductMaterial = (product) => {
     const attributes = product.mainProduct?.attributes
-    
+
     if (!attributes || !Array.isArray(attributes)) return null
-    
+
     // Find first attribute with non-null material
     const materialAttr = attributes.find(attr => attr && attr.material !== null && attr.material !== undefined && attr.material !== '')
     return materialAttr?.material || null
@@ -343,7 +343,7 @@ export const useProductStore = defineStore('productStore', () => {
   const getDescription = (product) => {
     return product.mainProduct?.description || ''
   }
-  
+
   const getProductBrand = (product) => {
     return product.brand?.name || product.mainProduct?.brandName || null
   }
@@ -356,7 +356,7 @@ export const useProductStore = defineStore('productStore', () => {
     if (mainProduct.discountValue && mainProduct.discountValue > 0) {
       return Math.round(price * (1 - mainProduct.discountValue / 100))
     }
-    return price 
+    return price
   }
 
   const getOriginalPrice = (product) => {
@@ -421,7 +421,7 @@ export const useProductStore = defineStore('productStore', () => {
       const primaryVariantImage = variantImages.find(img => img.isPrimary === true)
       if (primaryVariantImage?.imageUrl) {
         return fixImageUrl(primaryVariantImage.imageUrl)
-      } 
+      }
       const firstVariantImage = variantImages[0]?.imageUrl
       if (firstVariantImage) {
         return fixImageUrl(firstVariantImage)
@@ -439,15 +439,15 @@ export const useProductStore = defineStore('productStore', () => {
 
   const fixImageUrl = (url) => {
     if (!url) return '/assets/images/placeholder.jpg'
-    
+
     if (url.startsWith('http')) {
       return url
     }
-    
+
     if (url.startsWith('/')) {
       return `https://kartmania-api.vibrantick.org${url}`
     }
-    
+
     return `https://kartmania-api.vibrantick.org/${url}`
   }
 
@@ -539,7 +539,7 @@ export const useProductStore = defineStore('productStore', () => {
   }
 
   // ==================== FILTER & SORT PRODUCTS ====================
-  
+
   const filterAndSortProducts = () => {
     if (state.value.allProducts.length === 0) {
       state.value.filteredAndSortedProducts = []
@@ -553,10 +553,10 @@ export const useProductStore = defineStore('productStore', () => {
       }
       return
     }
-  
+
     let filtered = [...state.value.allProducts]
     const currentFilters = state.value.filters
-  
+
     // Apply price filter (client-side) - DISABLED to show all products
     // Temporarily disabling price filtering to ensure all products are shown
     // if (currentFilters.minPrice > 0 || currentFilters.maxPrice < defaultMaxPrice.value) {
@@ -621,7 +621,7 @@ export const useProductStore = defineStore('productStore', () => {
           // Replace any double encoded spaces
           newFilters.category = decoded.replace(/%20/g, ' ').trim()
         } catch (error) {
-              newFilters.category = query.category
+          newFilters.category = query.category
         }
       }
     }
@@ -678,14 +678,14 @@ export const useProductStore = defineStore('productStore', () => {
       const encodedCategory = encodeURIComponent(filters.category)
       query.category = encodedCategory
     }
-    
+
     if (filters.color) query.color = filters.color
     if (filters.size) query.size = filters.size
-    
+
     if (filters.brand) {
       query.brand = encodeURIComponent(filters.brand)
     }
-    
+
     if (filters.sortBy !== 'popularity') query.sort = filters.sortBy
     if (filters.minPrice > 0) query.min_price = filters.minPrice
     if (filters.maxPrice < defaultMaxPrice.value) query.max_price = filters.maxPrice
@@ -712,11 +712,11 @@ export const useProductStore = defineStore('productStore', () => {
   const applyFiltersFromExternalLink = async (filtersObj) => {
     try {
       state.value.isLoading = true;
-      
+
       // Reset everything first
       state.value.allProducts = [];
       state.value.filteredAndSortedProducts = [];
-      
+
       // Base filters
       const baseFilters = {
         category: '',
@@ -729,19 +729,19 @@ export const useProductStore = defineStore('productStore', () => {
         minPrice: 0,
         maxPrice: defaultMaxPrice.value
       };
-      
+
       // Merge with provided filters
       const mergedFilters = { ...baseFilters, ...filtersObj };
-      
+
       // Update state
       state.value.filters = mergedFilters;
-      
+
       // Fetch products
       await fetchProductsWithFilters(mergedFilters);
-      
+
       // Update URL
       updateURLFromFilters(mergedFilters);
-      
+
       return true;
     } catch (error) {
       throw error;
@@ -756,7 +756,7 @@ export const useProductStore = defineStore('productStore', () => {
     try {
       // Fetch categories with nested data
       const categoriesResult = await fetchCategoriesWithNestedData()
-      
+
       // Use fallback colors (API disabled to prevent 500 errors)
       state.value.colors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Yellow', 'Pink', 'Gray', 'Purple', 'Orange']
 
@@ -769,7 +769,7 @@ export const useProductStore = defineStore('productStore', () => {
         { id: '5', size: 'XL' },
         { id: '6', size: 'XXL' }
       ]
-      
+
       // Use fallback brands (API disabled to prevent 500 errors)
       state.value.brands = []
 
@@ -806,10 +806,10 @@ export const useProductStore = defineStore('productStore', () => {
     // Add category filter if selected - FIXED
     if (filters.category && filters.category !== 'all') {
       // Find category in categories array to get ID
-      const categoryObj = state.value.categories.find(cat => 
+      const categoryObj = state.value.categories.find(cat =>
         cat.name === filters.category || cat.name.toLowerCase() === filters.category.toLowerCase()
       )
-      
+
       if (categoryObj) {
         // Use category name (not ID) based on API expectation
         filterParams.push(`category: "${categoryObj.name}"`)
@@ -942,7 +942,7 @@ export const useProductStore = defineStore('productStore', () => {
 
       let response;
       let apiFailed = false;
-      
+
       try {
         // Use $fetch with proper configuration
         response = await $fetch(API_ENDPOINTS.graphql, {
@@ -958,11 +958,11 @@ export const useProductStore = defineStore('productStore', () => {
       }
 
       // Check if API failed or returned empty
-      if (apiFailed || !response || !response.data?.productFilter?.data || 
-          !Array.isArray(response.data.productFilter.data) || 
-          response.data.productFilter.data.length === 0) {
-        
-        
+      if (apiFailed || !response || !response.data?.productFilter?.data ||
+        !Array.isArray(response.data.productFilter.data) ||
+        response.data.productFilter.data.length === 0) {
+
+
         // Set empty state - no mock data
         state.value.allProducts = []
         state.value.filteredAndSortedProducts = []
@@ -974,12 +974,12 @@ export const useProductStore = defineStore('productStore', () => {
           from: 0,
           to: 0
         }
-        
+
         // Still update URL to maintain filter state
         if (!state.value.isUpdatingFromURL) {
           updateURLFromFilters(mergedFilters)
         }
-        
+
         return {
           products: [],
           pagination: state.value.pagination
@@ -989,7 +989,7 @@ export const useProductStore = defineStore('productStore', () => {
 
       // Process API response - flatten variants into individual products
       const realProducts = []
-      
+
       response.data.productFilter.data.forEach(product => {
         // Create a separate product entry for each variant
         if (product.variants && product.variants.length > 0) {
@@ -1029,7 +1029,7 @@ export const useProductStore = defineStore('productStore', () => {
               variantId: variant.id,
               variantIndex: index,
               // For product link and identification
-              groupId: `${product.groupId}-variant-${variant.id}`,
+              groupId: product.groupId,
               name: variant.name
             }
             realProducts.push(variantProduct)
@@ -1043,7 +1043,7 @@ export const useProductStore = defineStore('productStore', () => {
 
       // Update state with real products only (no mock data)
       state.value.allProducts = realProducts
-      
+
       // Update pagination to reflect actual variant count
       state.value.pagination = {
         ...response.data.productFilter.pagination,
@@ -1064,9 +1064,9 @@ export const useProductStore = defineStore('productStore', () => {
         pagination: state.value.pagination
       }
     } catch (error) {
-      
+
       // More detailed error logging
-      
+
       // Set empty state on any error
       state.value.allProducts = []
       state.value.filteredAndSortedProducts = []
@@ -1078,7 +1078,7 @@ export const useProductStore = defineStore('productStore', () => {
         from: 0,
         to: 0
       }
-      
+
       return {
         products: [],
         pagination: state.value.pagination
@@ -1095,7 +1095,7 @@ export const useProductStore = defineStore('productStore', () => {
   const updateFilters = async (newFilters) => {
     const result = await fetchProductsWithFilters(newFilters)
     return result
-  } 
+  }
 
   // ====================TOGGLE FILTER FUNCTIONS====================
 
@@ -1138,10 +1138,10 @@ export const useProductStore = defineStore('productStore', () => {
       currentFilters.category = ''
     } else {
       // Add category filter - use the exact category name from store
-      const categoryObj = categories.value.find(cat => 
+      const categoryObj = categories.value.find(cat =>
         cat.name.toLowerCase() === category.toLowerCase()
       )
-      
+
       if (categoryObj) {
         currentFilters.category = categoryObj.name // Use the exact name from store
       } else {
@@ -1270,7 +1270,7 @@ export const useProductStore = defineStore('productStore', () => {
       return false
     }
   }
-  
+
   // ==================== WATCHERS ====================
 
   watch(() => route.query, (newQuery, oldQuery) => {
@@ -1278,12 +1278,12 @@ export const useProductStore = defineStore('productStore', () => {
     if (state.value.isUpdatingFromURL || state.value.urlUpdateInProgress) {
       return;
     }
-    
+
     // Check if query actually changed
     if (JSON.stringify(newQuery) === JSON.stringify(oldQuery)) {
       return;
     }
-    
+
     syncFiltersFromURL();
   }, { deep: true, immediate: false });
 
@@ -1292,7 +1292,7 @@ export const useProductStore = defineStore('productStore', () => {
   return {
     // New getters
     categoryTree,
-    
+
     // Existing getters
     products,
     categories,
@@ -1312,7 +1312,7 @@ export const useProductStore = defineStore('productStore', () => {
     // New actions
     fetchCategoriesWithNestedData,
     applyFiltersFromExternalLink,
-    
+
     // Existing actions
     fetchProducts: fetchProductsWithFilters,
     updateFilters,

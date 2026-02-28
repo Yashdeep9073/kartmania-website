@@ -204,7 +204,7 @@
                           class="flex justify-between">
                           <span class="text-gray-600">Screen:</span>
                           <span class="font-medium">{{ selectedVariant.attributes[0].extraAttributes.screenSize
-                            }}</span>
+                          }}</span>
                         </div>
                         <div v-if="selectedVariant?.attributes?.[0]?.extraAttributes?.color"
                           class="flex justify-between">
@@ -258,7 +258,7 @@
                 <!-- Price Section -->
                 <div class="mt-32 flex-align flex-wrap gap-32">
                   <div class="flex-align gap-8">
-                    <h4 class="mb-0">₹{{ calculateDiscountedPrice() }}</h4>
+                    <h4 class="mb-0">₹{{ discountedPrice }}</h4>
                     <span v-if="mainProduct.discountValue > 0"
                       class="text-md text-gray-500 text-decoration-line-through">
                       ₹{{ selectedVariant?.price || mainProduct.price }}
@@ -314,9 +314,9 @@
                     </h6>
                   </div>
                   <div class="progress w-100 bg-gray-100 rounded-pill h-8" role="progressbar"
-                    :aria-valuenow="calculateStockPercentage()" aria-valuemin="0" aria-valuemax="100">
+                    :aria-valuenow="stockPercentage" aria-valuemin="0" aria-valuemax="100">
                     <div class="progress-bar bg-gradient-to-r from-green-500 to-emerald-500 rounded-pill"
-                      :style="{ width: calculateStockPercentage() + '%' }"></div>
+                      :style="{ width: stockPercentage + '%' }"></div>
                   </div>
                   <span class="text-sm text-gray-700 mt-8">
                     Available: {{ selectedVariant?.stock || mainProduct.stock }} units
@@ -813,7 +813,7 @@
                     </span>
                     <span class="text-heading fw-medium">
                       Unit: <span class="text-gray-500">{{ mainProduct.unit?.name }} ({{ mainProduct.unit?.shortName
-                      }})</span>
+                        }})</span>
                     </span>
                   </li>
                   <li v-if="mainProduct.manufacturedDate" class="text-gray-400 mb-14 flex-align gap-14">
@@ -942,7 +942,7 @@
 
                     <div class="bg-white p-3 rounded-lg border border-gray-100">
                       <span class="text-gray-500 text-xs">Discounted Price</span>
-                      <p class="text-main-600 font-medium">₹{{ calculateDiscountedPrice() }}</p>
+                      <p class="text-main-600 font-medium">₹{{ discountedPrice }}</p>
                     </div>
                   </div>
                 </div>
@@ -1152,770 +1152,286 @@
   </section>
 </template>
 
-<script setup>
-import { ref, onMounted, watch, computed } from 'vue'
-import { useRoute } from '#app'
+
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Thumbs, Pagination } from 'swiper/modules'
-import { useApiEndpoints } from '~/utlis/endpoints'
-import { useProductsApi } from '~/composables/api/useProductsApi'
+import { useProductGroupApi } from '~/composables/api/useProductGroupApi'
+
 import 'swiper/css'
 import 'swiper/css/thumbs'
 import 'swiper/css/pagination'
 
-// Get route
+/* ----------------------------------
+   ROUTE
+-----------------------------------*/
+
 const route = useRoute()
+const styleGroupId = computed(() => route.params.groupId as string)
 
-const styleGroupId = computed(() => {
-  const slug = route.path.split('/').pop()
-  return slug.split('--')[1] || null
-})
+/* ----------------------------------
+   API
+-----------------------------------*/
 
-// State 
-const groupID = ref(0)
+const { data, loading, error } = useProductGroupApi(styleGroupId)
+
+/* ----------------------------------
+   CORE STATE
+-----------------------------------*/
+
+const groupID = ref<string | number | null>(null)
+const mainProduct = ref<any>(null)
+const variants = ref<any[]>([])
+const selectedVariant = ref<any>(null)
+
+/* ----------------------------------
+   SWIPER STATE
+-----------------------------------*/
+
 const thumbsSwiper = ref(null)
 const mainSwiper = ref(null)
-const mobileThumbsSwiper = ref(null)
-const mobileMainSwiper = ref(null)
-const quantity = ref(1)
-const isInWishlist = ref(false)
-const rating = ref(0)
-const reviewTitle = ref('')
-const reviewContent = ref('')
-const activeTab = ref('description')
 const activeThumb = ref(0)
-const mobileActiveThumb = ref(0)
-const showSuccessMessage = ref(false)
-const successMessage = ref('')
-const showSizeGuide = ref(false)
 
-// Cart state
-const cartItems = ref([])
-const cartItemCount = ref(0)
-const cartSubtotal = ref(0)
-const cartTotalPrice = ref(0)
+/* ----------------------------------
+   QUANTITY
+-----------------------------------*/
 
-// Product Data
-const mainProduct = ref(null)
-const variants = ref([])
-const loading = ref(false)
-const error = ref(null)
+const quantity = ref(1)
 
-// Selection States
-const selectedColor = ref(null)
-const selectedSize = ref(null)
-const selectedVariant = ref(null)
+/* ----------------------------------
+   MAP API RESPONSE
+-----------------------------------*/
 
-// Images - Use backend product images only
+watch(
+  data,
+  (val) => {
+    if (!val) return
+
+    groupID.value = val.groupId
+    mainProduct.value = val.mainProduct
+    variants.value = val.variants ?? []
+
+    if (variants.value.length > 0) {
+      selectedVariant.value = variants.value[0]
+    }
+  },
+  { immediate: true }
+)
+
+/* ----------------------------------
+   DERIVED SELECTION (CLEAN)
+-----------------------------------*/
+
+const selectedColor = computed(
+  () => selectedVariant.value?.color?.name ?? null
+)
+
+const selectedSize = computed(
+  () => selectedVariant.value?.size?.name ?? null
+)
+
+/* ----------------------------------
+   IMAGES
+-----------------------------------*/
+
 const mainImages = computed(() => {
-  if (mainProduct.value?.images && mainProduct.value.images.length > 0) {
-    return mainProduct.value.images.map(img => img.imageUrl)
+  if (selectedVariant.value?.images?.length) {
+    return selectedVariant.value.images.map((i: any) => i.imageUrl)
   }
-  // Return empty array if no images - will show loading state
+
+  if (mainProduct.value?.images?.length) {
+    return mainProduct.value.images.map((i: any) => i.imageUrl)
+  }
+
   return []
 })
 
-const thumbnailImages = computed(() => {
-  if (mainProduct.value?.images && mainProduct.value.images.length > 0) {
-    return mainProduct.value.images.map(img => img.imageUrl)
-  }
-  // Return empty array if no images - will show loading state
-  return []
-})
+const thumbnailImages = computed(() => mainImages.value)
 
-// Computed Properties - Dynamic based on backend data
+/* ----------------------------------
+   AVAILABLE OPTIONS
+-----------------------------------*/
+
 const availableColorsWithImages = computed(() => {
-  const colorsMap = new Map()
+  const map = new Map()
 
-  variants.value.forEach(variant => {
-    if (variant.color && variant.images && variant.images.length > 0) {
-      if (!colorsMap.has(variant.color)) {
-        colorsMap.set(variant.color, {
-          name: variant.color,
-          imageUrl: variant.images[0].imageUrl,
-          hexCode: getColorCode(variant.color)
-        });
-      }
-    }
-  });
+  variants.value.forEach(v => {
+    const colorName = v.color?.name
+    if (!colorName || map.has(colorName)) return
 
-  variants.value.forEach(variant => {
-    if (variant.color && !colorsMap.has(variant.color)) {
-      colorsMap.set(variant.color, {
-        name: variant.color,
-        imageUrl: getColorPlaceholder(variant.color),
-        hexCode: getColorCode(variant.color)
-      });
-    }
-  });
+    map.set(colorName, {
+      name: colorName,
+      hexCode: v.color?.hexCode,
+      imageUrl: v.images?.[0]?.imageUrl ?? null
+    })
+  })
 
-  return Array.from(colorsMap.values())
-});
+  return Array.from(map.values())
+})
 
 const availableSizes = computed(() => {
-  const sizes = new Set()
-  variants.value.forEach(variant => {
-    if (variant.size) sizes.add(variant.size)
-  })
-
-  if (sizes.size === 0) {
-    return ['S', 'M', 'L', 'XL', 'XXL']
-  }
-
-  return Array.from(sizes)
+  return [...new Set(variants.value.map(v => v.size?.name))]
 })
 
-// Category detection computed properties
-const isClothingCategory = computed(() => {
-  const category = mainProduct.value?.category?.name?.toLowerCase() || ''
-  const subCategory = mainProduct.value?.subCategory?.name?.toLowerCase() || ''
-  const subSubCategory = mainProduct.value?.subSubCategory?.name?.toLowerCase() || ''
+/* ----------------------------------
+   VARIANT SELECTION
+-----------------------------------*/
 
-  return category.includes('clothing') ||
-    category.includes('apparel') ||
-    category.includes('fashion') ||
-    subCategory.includes('shirt') ||
-    subCategory.includes('pants') ||
-    subCategory.includes('dress') ||
-    subSubCategory.includes('t-shirt') ||
-    subSubCategory.includes('jeans')
-})
-
-const isShoesCategory = computed(() => {
-  const category = mainProduct.value?.category?.name?.toLowerCase() || ''
-  const subCategory = mainProduct.value?.subCategory?.name?.toLowerCase() || ''
-  const subSubCategory = mainProduct.value?.subSubCategory?.name?.toLowerCase() || ''
-
-  return category.includes('shoes') ||
-    category.includes('footwear') ||
-    subCategory.includes('sneakers') ||
-    subCategory.includes('boots') ||
-    subCategory.includes('sandals') ||
-    subSubCategory.includes('running') ||
-    subSubCategory.includes('sports')
-})
-
-const isElectronicsCategory = computed(() => {
-  const category = mainProduct.value?.category?.name?.toLowerCase() || ''
-  const subCategory = mainProduct.value?.subCategory?.name?.toLowerCase() || ''
-  const subSubCategory = mainProduct.value?.subSubCategory?.name?.toLowerCase() || ''
-
-  return category.includes('electronics') ||
-    category.includes('computer') ||
-    category.includes('phone') ||
-    category.includes('gadget') ||
-    subCategory.includes('laptop') ||
-    subCategory.includes('smartphone') ||
-    subSubCategory.includes('accessories')
-})
-
-// Size helper methods
-const getClothingSizes = () => {
-  const standardSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL']
-  const availableSizesList = availableSizes.value
-
-  // Return standard sizes that are available in the product
-  return standardSizes.filter(size => availableSizesList.includes(size))
-}
-
-const getShoeSizes = () => {
-  const standardShoeSizes = ['5', '6', '7', '8', '9', '10', '11', '12', '13']
-  const availableSizesList = availableSizes.value
-
-  // Return standard shoe sizes that are available in the product
-  return standardShoeSizes.filter(size => availableSizesList.includes(size))
-}
-
-const getElectronicsSizes = () => {
-  const availableSizesList = availableSizes.value
-
-  // For electronics, sizes might be like "64GB", "128GB", "256GB" or "Small", "Medium", "Large"
-  return availableSizesList.sort((a, b) => {
-    // Try to sort by numeric value if possible
-    const aNum = parseInt(a.replace(/[^0-9]/g, ''))
-    const bNum = parseInt(b.replace(/[^0-9]/g, ''))
-
-    if (!isNaN(aNum) && !isNaN(bNum)) {
-      return aNum - bNum
-    }
-
-    return a.localeCompare(b)
-  })
-}
-
-// Helper functions for dynamic product handling
-
-// Fetch product style group using products API hook
-const fetchProductStyleGroup = async (id) => {
-  if (!id) {
-    error.value = 'Invalid style group ID'
-    return
-  }
-
-  loading.value = true
-  error.value = null
-  mainProduct.value = null
-  variants.value = []
-  selectedVariant.value = null
-  selectedColor.value = null
-  selectedSize.value = null
-
-  try {
-    console.log('Fetching product style group with ID:', id)
-    
-    // Use the products API hook
-    const { products, loading: apiLoading, error: apiError, refresh } = useProductsApi({
-      id: id, // Add id parameter to fetch specific product
-      limit: 1
-    })
-    
-    // Call the fetch function
-    await refresh()
-    
-    // Wait for loading to complete
-    while (apiLoading.value) {
-      await new Promise(resolve => setTimeout(resolve, 100))
-    }
-    
-    // Check if we got product data
-    if (products.value && products.value.length > 0) {
-      mainProduct.value = products.value[0]
-      variants.value = products.value
-      
-      if (variants.value.length > 0) {
-        selectedVariant.value = variants.value[0]
-        selectedColor.value = variants.value[0].color || 'Default'
-        selectedSize.value = variants.value[0].size || 'M'
-      } else if (mainProduct.value) {
-        selectedVariant.value = mainProduct.value
-      }
-
-      console.log('Product data loaded from API hook:', {
-        mainProduct: mainProduct.value,
-        variants: variants.value
-      })
-    } else {
-      console.log('No product data found in API response')
-      error.value = apiError.value || 'Product not found'
-    }
-
-  } catch (err) {
-    console.error('Error fetching product:', err)
-    error.value = 'Failed to load product. Please try again later.'
-  } finally {
-    loading.value = false
-  }
-}
-
-// Helper function to get first image for a color
-const getColorFirstImage = (colorName) => {
-  const colorVariant = variants.value.find(variant =>
-    variant.color === colorName &&
-    variant.images &&
-    variant.images.length > 0
-  );
-
-  if (colorVariant?.images[0]?.imageUrl) {
-    return colorVariant.images[0].imageUrl;
-  }
-
-  return getColorPlaceholder(colorName);
-};
-
-// Color placeholder function
-const getColorPlaceholder = (colorName) => {
-  const colorMap = {
-    'blue': '/assets/images/recommended/blue-sample.jpg',
-    'red': '/assets/images/recommended/red-sample.jpg',
-    'green': '/assets/images/recommended/green-sample.jpg',
-    'black': '/assets/images/recommended/black-sample.jpg',
-    'white': '/assets/images/recommended/white-sample.jpg',
-    'yellow': '/assets/images/recommended/yellow-sample.jpg',
-    'purple': '/assets/images/recommended/purple-sample.jpg',
-    'pink': '/assets/images/recommended/pink-sample.jpg',
-    'orange': '/assets/images/recommended/orange-sample.jpg',
-    'gray': '/assets/images/recommended/gray-sample.jpg',
-    'brown': '/assets/images/recommended/brown-sample.jpg',
-    'navy': '/assets/images/recommended/navy-sample.jpg'
-  };
-
-  if (!colorName) return '/assets/images/placeholder.jpg';
-
-  const normalizedColor = colorName.toLowerCase().trim();
-  return colorMap[normalizedColor] || '/assets/images/placeholder.jpg';
-};
-
-// Color mapping function
-const getColorCode = (colorName) => {
-  const colorMap = {
-    'blue': '#3b82f6',
-    'red': '#ef4444',
-    'green': '#10b981',
-    'yellow': '#f59e0b',
-    'purple': '#8b5cf6',
-    'pink': '#ec4899',
-    'black': '#000000',
-    'white': '#ffffff',
-    'gray': '#6b7280',
-    'orange': '#f97316',
-    'brown': '#92400e',
-    'navy': '#1e3a8a',
-    'maroon': '#991b1b',
-    'teal': '#0d9488',
-    'cyan': '#06b6d4'
-  }
-
-  if (!colorName) return '#6b7280'
-  const normalizedColor = colorName.toLowerCase().trim()
-  return colorMap[normalizedColor] || '#6b7280'
-}
-
-// Cart Functions (same as before)
-const loadCartFromStorage = () => {
-  try {
-    const cartData = localStorage.getItem('shopping_cart')
-    if (cartData) {
-      const cart = JSON.parse(cartData)
-      cartItems.value = cart
-      updateCartSummary()
-    } else {
-      cartItems.value = []
-      updateCartSummary()
-    }
-  } catch (error) {
-    console.error('Error loading cart from storage:', error)
-    cartItems.value = []
-    updateCartSummary()
-  }
-}
-
-const updateCartSummary = () => {
-  cartItemCount.value = cartItems.value.reduce((total, item) => total + item.quantity, 0)
-  cartSubtotal.value = cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
-  cartTotalPrice.value = cartSubtotal.value
-}
-
-const saveCartToStorage = (cart) => {
-  try {
-    localStorage.setItem('shopping_cart', JSON.stringify(cart))
-    loadCartFromStorage()
-  } catch (error) {
-    console.error('Error saving cart to storage:', error)
-  }
-}
-
-const addToCart = () => {
-  const product = selectedVariant.value || mainProduct.value
-  if (!product || product.stock <= 0 || quantity.value <= 0) {
-    alert('Cannot add to cart. Check quantity and stock availability.')
-    return
-  }
-
-  try {
-    const existingCart = localStorage.getItem('shopping_cart')
-    let cart = existingCart ? JSON.parse(existingCart) : []
-
-    const existingIndex = cart.findIndex(item =>
-      item.productId === product.id &&
-      item.variantId === (selectedVariant.value?.id || null)
-    )
-
-    const discountedPrice = parseFloat(calculateDiscountedPrice())
-
-    if (existingIndex > -1) {
-      cart[existingIndex].quantity += quantity.value
-      cart[existingIndex].totalPrice = cart[existingIndex].price * cart[existingIndex].quantity
-    } else {
-      const cartItem = {
-        id: Date.now(),
-        productId: product.id,
-        variantId: selectedVariant.value?.id || null,
-        name: mainProduct.value.name,
-        groupId: groupID.value,
-        color: selectedVariant.value?.color || null,
-        size: selectedVariant.value?.size || null,
-        sku: product.sku,
-        price: discountedPrice,
-        quantity: quantity.value,
-        totalPrice: discountedPrice * quantity.value,
-        image: mainImages.value[0],
-        stock: product.stock,
-        maxStock: product.stock
-      }
-      cart.push(cartItem)
-    }
-
-    saveCartToStorage(cart)
-
-    successMessage.value = `${quantity.value} × ${mainProduct.value.name} added to cart!`
-    showSuccessMessage.value = true
-
-    setTimeout(() => {
-      showSuccessMessage.value = false
-    }, 3000)
-
-  } catch (error) {
-    console.error('Error adding to cart:', error)
-    alert('Error adding item to cart. Please try again.')
-  }
-}
-
-const updateCartItemQuantity = (itemId, change) => {
-  try {
-    const cartData = localStorage.getItem('shopping_cart')
-    if (!cartData) return
-
-    let cart = JSON.parse(cartData)
-    const itemIndex = cart.findIndex(item => item.id === itemId)
-
-    if (itemIndex > -1) {
-      const newQuantity = cart[itemIndex].quantity + change
-
-      if (newQuantity < 1) {
-        cart.splice(itemIndex, 1)
-      } else {
-        cart[itemIndex].quantity = newQuantity
-        cart[itemIndex].totalPrice = cart[itemIndex].price * newQuantity
-      }
-
-      saveCartToStorage(cart)
-    }
-  } catch (error) {
-    console.error('Error updating cart item quantity:', error)
-  }
-}
-
-const removeFromCart = (itemId) => {
-  try {
-    const cartData = localStorage.getItem('shopping_cart')
-    if (!cartData) return
-
-    let cart = JSON.parse(cartData)
-    cart = cart.filter(item => item.id !== itemId)
-
-    saveCartToStorage(cart)
-  } catch (error) {
-    console.error('Error removing item from cart:', error)
-  }
-}
- 
-
-const refreshCartSummary = () => {
-  loadCartFromStorage()
-}
-
-// Size Guide Functions (same as before)
-const openSizeGuide = () => {
-  showSizeGuide.value = true
-}
-
-const closeSizeGuide = () => {
-  showSizeGuide.value = false
-}
-
-const getSizeChartData = () => {
-  if (variants.value.length > 0) {
-    return variants.value.map(variant => {
-      const attributes = variant.attributes?.[0]?.extraAttributes || {}
-
-      return {
-        size: variant.size,
-        chest: attributes.chestForGarment || attributes.chestForBody || '38-40',
-        waist: attributes.waistForGarment || attributes.waistForBody || '32-34',
-        length: attributes.length || '26-27',
-        fit: 'Regular'
-      }
-    })
-  }
-
-  return [
-    { size: 'M', chest: '38-40', waist: '32-34', length: '26-27', fit: 'Regular' },
-    { size: 'L', chest: '40-42', waist: '34-36', length: '27-28', fit: 'Regular' },
-    { size: 'XL', chest: '42-44', waist: '36-38', length: '28-29', fit: 'Regular' },
-    { size: 'XXL', chest: '44-46', waist: '38-40', length: '29-30', fit: 'Regular' }
-  ]
-}
-
-const getFitClass = (size) => {
-  const fitMap = {
-    'XS': 'bg-blue-100 text-blue-800',
-    'S': 'bg-blue-100 text-blue-800',
-    'M': 'bg-green-100 text-green-800',
-    'L': 'bg-yellow-100 text-yellow-800',
-    'XL': 'bg-orange-100 text-orange-800',
-    'XXL': 'bg-red-100 text-red-800',
-    'XXXL': 'bg-purple-100 text-purple-800'
-  }
-  return fitMap[size] || 'bg-gray-100 text-gray-800'
-}
-
-const getFitText = (size) => {
-  const fitMap = {
-    'XS': 'Small',
-    'S': 'Small',
-    'M': 'Medium',
-    'L': 'Large',
-    'XL': 'X-Large',
-    'XXL': 'XX-Large',
-    'XXXL': 'XXX-Large'
-  }
-  return fitMap[size] || 'Regular'
-}
-
-// Selection Methods (same as before)
-const selectColor = (color) => {
-  selectedColor.value = color
-  findMatchingVariant()
-}
-
-const selectSize = (size) => {
-  selectedSize.value = size
-  findMatchingVariant()
-}
-
-const selectVariant = (variant) => {
+const selectVariant = (variant: any) => {
   selectedVariant.value = variant
-  selectedColor.value = variant.color
-  selectedSize.value = variant.size
 }
 
-const findMatchingVariant = () => {
-  if (!selectedColor.value && !selectedSize.value) return
-
-  const matchingVariant = variants.value.find(variant =>
-    variant.color === selectedColor.value &&
-    variant.size === selectedSize.value
+const selectColor = (colorName: string) => {
+  const match = variants.value.find(
+    v =>
+      v.color?.name === colorName &&
+      v.size?.name === selectedSize.value
   )
 
-  if (matchingVariant) {
-    selectedVariant.value = matchingVariant
-  }
+  if (match) selectedVariant.value = match
 }
 
-// WhatsApp order function (same as before)
-const orderOnWhatsapp = () => {
-  const phone = "8219773546"
-  const imageUrl = mainImages.value[0]
+const selectSize = (sizeName: string) => {
+  const match = variants.value.find(
+    v =>
+      v.size?.name === sizeName &&
+      v.color?.name === selectedColor.value
+  )
 
-  const message = `
- *New Order Request* 
---------------------------------
- *Product:* ${mainProduct.value.name}
- *Variant:* ${selectedVariant.value?.color || ''} ${selectedVariant.value?.size || ''}
- *Price:* ₹${calculateDiscountedPrice()}
- *SKU:* ${selectedVariant.value?.sku || mainProduct.value.sku}
- *Image:* ${imageUrl}
-
-Please confirm the availability.
-  `
-
-  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
-  window.open(url, "_blank")
+  if (match) selectedVariant.value = match
 }
 
-// Helper Methods (same as before)
-const calculateDiscountedPrice = () => {
-  const product = selectedVariant.value || mainProduct.value
-  if (!product) return '0'
+/* ----------------------------------
+   PRICE
+-----------------------------------*/
 
-  const price = parseFloat(product.price) || 0
-  const discount = parseFloat(mainProduct.value?.discountValue) || 0
+const discountedPrice = computed(() => {
+  if (!selectedVariant.value) return 0
 
-  if (discount > 0 && mainProduct.value?.discount === 'PERCENTAGE') {
-    const discountedPrice = price - (price * discount / 100)
-    return discountedPrice.toFixed(2)
+  const price = parseFloat(selectedVariant.value.price ?? 0)
+  const discount = parseFloat(mainProduct.value?.discountValue ?? 0)
+
+  if (mainProduct.value?.discount === 'PERCENTAGE' && discount > 0) {
+    return +(price - (price * discount) / 100).toFixed(2)
   }
 
-  return price.toFixed(2)
-}
+  return price
+})
 
-const calculateAverageRating = () => {
-  if (!mainProduct.value || !mainProduct.value.reviews || mainProduct.value.reviews.length === 0) {
-    return '4.5'
-  }
-
-  const totalRating = mainProduct.value.reviews.reduce((sum, review) => sum + (review.rating || 0), 0)
-  return (totalRating / mainProduct.value.reviews.length).toFixed(1)
-}
-
-const calculateStockPercentage = () => {
-  const product = selectedVariant.value || mainProduct.value
-  if (!product) return 0
-
-  const maxStock = 100
-  const currentStock = product.stock || 0
-
-  return Math.min((currentStock / maxStock) * 100, 100)
-}
+/* ----------------------------------
+   STOCK
+-----------------------------------*/
 
 const getStockStatus = () => {
-  const product = selectedVariant.value || mainProduct.value
-  if (!product) return 'Stock information not available'
-
-  const stock = product.stock || 0
-
+  const stock = selectedVariant.value?.stock ?? 0
   if (stock <= 0) return 'Out of Stock'
   if (stock <= 5) return 'Low Stock - Hurry!'
-  if (stock <= 20) return 'Limited Stock Available'
   return 'In Stock'
 }
 
-const formatDate = (dateString) => {
-  if (!dateString) return 'N/A'
+/* ----------------------------------
+   QUANTITY CONTROLS
+-----------------------------------*/
 
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  } catch (e) {
-    console.error('Date formatting error:', e)
-    return 'Invalid date'
-  }
+const increaseQuantity = () => {
+  const max = selectedVariant.value?.stock ?? 1
+  if (quantity.value < max) quantity.value++
 }
 
-// Desktop Swiper Methods
-const setThumbsSwiper = (swiper) => {
+const decreaseQuantity = () => {
+  if (quantity.value > 1) quantity.value--
+}
+
+/* ----------------------------------
+   SWIPER METHODS
+-----------------------------------*/
+
+const setThumbsSwiper = (swiper: any) => {
   thumbsSwiper.value = swiper
 }
 
-const setMainSwiper = (swiper) => {
+const setMainSwiper = (swiper: any) => {
   mainSwiper.value = swiper
 }
 
-const goToSlide = (index) => {
+const goToSlide = (index: number) => {
   activeThumb.value = index
-  if (mainSwiper.value) {
-    mainSwiper.value.slideTo(index)
-  }
+  if (mainSwiper.value) mainSwiper.value.slideTo(index)
 }
 
-const onSlideChange = (swiper) => {
+const onSlideChange = (swiper: any) => {
   activeThumb.value = swiper.activeIndex
 }
 
-// Mobile Swiper Methods
-const setMobileThumbsSwiper = (swiper) => {
-  mobileThumbsSwiper.value = swiper
+
+
+/* ----------------------------------
+   CART (SIMPLE)
+-----------------------------------*/
+
+const cartItems = ref<any[]>([])
+
+const loadCartFromStorage = () => {
+  const data = localStorage.getItem('shopping_cart')
+  cartItems.value = data ? JSON.parse(data) : []
 }
 
-const setMobileMainSwiper = (swiper) => {
-  mobileMainSwiper.value = swiper
+const saveCart = (cart: any[]) => {
+  localStorage.setItem('shopping_cart', JSON.stringify(cart))
+  loadCartFromStorage()
 }
 
-const goToMobileSlide = (index) => {
-  mobileActiveThumb.value = index
-  if (mobileMainSwiper.value) {
-    mobileMainSwiper.value.slideTo(index)
-  }
-}
+const addToCart = () => {
+  if (!selectedVariant.value) return
 
-const onMobileSlideChange = (swiper) => {
-  mobileActiveThumb.value = swiper.activeIndex
-}
+  const cart = [...cartItems.value]
 
-// Quantity Methods (same as before)
-const decreaseQuantity = () => {
-  if (quantity.value > 1) {
-    quantity.value--
-  }
-}
+  const existing = cart.find(
+    item =>
+      item.productId === mainProduct.value.id &&
+      item.variantId === selectedVariant.value.id
+  )
 
-const increaseQuantity = () => {
-  const product = selectedVariant.value || mainProduct.value
-  const maxStock = product?.stock || 10
-
-  if (quantity.value < maxStock) {
-    quantity.value++
-  }
-}
-
-const validateQuantity = () => {
-  if (quantity.value < 1) {
-    quantity.value = 1
-  }
-  const product = selectedVariant.value || mainProduct.value
-  const maxStock = product?.stock || 10
-  if (quantity.value > maxStock) {
-    quantity.value = maxStock
-  }
-}
-
-// Action Methods (same as before)
-const toggleWishlist = () => {
-  isInWishlist.value = !isInWishlist.value
-  const message = isInWishlist.value ? 'Added to wishlist!' : 'Removed from wishlist!'
-  alert(message)
-}
-
-const compareProduct = () => {
-  alert('Product added to compare list!')
-}
-
-const shareProduct = () => {
-  if (navigator.share) {
-    navigator.share({
-      title: mainProduct.value?.name || "Product",
-      text: `Check out ${mainProduct.value?.name} for ₹${calculateDiscountedPrice()}`,
-      url: window.location.href
-    }).catch(err => {
-      console.error('Error sharing:', err)
-    })
+  if (existing) {
+    existing.quantity += quantity.value
   } else {
-    alert('Share feature not supported on this browser')
-  }
-}
-
-const setRating = (stars) => {
-  rating.value = stars
-}
-
-const submitReview = () => {
-  if (!reviewTitle.value.trim() || !reviewContent.value.trim()) {
-    alert('Please fill in both title and content for review.')
-    return
+    cart.push({
+      id: Date.now(),
+      productId: mainProduct.value.id,
+      variantId: selectedVariant.value.id,
+      name: mainProduct.value.name,
+      price: discountedPrice.value,
+      quantity: quantity.value,
+      image: mainImages.value[0]
+    })
   }
 
-  alert('Review submitted successfully! Thank you for your feedback.')
-
-  rating.value = 0
-  reviewTitle.value = ''
-  reviewContent.value = ''
+  saveCart(cart)
 }
 
-// Lifecycle
+
+const stockPercentage = computed(() => {
+  const stock = selectedVariant.value?.stock ?? 0
+  const maxStock = 100
+  return Math.min((stock / maxStock) * 100, 100)
+})
+
+
+/* ----------------------------------
+   LIFECYCLE
+-----------------------------------*/
+
 onMounted(() => {
-  console.log('Product Details page mounted')
-  console.log('Style Group ID from URL:', styleGroupId.value)
-
-  // Load cart data
   loadCartFromStorage()
 
-  if (styleGroupId.value) {
-    fetchProductStyleGroup(styleGroupId.value)
-  } else {
-    error.value = 'No style group ID found in URL'
-    loading.value = false
-  }
-})
-
-// Watch for route changes
-watch(() => styleGroupId.value, () => {
-  if (styleGroupId.value) {
-    fetchProductStyleGroup(styleGroupId.value)
-  }
-})
-
-// Watch for storage changes (for cross-tab updates)
-if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event) => {
     if (event.key === 'shopping_cart') {
       loadCartFromStorage()
     }
   })
-}
+})
 </script>
 
 <style scoped>

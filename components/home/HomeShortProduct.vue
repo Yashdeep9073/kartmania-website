@@ -21,7 +21,8 @@
                 <SwiperSlide v-for="product in featuredProducts" :key="product.id">
                   <div class="flex-align gap-16">
                     <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
-                      <NuxtLink to="/shop/shop-all/--1" class="link">
+                      <!-- Fix this link -->
+                      <NuxtLink to="/shop-all/--1" class="link">
                         <img :src="product.image" :alt="product.name" loading="lazy">
                       </NuxtLink>
                     </div>
@@ -34,7 +35,7 @@
                         <span class="text-xs fw-bold text-gray-500">({{ product.reviews }})</span>
                       </div>
                       <h6 class="title text-lg fw-semibold mt-8 mb-8">
-                        <NuxtLink to="/shop/shop-all/--1" class="link text-line-1">
+                        <NuxtLink to="/shop-all/--1" class="link text-line-1">
                           {{ product.name }}
                         </NuxtLink>
                       </h6>
@@ -69,7 +70,7 @@
                 <SwiperSlide v-for="product in topSellingProducts" :key="product.id">
                   <div class="flex-align gap-16">
                     <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
-                      <NuxtLink to="/shop/shop-all/--1" class="link">
+                      <NuxtLink to="/shop-all/--1" class="link">
                         <img :src="product.image" :alt="product.name" loading="lazy">
                       </NuxtLink>
                     </div>
@@ -82,7 +83,7 @@
                         <span class="text-xs fw-bold text-gray-500">({{ product.reviews }})</span>
                       </div>
                       <h6 class="title text-lg fw-semibold mt-8 mb-8">
-                        <NuxtLink to="/shop/shop-all/--1" class="link text-line-1">
+                        <NuxtLink to="/shop-all/--1" class="link text-line-1">
                           {{ product.name }}
                         </NuxtLink>
                       </h6>
@@ -117,7 +118,7 @@
                 <SwiperSlide v-for="product in onSaleProducts" :key="product.id">
                   <div class="flex-align gap-16">
                     <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
-                      <NuxtLink to="/shop/shop-all/--1" class="link">
+                      <NuxtLink to="/shop-all/--1" class="link">
                         <img :src="product.image" :alt="product.name" loading="lazy">
                       </NuxtLink>
                     </div>
@@ -130,7 +131,7 @@
                         <span class="text-xs fw-bold text-gray-500">({{ product.reviews }})</span>
                       </div>
                       <h6 class="title text-lg fw-semibold mt-8 mb-8">
-                        <NuxtLink to="/shop/shop-all/--1" class="link text-line-1">
+                        <NuxtLink to="/shop-all/--1" class="link text-line-1">
                           {{ product.name }}
                         </NuxtLink>
                       </h6>
@@ -173,7 +174,7 @@
               <p class="text-neutral-300 fw-medium text-sm">Don't miss this opportunity at a special</p>
             </div>
             
-            <NuxtLink to="/shop/shop-all/--1" class="product-card__thumb flex-center overflow-hidden">
+            <NuxtLink to="/shop-all/--1" class="product-card__thumb flex-center overflow-hidden">
               <img :src="weekDealProduct.image" :alt="weekDealProduct.name" loading="lazy" class="week-deal-image">
             </NuxtLink>
             
@@ -194,7 +195,7 @@
               </div>
               
               <h6 class="title text-md fw-semibold mt-10 mb-0">
-                <NuxtLink to="/shop/shop-all/--1" class="link text-line-2 fw-bold">
+                <NuxtLink to="/shop-all/--1" class="link text-line-2 fw-bold">
                   {{ weekDealProduct.name }}
                 </NuxtLink>
               </h6>   

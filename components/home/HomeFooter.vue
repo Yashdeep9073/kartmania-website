@@ -89,7 +89,7 @@
               <NuxtLink to="/cancellation-returns" class="text-heading hover-text-main-600">Cancellation & Returns</NuxtLink>
             </li>
             <li class="">
-              <NuxtLink to="/shop/shop-all" class="text-heading hover-text-main-600">Online Shopping</NuxtLink>
+              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Online Shopping</NuxtLink>
             </li>
           </ul>
         </div>
@@ -106,7 +106,7 @@
               <NuxtLink to="/cart/cart" class="text-heading hover-text-main-600">Shoping Cart</NuxtLink>
             </li>
             <li class="mb-16">
-              <NuxtLink to="/shop/shop-all" class="text-heading hover-text-main-600">Compare</NuxtLink>
+              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Compare</NuxtLink>
             </li>
             <li class="mb-16">
               <NuxtLink to="/contact/contact" class="text-heading hover-text-main-600">Help Ticket</NuxtLink>
@@ -121,22 +121,22 @@
           <h6 class="footer-item__title">Daily Groceries</h6>
           <ul class="footer-menu">
             <li class="mb-16">
-              <NuxtLink to="/shop/shop-all" class="text-heading hover-text-main-600">Clothing</NuxtLink>
+              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Clothing</NuxtLink>
             </li>
             <li class="mb-16">
-              <NuxtLink to="/shop/shop-all" class="text-heading hover-text-main-600">Electronics</NuxtLink>
+              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Electronics</NuxtLink>
             </li>
             <li class="mb-16">
-              <NuxtLink to="/shop/shop-all" class="text-heading hover-text-main-600">Summer Deals</NuxtLink>
+              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Summer Deals</NuxtLink>
             </li>
             <li class="mb-16">
-              <NuxtLink to="/shop/shop-all" class="text-heading hover-text-main-600">Household Supplies</NuxtLink>
+              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Household Supplies</NuxtLink>
             </li>
             <li class="mb-16">
-              <NuxtLink to="/shop/shop-all" class="text-heading hover-text-main-600">Cars & Bike</NuxtLink>
+              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Cars & Bike</NuxtLink>
             </li>
             <li class="">
-              <NuxtLink to="/shop/shop-all" class="text-heading hover-text-main-600">Seasons Sales</NuxtLink>
+              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Seasons Sales</NuxtLink>
             </li>
           </ul>
         </div>

@@ -21,7 +21,7 @@
         </div>
         <h4 class="text-2xl fw-bold text-gray-800 mb-16">Your cart is empty</h4>
         <p class="text-gray-600 mb-32">Add some products to your cart to checkout</p>
-        <NuxtLink to="/shop/shop-all" class="btn btn-main py-16 px-32 rounded-8">
+        <NuxtLink to="/shop-all" class="btn btn-main py-16 px-32 rounded-8">
           <i class="ph ph-shopping-bag me-2"></i> Continue Shopping
         </NuxtLink>
       </div>

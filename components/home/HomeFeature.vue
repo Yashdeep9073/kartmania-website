@@ -170,7 +170,7 @@ const loadCategories = async () => {
           image: category.image,
           logo: category.logo,
           productCount: category._count?.products || 0,
-          link: '/shop/shop-all',
+          link: '/shop-all',
           fallbackImage: getFallbackImage(category.name)
         }))
         
@@ -184,7 +184,7 @@ const loadCategories = async () => {
         name: item.name || item.title,
         image: item.image,
         productCount: item._count?.products || parseInt(item.products) || 0,
-        link: item.link || '/shop/shop-all',
+        link: item.link || '/shop-all',
         fallbackImage: item.image
       }))
     }
@@ -196,7 +196,7 @@ const loadCategories = async () => {
       name: item.name || item.title,
       image: item.image,
       productCount: item._count?.products || parseInt(item.products) || 0,
-      link: item.link || '/shop/shop-all',
+      link: item.link || '/shop-all',
       fallbackImage: item.image
     }))
   } finally {
@@ -222,7 +222,7 @@ const getCategoryImage = (category) => {
 
 // Get category link
 const getCategoryLink = (category) => {
-  return `/shop/shop-all?category=${encodeURIComponent(category.name)}`
+  return `/shop-all?category=${encodeURIComponent(category.name)}`
 }
 
 // Handle image error for desktop
@@ -278,6 +278,7 @@ onBeforeUnmount(() => {
   }
 })
 </script> 
+
 <style scoped>
 /* Desktop Categories Styling */
 

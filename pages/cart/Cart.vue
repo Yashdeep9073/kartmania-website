@@ -20,7 +20,7 @@
         </div>
         <h4 class="text-2xl fw-bold text-gray-800 mb-16">Your cart is empty</h4>
         <p class="text-gray-600 mb-32">Add some products to your cart to see them here</p>
-        <NuxtLink to="/shop/shop-all" class="btn btn-main py-16 px-32 rounded-8">
+        <NuxtLink to="/shop-all" class="btn btn-main py-16 px-32 rounded-8">
           <i class="ph ph-shopping-bag me-2"></i> Continue Shopping
         </NuxtLink>
       </div>
@@ -64,7 +64,7 @@
                     <td>
                       <div class="table-product d-flex align-items-center gap-24">
                         <NuxtLink 
-                          :to="`/shop/shop-all/--${item.groupId}`" 
+                          :to="`/shop-all/--${item.groupId}`" 
                           class="table-product__thumb border border-gray-100 rounded-8 flex-center"
                           style="width: 100px; height: 100px;"
                         >
@@ -78,7 +78,7 @@
                         <div class="table-product__content text-start">
                           <h6 class="title text-lg fw-semibold mb-8">
                             <NuxtLink 
-                              :to="`/shop/shop-all/--${item.groupId}`" 
+                              :to="`/shop-all/--${item.groupId}`" 
                               class="link text-line-2"
                             > 
                               {{ item.name }}
@@ -191,7 +191,7 @@
               </div>
               <div class="flex-align gap-16">
                 <NuxtLink 
-                  to="/shop/shop-all" 
+                  to="/shop-all" 
                   class="text-lg text-gray-500 hover-text-main-600 transition-colors"
                 >
                   <i class="ph ph-arrow-left me-2"></i> Continue Shopping
@@ -276,7 +276,7 @@
               </NuxtLink>
               
               <NuxtLink 
-                to="/shop/shop-all" 
+                to="/shop-all" 
                 class="btn btn-outline-main py-18 w-100 rounded-8 fw-semibold flex-center gap-12"
               >
                 <i class="ph ph-shopping-bag"></i>

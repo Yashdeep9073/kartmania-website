@@ -13,7 +13,7 @@
         <!-- Or link to categories -->
         <div class="col-md-3 col-6">
           <NuxtLink  
-            to="/shop/shop-all?category=women"
+            to="/shop-all?category=women"
             class="category-card d-block text-center p-24 bg-white rounded-8 border border-gray-100 hover-border-main-600 transition-all"
           >
             <div class="icon-wrapper mb-16">
@@ -26,7 +26,7 @@
         
         <div class="col-md-3 col-6">
           <NuxtLink 
-            to="/shop/shop-all?category=men"
+            to="/shop-all?category=men"
             class="category-card d-block text-center p-24 bg-white rounded-8 border border-gray-100 hover-border-main-600 transition-all"
           >
             <div class="icon-wrapper mb-16">
@@ -39,7 +39,7 @@
         
         <div class="col-md-3 col-6">
           <NuxtLink 
-            to="/shop/shop-all?category=electronics"
+            to="/shop-all?category=electronics"
             class="category-card d-block text-center p-24 bg-white rounded-8 border border-gray-100 hover-border-main-600 transition-all"
           >
             <div class="icon-wrapper mb-16">
@@ -52,7 +52,7 @@
         
         <div class="col-md-3 col-6">
           <NuxtLink 
-            to="/shop/shop-all"
+            to="/shop-all"
             class="category-card d-block text-center p-24 bg-white rounded-8 border border-gray-100 hover-border-main-600 transition-all"
           >
             <div class="icon-wrapper mb-16">

@@ -1,6 +1,6 @@
 import { ref, watchEffect } from 'vue'
 import type { FetchProductsParams, Product, ProductsApiResponse } from "~/types/products"
-import { useApiEndpoints } from "~/utlis/endpoints"
+import { useApiEndpoints } from "~/utils/endpoints"
 
 export const useProductsApi = (params: FetchProductsParams = {}) => {
 

@@ -116,7 +116,7 @@ const fetchCategories = async () => {
 onMounted(fetchCategories)
 
 const getSubCategoryLink = (category, sub) => {
-  return `/shop/shop-all?category=${category.name}`
+  return `/shop-all?category=${category.name}`
 }
 </script>
 

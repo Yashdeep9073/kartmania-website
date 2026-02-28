@@ -16,7 +16,7 @@
               <div class="product-card style-two h-100 p-8 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2 flex-align gap-16">
                 <div class="">
                   <span class="product-card__badge bg-danger-600 px-8 py-4 text-sm text-white">Sale {{ product.discount }}%</span>
-                  <NuxtLink :to="`/shop/shop-all/${product.id}`" class="product-card__thumb flex-center overflow-hidden">
+                  <NuxtLink :to="`/shop-all/${product.id}`" class="product-card__thumb flex-center overflow-hidden">
                     <img :src="product.image" :alt="product.name">
                   </NuxtLink>
                   <div class="countdown">
@@ -47,7 +47,7 @@
                     <span class="text-xs fw-bold text-gray-600">({{ product.reviews }})</span>
                   </div>
                   <h6 class="title text-lg fw-semibold mt-12 mb-8">
-                    <NuxtLink :to="`/shop/shop-all/${product.id}`" class="link text-line-2">{{ product.name }}</NuxtLink>
+                    <NuxtLink :to="`/shop-all/${product.id}`" class="link text-line-2">{{ product.name }}</NuxtLink>
                   </h6>
                   <div class="flex-align gap-4">
                     <span class="text-main-600 text-md d-flex"><i class="ph-fill ph-storefront"></i></span>
@@ -104,7 +104,7 @@
                 <span class="text-sm fw-medium text-heading">{{ dailyDealsOffers[0].description || 'Limited time offer' }}</span>
                 <span class="text-xs text-heading">Expire {{ new Date(dailyDealsOffers[0].endDate).toLocaleDateString() }}</span>
               </div>
-              <NuxtLink to="/shop/shop-all" class="mt-16 btn bg-success-600 hover-text-white hover-bg-success-700 text-white fw-medium d-inline-flex align-items-center rounded-pill gap-8">
+              <NuxtLink to="/shop-all" class="mt-16 btn bg-success-600 hover-text-white hover-bg-success-700 text-white fw-medium d-inline-flex align-items-center rounded-pill gap-8">
                 Shop Now
                 <span class="icon text-xl d-flex"><i class="ph ph-arrow-right"></i></span>
               </NuxtLink>
@@ -125,7 +125,7 @@
                 <span class="text-sm fw-medium text-heading">Delivery by 6:15am</span>
                 <span class="text-xs text-heading">Expire Aug 5</span>
               </div>
-              <NuxtLink to="/shop/shop-all" class="mt-16 btn bg-success-600 hover-text-white hover-bg-success-700 text-white fw-medium d-inline-flex align-items-center rounded-pill gap-8">
+              <NuxtLink to="/shop-all" class="mt-16 btn bg-success-600 hover-text-white hover-bg-success-700 text-white fw-medium d-inline-flex align-items-center rounded-pill gap-8">
                 Shop Now
                 <span class="icon text-xl d-flex"><i class="ph ph-arrow-right"></i></span>
               </NuxtLink>

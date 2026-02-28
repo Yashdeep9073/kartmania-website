@@ -268,7 +268,7 @@ const handleImageError = (event, index) => {
 
 // Get product link
 const getProductLink = (product) => {
-  return `/shop/shop-all/${getProductName(product)}--${product.groupId}`
+  return `/shop-all/${getProductName(product)}--${product.groupId}`
 }
 
 // Initialize

@@ -20,7 +20,7 @@
           <i class="ph ph-heart text-6xl text-gray-300 mb-24 d-block"></i>
           <h4 class="text-2xl fw-bold mb-16">Your wishlist is empty</h4>
           <p class="text-gray-600 mb-32">You haven't added any products to your wishlist yet.</p>
-          <NuxtLink to="/shop/shop-all" class="btn btn-main py-16 px-32 rounded-8">
+          <NuxtLink to="/shop-all" class="btn btn-main py-16 px-32 rounded-8">
             <i class="ph ph-shopping-cart me-8"></i>
             Start Shopping
           </NuxtLink>
@@ -588,7 +588,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useProductStore } from '../store/useProductStore'
 import { useWishlistStore } from '../store/useWishlistStore'
-import { toKebabCase } from "../utlis/toKebabCase"
 import WishlistBreakcrumb from '../../components/wishlist/WishlistBreakcrumb.vue'
 import Breadcrumbs from '../../components/navigation/Breadcrumbs.vue'
 import WishlistShop from '../../components/wishlist/WishlistShop.vue'
@@ -652,7 +651,7 @@ const formatPrice = (price) => {
 }
 
 const getProductLink = (product) => {
-  const productName = toKebabCase(getProductName(product))
+  const productName = getProductName(product)
   const productId = product.groupId || getProductId(product)
   return `/shop-all/${productName}--${productId}`
 }

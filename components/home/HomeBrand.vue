@@ -9,7 +9,7 @@
 
           <div class="flex-align gap-12">  
             <NuxtLink
-              to="/shop/shop-all"
+              to="/shop-all"
               class="text-sm fw-medium text-gray-700 hover-text-main-600"
             >
               View All
@@ -76,7 +76,7 @@
                 :key="brand.id"
               >
                 <NuxtLink
-                  :to="`/shop/shop-all?brand=${encodeURIComponent(brand.name)}`" 
+                  :to="`/shop-all?brand=${encodeURIComponent(brand.name)}`" 
                   class="brand-item d-block h-100"
                 >
                   <div class="brand-card h-100 p-8 p-md-12">

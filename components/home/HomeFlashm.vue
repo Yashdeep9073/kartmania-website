@@ -73,7 +73,7 @@
                     </ul>
                   </div>
                   <NuxtLink 
-                    to="/shop/shop-all" 
+                    to="/shop-all" 
                     :class="[
                       'btn d-inline-flex align-items-center rounded-pill gap-8 mt-24',
                       index === 0 ? 'btn-main' : 'bg-success-600 hover-bg-success-700'
@@ -143,7 +143,7 @@
                     </ul>
                   </div>
                   <NuxtLink 
-                    to="/shop/shop-all" 
+                    to="/shop-all" 
                     :class="[
                       'btn d-inline-flex align-items-center justify-content-center rounded-pill gap-4 gap-md-6 px-4 px-md-5 py-2 py-md-3 text-xs text-md-sm fw-semibold',
                       index === 0 ? 'btn-main' : 'bg-success-600 hover-bg-success-700 text-white'

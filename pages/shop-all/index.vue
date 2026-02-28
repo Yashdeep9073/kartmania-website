@@ -101,7 +101,7 @@
                 :disabled="isLoading">
                 {{ category.name }}
               </button>
-              <NuxtLink to="/shop/shop-all" class="view-all-link" v-if="categories.length > 5">
+              <NuxtLink to="/shop-all" class="view-all-link" v-if="categories.length > 5">
                 View All
               </NuxtLink>
             </div>
@@ -712,13 +712,12 @@
 </template>
 
 <script setup>
-import { toKebabCase } from '~/utlis/toKebabCase'
 import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductStore } from '~/store/useProductStore'
-import { encodeId } from '~/utlis/encode'
 import { useWishlistStore } from '~/store/useWishlistStore'
 import { useToast } from "vue-toastification";
+import { formatString,formatStringWithDash } from '~/utils/format';
 
 const toast = useToast();
 const route = useRoute()
@@ -867,11 +866,10 @@ const isProductNew = (product) => {
 }
 
 const getProductLink = (product) => {
-  const productName = toKebabCase(getProductName(product))
-  const productId = encodeId(getProductId(product))
+  const productName = formatStringWithDash(getProductName(product))
   const productColor = getProductColor(product)
 
-  let url = `/shop/shop-all/${productName}--${product.groupId}`
+  let url = `/shop-all/${productName}/${product.groupId}`
 
   if (productColor) {
     url += `?color=${encodeURIComponent(productColor)}`

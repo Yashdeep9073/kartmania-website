@@ -9,7 +9,7 @@
           </div>
           <h3 class="mb-0">{{ title }}</h3>
         </div>
-        <NuxtLink to="/shop/shop-all" class="btn btn-outline btn-sm">
+        <NuxtLink to="/shop-all" class="btn btn-outline btn-sm">
           View All
           <i class="ph ph-arrow-right ms-2"></i>
         </NuxtLink>

@@ -82,7 +82,7 @@
               <!-- View All Button (Optional) -->
               <div v-if="categories.length > 9 || fallbackCategories.length > 0" class="view-all-container">
                 <NuxtLink 
-                  to="/shop/shop-all" 
+                  to="/shop-all" 
                   class="view-all-button"
                   @click="closeCategoryDropdown"
                 >
@@ -239,28 +239,28 @@
                         <h5 class="section-title">Topwear</h5>
                         <div class="category-items">
                           <NuxtLink 
-                            to="/shop/shop-all?category=T-Shirts" 
+                            to="/shop-all?category=T-Shirts" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             T-Shirts
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Shirts" 
+                            to="/shop-all?category=Shirts" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Shirts
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Kurtas" 
+                            to="/shop-all?category=Kurtas" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Kurtas
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Sweatshirts" 
+                            to="/shop-all?category=Sweatshirts" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
@@ -272,28 +272,28 @@
                         <h5 class="section-title">Bottomwear</h5>
                         <div class="category-items">
                           <NuxtLink 
-                            to="/shop/shop-all?category=Jeans" 
+                            to="/shop-all?category=Jeans" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Jeans
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Trousers" 
+                            to="/shop-all?category=Trousers" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Trousers
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Shorts" 
+                            to="/shop-all?category=Shorts" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Shorts
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Track Pants" 
+                            to="/shop-all?category=Track Pants" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
@@ -305,28 +305,28 @@
                         <h5 class="section-title">Footwear</h5>
                         <div class="category-items">
                           <NuxtLink 
-                            to="/shop/shop-all?category=Casual Shoes" 
+                            to="/shop-all?category=Casual Shoes" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Casual Shoes
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Sports Shoes" 
+                            to="/shop-all?category=Sports Shoes" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Sports Shoes
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Sandals" 
+                            to="/shop-all?category=Sandals" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Sandals
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Slippers" 
+                            to="/shop-all?category=Slippers" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
@@ -338,28 +338,28 @@
                         <h5 class="section-title">Accessories</h5>
                         <div class="category-items">
                           <NuxtLink 
-                            to="/shop/shop-all?category=Watches" 
+                            to="/shop-all?category=Watches" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Watches
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Sunglasses" 
+                            to="/shop-all?category=Sunglasses" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Sunglasses
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Belts" 
+                            to="/shop-all?category=Belts" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Belts
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Wallets" 
+                            to="/shop-all?category=Wallets" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
@@ -371,28 +371,28 @@
                         <h5 class="section-title">Winterwear</h5>
                         <div class="category-items">
                           <NuxtLink 
-                            to="/shop/shop-all?category=Jackets" 
+                            to="/shop-all?category=Jackets" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Jackets
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Sweaters" 
+                            to="/shop-all?category=Sweaters" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Sweaters
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Thermals" 
+                            to="/shop-all?category=Thermals" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Thermals
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Gloves" 
+                            to="/shop-all?category=Gloves" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
@@ -404,28 +404,28 @@
                         <h5 class="section-title">Sports</h5>
                         <div class="category-items">
                           <NuxtLink 
-                            to="/shop/shop-all?category=Activewear" 
+                            to="/shop-all?category=Activewear" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Activewear
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Gym Wear" 
+                            to="/shop-all?category=Gym Wear" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Gym Wear
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Swimwear" 
+                            to="/shop-all?category=Swimwear" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
                             Swimwear
                           </NuxtLink>
                           <NuxtLink 
-                            to="/shop/shop-all?category=Sports Accessories" 
+                            to="/shop-all?category=Sports Accessories" 
                             class="subcategory-item"
                             @click="handleSubCategoryClick"
                           >
@@ -869,66 +869,66 @@ const fallbackCategories = ref([
     id: 1,
     name: 'Electronics',
     image: '/assets/images/categories/electronics.png',
-    link: '/shop/shop-all?category=Electronics',
+    link: '/shop-all?category=Electronics',
     subCategoriesFallback: [
       {
         id: 101,
         name: 'Mobiles',
-        link: '/shop/shop-all?category=Mobiles',
+        link: '/shop-all?category=Mobiles',
         subSubCategories: [
-          { id: 1001, name: 'Smartphones', link: '/shop/shop-all?category=Smartphones' },
-          { id: 1002, name: 'Feature Phones', link: '/shop/shop-all?category=Feature Phones' },
-          { id: 1003, name: 'Tablets', link: '/shop/shop-all?category=Tablets' }
+          { id: 1001, name: 'Smartphones', link: '/shop-all?category=Smartphones' },
+          { id: 1002, name: 'Feature Phones', link: '/shop-all?category=Feature Phones' },
+          { id: 1003, name: 'Tablets', link: '/shop-all?category=Tablets' }
         ]
       },
       {
         id: 102,
         name: 'Laptops',
-        link: '/shop/shop-all?category=Laptops',
+        link: '/shop-all?category=Laptops',
         subSubCategories: [
-          { id: 1004, name: 'Gaming Laptops', link: '/shop/shop-all?category=Gaming Laptops' },
-          { id: 1005, name: 'Ultrabooks', link: '/shop/shop-all?category=Ultrabooks' },
-          { id: 1006, name: 'Business Laptops', link: '/shop/shop-all?category=Business Laptops' }
+          { id: 1004, name: 'Gaming Laptops', link: '/shop-all?category=Gaming Laptops' },
+          { id: 1005, name: 'Ultrabooks', link: '/shop-all?category=Ultrabooks' },
+          { id: 1006, name: 'Business Laptops', link: '/shop-all?category=Business Laptops' }
         ]
       },
       {
         id: 103,
         name: 'TVs',
-        link: '/shop/shop-all?category=TVs',
+        link: '/shop-all?category=TVs',
         subSubCategories: [
-          { id: 1007, name: 'Smart TVs', link: '/shop/shop-all?category=Smart TVs' },
-          { id: 1008, name: 'LED TVs', link: '/shop/shop-all?category=LED TVs' },
-          { id: 1009, name: 'OLED TVs', link: '/shop/shop-all?category=OLED TVs' }
+          { id: 1007, name: 'Smart TVs', link: '/shop-all?category=Smart TVs' },
+          { id: 1008, name: 'LED TVs', link: '/shop-all?category=LED TVs' },
+          { id: 1009, name: 'OLED TVs', link: '/shop-all?category=OLED TVs' }
         ]
       },
       {
         id: 104,
         name: 'Audio',
-        link: '/shop/shop-all?category=Audio',
+        link: '/shop-all?category=Audio',
         subSubCategories: [
-          { id: 1010, name: 'Headphones', link: '/shop/shop-all?category=Headphones' },
-          { id: 1011, name: 'Speakers', link: '/shop/shop-all?category=Speakers' },
-          { id: 1012, name: 'Earphones', link: '/shop/shop-all?category=Earphones' }
+          { id: 1010, name: 'Headphones', link: '/shop-all?category=Headphones' },
+          { id: 1011, name: 'Speakers', link: '/shop-all?category=Speakers' },
+          { id: 1012, name: 'Earphones', link: '/shop-all?category=Earphones' }
         ]
       },
       {
         id: 105,
         name: 'Cameras',
-        link: '/shop/shop-all?category=Cameras',
+        link: '/shop-all?category=Cameras',
         subSubCategories: [
-          { id: 1013, name: 'DSLR', link: '/shop/shop-all?category=DSLR' },
-          { id: 1014, name: 'Mirrorless', link: '/shop/shop-all?category=Mirrorless' },
-          { id: 1015, name: 'Action Cameras', link: '/shop/shop-all?category=Action Cameras' }
+          { id: 1013, name: 'DSLR', link: '/shop-all?category=DSLR' },
+          { id: 1014, name: 'Mirrorless', link: '/shop-all?category=Mirrorless' },
+          { id: 1015, name: 'Action Cameras', link: '/shop-all?category=Action Cameras' }
         ]
       },
       {
         id: 106,
         name: 'Wearables',
-        link: '/shop/shop-all?category=Wearables',
+        link: '/shop-all?category=Wearables',
         subSubCategories: [
-          { id: 1016, name: 'Smart Watches', link: '/shop/shop-all?category=Smart Watches' },
-          { id: 1017, name: 'Fitness Bands', link: '/shop/shop-all?category=Fitness Bands' },
-          { id: 1018, name: 'VR Headsets', link: '/shop/shop-all?category=VR Headsets' }
+          { id: 1016, name: 'Smart Watches', link: '/shop-all?category=Smart Watches' },
+          { id: 1017, name: 'Fitness Bands', link: '/shop-all?category=Fitness Bands' },
+          { id: 1018, name: 'VR Headsets', link: '/shop-all?category=VR Headsets' }
         ]
       }
     ]
@@ -937,69 +937,69 @@ const fallbackCategories = ref([
     id: 2,
     name: 'Fashion',
     image: '/assets/images/categories/fashion.png',
-    link: '/shop/shop-all?category=Fashion',
+    link: '/shop-all?category=Fashion',
     subCategoriesFallback: [
       {
         id: 201,
         name: 'Men',
-        link: '/shop/shop-all?category=Men',
+        link: '/shop-all?category=Men',
         subSubCategories: [
-          { id: 2001, name: 'T-Shirts', link: '/shop/shop-all?category=T-Shirts' },
-          { id: 2002, name: 'Shirts', link: '/shop/shop-all?category=Shirts' },
-          { id: 2003, name: 'Jeans', link: '/shop/shop-all?category=Jeans' },
-          { id: 2004, name: 'Footwear', link: '/shop/shop-all?category=Footwear' }
+          { id: 2001, name: 'T-Shirts', link: '/shop-all?category=T-Shirts' },
+          { id: 2002, name: 'Shirts', link: '/shop-all?category=Shirts' },
+          { id: 2003, name: 'Jeans', link: '/shop-all?category=Jeans' },
+          { id: 2004, name: 'Footwear', link: '/shop-all?category=Footwear' }
         ]
       },
       {
         id: 202,
         name: 'Women',
-        link: '/shop/shop-all?category=Women',
+        link: '/shop-all?category=Women',
         subSubCategories: [
-          { id: 2005, name: 'Dresses', link: '/shop/shop-all?category=Dresses' },
-          { id: 2006, name: 'Tops', link: '/shop/shop-all?category=Tops' },
-          { id: 2007, name: 'Jeans', link: '/shop/shop-all?category=Jeans' },
-          { id: 2008, name: 'Footwear', link: '/shop/shop-all?category=Footwear' }
+          { id: 2005, name: 'Dresses', link: '/shop-all?category=Dresses' },
+          { id: 2006, name: 'Tops', link: '/shop-all?category=Tops' },
+          { id: 2007, name: 'Jeans', link: '/shop-all?category=Jeans' },
+          { id: 2008, name: 'Footwear', link: '/shop-all?category=Footwear' }
         ]
       },
       {
         id: 203,
         name: 'Kids',
-        link: '/shop/shop-all?category=Kids',
+        link: '/shop-all?category=Kids',
         subSubCategories: [
-          { id: 2009, name: 'Boys Clothing', link: '/shop/shop-all?category=Boys Clothing' },
-          { id: 2010, name: 'Girls Clothing', link: '/shop/shop-all?category=Girls Clothing' },
-          { id: 2011, name: 'Toys', link: '/shop/shop-all?category=Toys' }
+          { id: 2009, name: 'Boys Clothing', link: '/shop-all?category=Boys Clothing' },
+          { id: 2010, name: 'Girls Clothing', link: '/shop-all?category=Girls Clothing' },
+          { id: 2011, name: 'Toys', link: '/shop-all?category=Toys' }
         ]
       },
       {
         id: 204,
         name: 'Accessories',
-        link: '/shop/shop-all?category=Accessories',
+        link: '/shop-all?category=Accessories',
         subSubCategories: [
-          { id: 2012, name: 'Watches', link: '/shop/shop-all?category=Watches' },
-          { id: 2013, name: 'Sunglasses', link: '/shop/shop-all?category=Sunglasses' },
-          { id: 2014, name: 'Bags', link: '/shop/shop-all?category=Bags' },
-          { id: 2015, name: 'Jewellery', link: '/shop/shop-all?category=Jewellery' }
+          { id: 2012, name: 'Watches', link: '/shop-all?category=Watches' },
+          { id: 2013, name: 'Sunglasses', link: '/shop-all?category=Sunglasses' },
+          { id: 2014, name: 'Bags', link: '/shop-all?category=Bags' },
+          { id: 2015, name: 'Jewellery', link: '/shop-all?category=Jewellery' }
         ]
       },
       {
         id: 205,
         name: 'Ethnic Wear',
-        link: '/shop/shop-all?category=Ethnic Wear',
+        link: '/shop-all?category=Ethnic Wear',
         subSubCategories: [
-          { id: 2016, name: 'Kurtas', link: '/shop/shop-all?category=Kurtas' },
-          { id: 2017, name: 'Sarees', link: '/shop/shop-all?category=Sarees' },
-          { id: 2018, name: 'Lehengas', link: '/shop/shop-all?category=Lehengas' }
+          { id: 2016, name: 'Kurtas', link: '/shop-all?category=Kurtas' },
+          { id: 2017, name: 'Sarees', link: '/shop-all?category=Sarees' },
+          { id: 2018, name: 'Lehengas', link: '/shop-all?category=Lehengas' }
         ]
       },
       {
         id: 206,
         name: 'Winter Wear',
-        link: '/shop/shop-all?category=Winter Wear',
+        link: '/shop-all?category=Winter Wear',
         subSubCategories: [
-          { id: 2019, name: 'Jackets', link: '/shop/shop-all?category=Jackets' },
-          { id: 2020, name: 'Sweaters', link: '/shop/shop-all?category=Sweaters' },
-          { id: 2021, name: 'Thermals', link: '/shop/shop-all?category=Thermals' }
+          { id: 2019, name: 'Jackets', link: '/shop-all?category=Jackets' },
+          { id: 2020, name: 'Sweaters', link: '/shop-all?category=Sweaters' },
+          { id: 2021, name: 'Thermals', link: '/shop-all?category=Thermals' }
         ]
       }
     ]
@@ -1008,69 +1008,69 @@ const fallbackCategories = ref([
     id: 3,
     name: 'Home & Kitchen',
     image: '/assets/images/categories/home-kitchen.png',
-    link: '/shop/shop-all?category=Home%20%26%20Kitchen',
+    link: '/shop-all?category=Home%20%26%20Kitchen',
     subCategoriesFallback: [
       {
         id: 301,
         name: 'Furniture',
-        link: '/shop/shop-all?category=Furniture',
+        link: '/shop-all?category=Furniture',
         subSubCategories: [
-          { id: 3001, name: 'Sofas', link: '/shop/shop-all?category=Sofas' },
-          { id: 3002, name: 'Beds', link: '/shop/shop-all?category=Beds' },
-          { id: 3003, name: 'Dining Tables', link: '/shop/shop-all?category=Dining Tables' },
-          { id: 3004, name: 'Wardrobes', link: '/shop/shop-all?category=Wardrobes' }
+          { id: 3001, name: 'Sofas', link: '/shop-all?category=Sofas' },
+          { id: 3002, name: 'Beds', link: '/shop-all?category=Beds' },
+          { id: 3003, name: 'Dining Tables', link: '/shop-all?category=Dining Tables' },
+          { id: 3004, name: 'Wardrobes', link: '/shop-all?category=Wardrobes' }
         ]
       },
       {
         id: 302,
         name: 'Kitchen Appliances',
-        link: '/shop/shop-all?category=Kitchen Appliances',
+        link: '/shop-all?category=Kitchen Appliances',
         subSubCategories: [
-          { id: 3005, name: 'Mixer Grinder', link: '/shop/shop-all?category=Mixer Grinder' },
-          { id: 3006, name: 'Cookware', link: '/shop/shop-all?category=Cookware' },
-          { id: 3007, name: 'Microwave', link: '/shop/shop-all?category=Microwave' },
-          { id: 3008, name: 'Refrigerator', link: '/shop/shop-all?category=Refrigerator' }
+          { id: 3005, name: 'Mixer Grinder', link: '/shop-all?category=Mixer Grinder' },
+          { id: 3006, name: 'Cookware', link: '/shop-all?category=Cookware' },
+          { id: 3007, name: 'Microwave', link: '/shop-all?category=Microwave' },
+          { id: 3008, name: 'Refrigerator', link: '/shop-all?category=Refrigerator' }
         ]
       },
       {
         id: 303,
         name: 'Home Decor',
-        link: '/shop/shop-all?category=Home Decor',
+        link: '/shop-all?category=Home Decor',
         subSubCategories: [
-          { id: 3009, name: 'Wall Art', link: '/shop/shop-all?category=Wall Art' },
-          { id: 3010, name: 'Curtains', link: '/shop/shop-all?category=Curtains' },
-          { id: 3011, name: 'Cushions', link: '/shop/shop-all?category=Cushions' },
-          { id: 3012, name: 'Lighting', link: '/shop/shop-all?category=Lighting' }
+          { id: 3009, name: 'Wall Art', link: '/shop-all?category=Wall Art' },
+          { id: 3010, name: 'Curtains', link: '/shop-all?category=Curtains' },
+          { id: 3011, name: 'Cushions', link: '/shop-all?category=Cushions' },
+          { id: 3012, name: 'Lighting', link: '/shop-all?category=Lighting' }
         ]
       },
       {
         id: 304,
         name: 'Bed & Bath',
-        link: '/shop/shop-all?category=Bed & Bath',
+        link: '/shop-all?category=Bed & Bath',
         subSubCategories: [
-          { id: 3013, name: 'Bed Sheets', link: '/shop/shop-all?category=Bed Sheets' },
-          { id: 3014, name: 'Towels', link: '/shop/shop-all?category=Towels' },
-          { id: 3015, name: 'Mattresses', link: '/shop/shop-all?category=Mattresses' }
+          { id: 3013, name: 'Bed Sheets', link: '/shop-all?category=Bed Sheets' },
+          { id: 3014, name: 'Towels', link: '/shop-all?category=Towels' },
+          { id: 3015, name: 'Mattresses', link: '/shop-all?category=Mattresses' }
         ]
       },
       {
         id: 305,
         name: 'Home Appliances',
-        link: '/shop/shop-all?category=Home Appliances',
+        link: '/shop-all?category=Home Appliances',
         subSubCategories: [
-          { id: 3016, name: 'Air Conditioner', link: '/shop/shop-all?category=Air Conditioner' },
-          { id: 3017, name: 'Washing Machine', link: '/shop/shop-all?category=Washing Machine' },
-          { id: 3018, name: 'Vacuum Cleaner', link: '/shop/shop-all?category=Vacuum Cleaner' }
+          { id: 3016, name: 'Air Conditioner', link: '/shop-all?category=Air Conditioner' },
+          { id: 3017, name: 'Washing Machine', link: '/shop-all?category=Washing Machine' },
+          { id: 3018, name: 'Vacuum Cleaner', link: '/shop-all?category=Vacuum Cleaner' }
         ]
       },
       {
         id: 306,
         name: 'Storage',
-        link: '/shop/shop-all?category=Storage',
+        link: '/shop-all?category=Storage',
         subSubCategories: [
-          { id: 3019, name: 'Containers', link: '/shop/shop-all?category=Containers' },
-          { id: 3020, name: 'Organizers', link: '/shop/shop-all?category=Organizers' },
-          { id: 3021, name: 'Shelves', link: '/shop/shop-all?category=Shelves' }
+          { id: 3019, name: 'Containers', link: '/shop-all?category=Containers' },
+          { id: 3020, name: 'Organizers', link: '/shop-all?category=Organizers' },
+          { id: 3021, name: 'Shelves', link: '/shop-all?category=Shelves' }
         ]
       }
     ]
@@ -1079,69 +1079,69 @@ const fallbackCategories = ref([
     id: 4,
     name: 'Beauty',
     image: '/assets/images/categories/beauty.png',
-    link: '/shop/shop-all?category=Beauty',
+    link: '/shop-all?category=Beauty',
     subCategoriesFallback: [
       {
         id: 401,
         name: 'Skincare',
-        link: '/shop/shop-all?category=Skincare',
+        link: '/shop-all?category=Skincare',
         subSubCategories: [
-          { id: 4001, name: 'Face Wash', link: '/shop/shop-all?category=Face Wash' },
-          { id: 4002, name: 'Moisturizer', link: '/shop/shop-all?category=Moisturizer' },
-          { id: 4003, name: 'Serums', link: '/shop/shop-all?category=Serums' },
-          { id: 4004, name: 'Sunscreen', link: '/shop/shop-all?category=Sunscreen' }
+          { id: 4001, name: 'Face Wash', link: '/shop-all?category=Face Wash' },
+          { id: 4002, name: 'Moisturizer', link: '/shop-all?category=Moisturizer' },
+          { id: 4003, name: 'Serums', link: '/shop-all?category=Serums' },
+          { id: 4004, name: 'Sunscreen', link: '/shop-all?category=Sunscreen' }
         ]
       },
       {
         id: 402,
         name: 'Makeup',
-        link: '/shop/shop-all?category=Makeup',
+        link: '/shop-all?category=Makeup',
         subSubCategories: [
-          { id: 4005, name: 'Lipstick', link: '/shop/shop-all?category=Lipstick' },
-          { id: 4006, name: 'Foundation', link: '/shop/shop-all?category=Foundation' },
-          { id: 4007, name: 'Eyeshadow', link: '/shop/shop-all?category=Eyeshadow' },
-          { id: 4008, name: 'Mascara', link: '/shop/shop-all?category=Mascara' }
+          { id: 4005, name: 'Lipstick', link: '/shop-all?category=Lipstick' },
+          { id: 4006, name: 'Foundation', link: '/shop-all?category=Foundation' },
+          { id: 4007, name: 'Eyeshadow', link: '/shop-all?category=Eyeshadow' },
+          { id: 4008, name: 'Mascara', link: '/shop-all?category=Mascara' }
         ]
       },
       {
         id: 403,
         name: 'Haircare',
-        link: '/shop/shop-all?category=Haircare',
+        link: '/shop-all?category=Haircare',
         subSubCategories: [
-          { id: 4009, name: 'Shampoo', link: '/shop/shop-all?category=Shampoo' },
-          { id: 4010, name: 'Conditioner', link: '/shop/shop-all?category=Conditioner' },
-          { id: 4011, name: 'Hair Oil', link: '/shop/shop-all?category=Hair Oil' },
-          { id: 4012, name: 'Hair Color', link: '/shop/shop-all?category=Hair Color' }
+          { id: 4009, name: 'Shampoo', link: '/shop-all?category=Shampoo' },
+          { id: 4010, name: 'Conditioner', link: '/shop-all?category=Conditioner' },
+          { id: 4011, name: 'Hair Oil', link: '/shop-all?category=Hair Oil' },
+          { id: 4012, name: 'Hair Color', link: '/shop-all?category=Hair Color' }
         ]
       },
       {
         id: 404,
         name: 'Fragrances',
-        link: '/shop/shop-all?category=Fragrances',
+        link: '/shop-all?category=Fragrances',
         subSubCategories: [
-          { id: 4013, name: 'Perfumes', link: '/shop/shop-all?category=Perfumes' },
-          { id: 4014, name: 'Body Sprays', link: '/shop/shop-all?category=Body Sprays' },
-          { id: 4015, name: 'Deodorants', link: '/shop/shop-all?category=Deodorants' }
+          { id: 4013, name: 'Perfumes', link: '/shop-all?category=Perfumes' },
+          { id: 4014, name: 'Body Sprays', link: '/shop-all?category=Body Sprays' },
+          { id: 4015, name: 'Deodorants', link: '/shop-all?category=Deodorants' }
         ]
       },
       {
         id: 405,
         name: 'Personal Care',
-        link: '/shop/shop-all?category=Personal Care',
+        link: '/shop-all?category=Personal Care',
         subSubCategories: [
-          { id: 4016, name: 'Body Wash', link: '/shop/shop-all?category=Body Wash' },
-          { id: 4017, name: 'Soaps', link: '/shop/shop-all?category=Soaps' },
-          { id: 4018, name: 'Razors', link: '/shop/shop-all?category=Razors' }
+          { id: 4016, name: 'Body Wash', link: '/shop-all?category=Body Wash' },
+          { id: 4017, name: 'Soaps', link: '/shop-all?category=Soaps' },
+          { id: 4018, name: 'Razors', link: '/shop-all?category=Razors' }
         ]
       },
       {
         id: 406,
         name: 'Tools & Appliances',
-        link: '/shop/shop-all?category=Beauty Tools',
+        link: '/shop-all?category=Beauty Tools',
         subSubCategories: [
-          { id: 4019, name: 'Hair Dryer', link: '/shop/shop-all?category=Hair Dryer' },
-          { id: 4020, name: 'Straightener', link: '/shop/shop-all?category=Straightener' },
-          { id: 4021, name: 'Trimmers', link: '/shop/shop-all?category=Trimmers' }
+          { id: 4019, name: 'Hair Dryer', link: '/shop-all?category=Hair Dryer' },
+          { id: 4020, name: 'Straightener', link: '/shop-all?category=Straightener' },
+          { id: 4021, name: 'Trimmers', link: '/shop-all?category=Trimmers' }
         ]
       }
     ]
@@ -1150,69 +1150,69 @@ const fallbackCategories = ref([
     id: 5,
     name: 'Sports',
     image: '/assets/images/categories/sports.png',
-    link: '/shop/shop-all?category=Sports',
+    link: '/shop-all?category=Sports',
     subCategoriesFallback: [
       {
         id: 501,
         name: 'Fitness Equipment',
-        link: '/shop/shop-all?category=Fitness Equipment',
+        link: '/shop-all?category=Fitness Equipment',
         subSubCategories: [
-          { id: 5001, name: 'Treadmills', link: '/shop/shop-all?category=Treadmills' },
-          { id: 5002, name: 'Exercise Bikes', link: '/shop/shop-all?category=Exercise Bikes' },
-          { id: 5003, name: 'Dumbbells', link: '/shop/shop-all?category=Dumbbells' },
-          { id: 5004, name: 'Yoga Mats', link: '/shop/shop-all?category=Yoga Mats' }
+          { id: 5001, name: 'Treadmills', link: '/shop-all?category=Treadmills' },
+          { id: 5002, name: 'Exercise Bikes', link: '/shop-all?category=Exercise Bikes' },
+          { id: 5003, name: 'Dumbbells', link: '/shop-all?category=Dumbbells' },
+          { id: 5004, name: 'Yoga Mats', link: '/shop-all?category=Yoga Mats' }
         ]
       },
       {
         id: 502,
         name: 'Team Sports',
-        link: '/shop/shop-all?category=Team Sports',
+        link: '/shop-all?category=Team Sports',
         subSubCategories: [
-          { id: 5005, name: 'Cricket', link: '/shop/shop-all?category=Cricket' },
-          { id: 5006, name: 'Football', link: '/shop/shop-all?category=Football' },
-          { id: 5007, name: 'Basketball', link: '/shop/shop-all?category=Basketball' },
-          { id: 5008, name: 'Volleyball', link: '/shop/shop-all?category=Volleyball' }
+          { id: 5005, name: 'Cricket', link: '/shop-all?category=Cricket' },
+          { id: 5006, name: 'Football', link: '/shop-all?category=Football' },
+          { id: 5007, name: 'Basketball', link: '/shop-all?category=Basketball' },
+          { id: 5008, name: 'Volleyball', link: '/shop-all?category=Volleyball' }
         ]
       },
       {
         id: 503,
         name: 'Outdoor Sports',
-        link: '/shop/shop-all?category=Outdoor Sports',
+        link: '/shop-all?category=Outdoor Sports',
         subSubCategories: [
-          { id: 5009, name: 'Cycling', link: '/shop/shop-all?category=Cycling' },
-          { id: 5010, name: 'Camping', link: '/shop/shop-all?category=Camping' },
-          { id: 5011, name: 'Hiking', link: '/shop/shop-all?category=Hiking' },
-          { id: 5012, name: 'Swimming', link: '/shop/shop-all?category=Swimming' }
+          { id: 5009, name: 'Cycling', link: '/shop-all?category=Cycling' },
+          { id: 5010, name: 'Camping', link: '/shop-all?category=Camping' },
+          { id: 5011, name: 'Hiking', link: '/shop-all?category=Hiking' },
+          { id: 5012, name: 'Swimming', link: '/shop-all?category=Swimming' }
         ]
       },
       {
         id: 504,
         name: 'Racquet Sports',
-        link: '/shop/shop-all?category=Racquet Sports',
+        link: '/shop-all?category=Racquet Sports',
         subSubCategories: [
-          { id: 5013, name: 'Badminton', link: '/shop/shop-all?category=Badminton' },
-          { id: 5014, name: 'Tennis', link: '/shop/shop-all?category=Tennis' },
-          { id: 5015, name: 'Table Tennis', link: '/shop/shop-all?category=Table Tennis' }
+          { id: 5013, name: 'Badminton', link: '/shop-all?category=Badminton' },
+          { id: 5014, name: 'Tennis', link: '/shop-all?category=Tennis' },
+          { id: 5015, name: 'Table Tennis', link: '/shop-all?category=Table Tennis' }
         ]
       },
       {
         id: 505,
         name: 'Sports Apparel',
-        link: '/shop/shop-all?category=Sports Apparel',
+        link: '/shop-all?category=Sports Apparel',
         subSubCategories: [
-          { id: 5016, name: 'Sports Shoes', link: '/shop/shop-all?category=Sports Shoes' },
-          { id: 5017, name: 'Tracksuits', link: '/shop/shop-all?category=Tracksuits' },
-          { id: 5018, name: 'T-Shirts', link: '/shop/shop-all?category=Sports T-Shirts' }
+          { id: 5016, name: 'Sports Shoes', link: '/shop-all?category=Sports Shoes' },
+          { id: 5017, name: 'Tracksuits', link: '/shop-all?category=Tracksuits' },
+          { id: 5018, name: 'T-Shirts', link: '/shop-all?category=Sports T-Shirts' }
         ]
       },
       {
         id: 506,
         name: 'Accessories',
-        link: '/shop/shop-all?category=Sports Accessories',
+        link: '/shop-all?category=Sports Accessories',
         subSubCategories: [
-          { id: 5019, name: 'Fitness Trackers', link: '/shop/shop-all?category=Fitness Trackers' },
-          { id: 5020, name: 'Water Bottles', link: '/shop/shop-all?category=Water Bottles' },
-          { id: 5021, name: 'Gym Bags', link: '/shop/shop-all?category=Gym Bags' }
+          { id: 5019, name: 'Fitness Trackers', link: '/shop-all?category=Fitness Trackers' },
+          { id: 5020, name: 'Water Bottles', link: '/shop-all?category=Water Bottles' },
+          { id: 5021, name: 'Gym Bags', link: '/shop-all?category=Gym Bags' }
         ]
       }
     ]
@@ -1233,7 +1233,7 @@ const mobileTabs = [
   {
     name: 'categories',
     label: 'Categories',
-    route: '/shop/shop-all',
+    route: '/shop-all',
     icon: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'
   },
   {
@@ -1266,7 +1266,7 @@ const desktopTabs = [
   {
     name: 'categories',
     label: 'Shop',
-    route: '/shop/shop-all',
+    route: '/shop-all',
     icon: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z'
   },
   {
@@ -1379,7 +1379,7 @@ const updateActiveTabFromRoute = () => {
   
   if (path === '/') {
     activeTab.value = 'home'
-  } else if (path.includes('/shop/shop-all')) {
+  } else if (path.includes('/shop-all')) {
     activeTab.value = 'categories'
   } else if (path.includes('/cart')) {
     activeTab.value = 'cart'
@@ -1392,7 +1392,7 @@ const updateActiveTabFromRoute = () => {
 
 // ==================== FALLBACK CATEGORY FUNCTIONS ====================
 const getFallbackCategoryLink = (category) => {
-  return category.link || `/shop/shop-all?category=${encodeURIComponent(category.name)}`
+  return category.link || `/shop-all?category=${encodeURIComponent(category.name)}`
 }
 
 const handleFallbackCategoryClick = (category) => {
@@ -1536,7 +1536,7 @@ const performMobileSearchSubmit = () => {
 const selectMobileProduct = (product) => {
   addToRecentSearches(mobileSearchQuery.value)
   closeMobileSearch()
-  router.push(`/shop/shop-all/${product.name}--${product.groupId}`)
+  router.push(`/shop-all/${product.name}--${product.groupId}`)
 }
 
 const formatPrice = (price) => {
@@ -1648,7 +1648,7 @@ const getCategoryLink = (category) => {
   if (category.link) {
     return category.link
   }
-  return `/shop/shop-all?category=${encodeURIComponent(category.name)}`
+  return `/shop-all?category=${encodeURIComponent(category.name)}`
 }
 
 const isActiveCategory = (category) => {
@@ -1848,7 +1848,7 @@ const selectProduct = (product) => {
   showSearchDropdown.value = false
   searchQuery.value = ''
   window.scrollTo(0, 0)
-  router.push(`/shop/shop-all/${product.name}--${product.groupId}`)
+  router.push(`/shop-all/${product.name}--${product.groupId}`)
 }
 
 // ==================== MOBILE MENU ====================

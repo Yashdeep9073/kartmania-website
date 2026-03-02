@@ -16,24 +16,26 @@
 
       <!-- Main Content -->
       <div v-else-if="mainProduct" class="row gy-4">
-        <div class="col-lg-9">
+        <div class="col-lg-9 order-lg-1">
           <div class="row gy-4">
             <!-- Product Images Section -->
             <div class="col-xl-6">
-              <div class="product-details__left">
+              <div class="product-details__left sticky-image-gallery">
                 <!-- Desktop: Vertical thumbnails on left -->
                 <div class="product-gallery-wrapper d-none d-xl-flex">
                   <!-- LEFT: VERTICAL THUMBNAILS (Desktop only) -->
                   <div class="thumbnail-container me-3">
-                    <Swiper direction="vertical" @swiper="setThumbsSwiper" :spaceBetween="12" :slidesPerView="4"
-                      :freeMode="true" :watchSlidesProgress="true" :lazy="true" :preloadImages="false" class="thumbnail-swiper h-100">
-                      <SwiperSlide v-for="(thumb, index) in thumbnailImages" :key="index" @click="goToSlide(Number(index))">
+                    <Swiper direction="vertical" @swiper="setThumbsSwiper" :spaceBetween="12" :slidesPerView="4" :watchSlidesProgress="true"
+                      class="thumbnail-swiper h-100">
+                      <SwiperSlide v-for="(thumb, index) in thumbnailImages" :key="index"
+                        @click="goToSlide(Number(index))">
                         <div :class="[
                           'thumbnail-item',
                           activeThumb === index ? 'active-thumbnail' : ''
                         ]">
                           <div class="thumbnail-image-wrapper">
-                            <img :src="safeLoadImage(thumb)" :alt="`Thumbnail ${Number(index) + 1}`" class="thumbnail-image" loading="lazy" decoding="async" @error="handleImageError" />
+                            <img :src="safeLoadImage(thumb)" :alt="`Thumbnail ${Number(index) + 1}`"
+                              class="thumbnail-image" loading="lazy" decoding="async" @error="handleImageError" />
                           </div>
                         </div>
                       </SwiperSlide>
@@ -43,11 +45,13 @@
                   <!-- RIGHT: MAIN IMAGE -->
                   <div class="product-details__thumb-slider overflow-hidden flex-grow-1">
                     <Swiper :modules="[Thumbs]" :thumbs="{ swiper: thumbsSwiper }" :spaceBetween="0" :slidesPerView="1"
-                      :lazy="true" :preloadImages="false" :loadOnTransitionStart="true" class="main-swiper h-100" @swiper="setMainSwiper" @slideChange="onSlideChange">
+                      :loadOnTransitionStart="true" class="main-swiper h-100"
+                      @swiper="setMainSwiper" @slideChange="onSlideChange">
                       <SwiperSlide v-for="(image, index) in mainImages" :key="index" class="main-image-slide h-100">
                         <div class="main-image-container h-100 d-flex align-items-center justify-content-center">
-                          <img :src="safeLoadImage(image)" :alt="`Product image ${Number(index) + 1}`" class="main-product-image" 
-                            :loading="index === 0 ? 'eager' : 'lazy'" decoding="async" :preload="index === 0" @error="handleImageError" />
+                          <img :src="safeLoadImage(image)" :alt="`Product image ${Number(index) + 1}`"
+                            class="main-product-image" :loading="index === 0 ? 'eager' : 'lazy'" decoding="async"
+                            :preload="index === 0" @error="handleImageError" />
                         </div>
 
                       </SwiperSlide>
@@ -58,15 +62,18 @@
                 <div class="d-xl-none">
                   <!-- Main Image with Dots -->
                   <div class="mobile-main-slider">
-                    <Swiper :modules="[Pagination]" :spaceBetween="0" :slidesPerView="1" :lazy="true" :preloadImages="false" :pagination="{
-                      clickable: true,
-                      el: '.mobile-pagination',
-                      bulletClass: 'mobile-dot',
-                      bulletActiveClass: 'mobile-dot-active'
-                    }" @swiper="setMobileMainSwiper" @slideChange="onMobileSlideChange" class="mobile-main-swiper">
+                    <Swiper :modules="[Pagination]" :spaceBetween="0" :slidesPerView="1"
+                      :pagination="{
+                        clickable: true,
+                        el: '.mobile-pagination',
+                        bulletClass: 'mobile-dot',
+                        bulletActiveClass: 'mobile-dot-active'
+                      } as any" @swiper="setMobileMainSwiper" @slideChange="onMobileSlideChange" class="mobile-main-swiper">
                       <SwiperSlide v-for="(image, index) in mainImages" :key="index">
                         <div class="mobile-main-image-container">
-                          <img :src="safeLoadImage(image)" :alt="`Product image ${Number(index) + 1}`" class="mobile-main-product-image" :loading="index === 0 ? 'eager' : 'lazy'" decoding="async" :preload="index === 0" @error="handleImageError" />
+                          <img :src="safeLoadImage(image)" :alt="`Product image ${Number(index) + 1}`"
+                            class="mobile-main-product-image" :loading="index === 0 ? 'eager' : 'lazy'" decoding="async"
+                            :preload="index === 0" @error="handleImageError" />
                         </div>
                       </SwiperSlide>
                     </Swiper>
@@ -76,8 +83,9 @@
 
                   <!-- Horizontal Thumbnails Slider for Mobile -->
                   <div class="mobile-thumbnails-slider mt-4">
-                    <Swiper :spaceBetween="10" :slidesPerView="4" :freeMode="true" :watchSlidesProgress="true" :lazy="true" :preloadImages="false"
-                      class="mobile-thumbnail-swiper" @swiper="setMobileThumbsSwiper">
+                    <Swiper :spaceBetween="10" :slidesPerView="4":watchSlidesProgress="true"
+                      class="mobile-thumbnail-swiper"
+                      @swiper="setMobileThumbsSwiper">
                       <SwiperSlide v-for="(thumb, index) in thumbnailImages" :key="index"
                         @click="goToMobileSlide(Number(index))">
                         <div :class="[
@@ -85,7 +93,9 @@
                           mobileActiveThumb === index ? 'mobile-active-thumbnail' : ''
                         ]">
                           <div class="mobile-thumbnail-image-wrapper">
-                            <img :src="safeLoadImage(thumb)" :alt="`Thumbnail ${Number(index) + 1}`" class="mobile-thumbnail-image" loading="lazy" decoding="async" @error="handleImageError" />
+                            <img :src="safeLoadImage(thumb)" :alt="`Thumbnail ${Number(index) + 1}`"
+                              class="mobile-thumbnail-image" loading="lazy" decoding="async"
+                              @error="handleImageError" />
                           </div>
                         </div>
                       </SwiperSlide>
@@ -124,8 +134,7 @@
                   <span class="text-gray-900 d-block mb-8 fw-semibold">Color:</span>
                   <div class="flex-align flex-wrap gap-16">
                     <div v-for="color in availableColorsWithImages" :key="color.name" @click="selectColor(color.name)"
-                      @mouseenter="preloadColorImages(color.name)"
-                      :class="['flex flex-col items-center cursor-pointer', 
+                      @mouseenter="preloadColorImages(color.name)" :class="['flex flex-col items-center cursor-pointer',
                         isChangingColor ? 'pointer-events-none opacity-50' : '']">
                       <div :class="[
                         'color-option w-48 h-48 rounded-lg border-2 transition-all duration-300 overflow-hidden relative',
@@ -133,14 +142,16 @@
                           ? 'border-main-600 scale-110 shadow-lg ring-2 ring-main-600 ring-offset-2'
                           : 'border-gray-300 hover:border-gray-400 hover:scale-105'
                       ]" :title="color.name">
-                        <img :src="safeLoadImage(color.imageUrl)" :alt="color.name" class="w-full h-full object-cover" loading="lazy" decoding="async" @error="handleImageError" />
+                        <img :src="safeLoadImage(color.imageUrl)" :alt="color.name" class="w-full h-full object-cover"
+                          loading="lazy" decoding="async" @error="handleImageError" />
                         <div v-if="selectedColor === color.name"
                           class="absolute top-2 right-2 bg-main-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
                           <i class="ph-fill ph-check text-xs"></i>
                         </div>
-                        <div v-if="isChangingColor && selectedColor === color.name" 
+                        <div v-if="isChangingColor && selectedColor === color.name"
                           class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-                          <div class="w-6 h-6 border-2 border-main-600 border-t-transparent rounded-full animate-spin"></div>
+                          <div class="w-6 h-6 border-2 border-main-600 border-t-transparent rounded-full animate-spin">
+                          </div>
                         </div>
                       </div>
                       <span class="text-xs text-gray-700 mt-2 font-medium">{{ color.name }}</span>
@@ -211,7 +222,7 @@
                           class="flex justify-between">
                           <span class="text-gray-600">Screen:</span>
                           <span class="font-medium">{{ selectedVariant.attributes[0].extraAttributes.screenSize
-                          }}</span>
+                            }}</span>
                         </div>
                         <div v-if="selectedVariant?.attributes?.[0]?.extraAttributes?.color"
                           class="flex justify-between">
@@ -242,10 +253,10 @@
                       <span class="text-sm text-gray-600">Selected:</span>
                       <div class="flex-align gap-12 mt-4">
                         <span class="badge bg-blue-100 text-blue-800 border border-blue-200">
-                          {{ selectedVariant.color }}
+                          {{ selectedVariant.color?.name || selectedVariant.color }}
                         </span>
                         <span class="badge bg-green-100 text-green-800 border border-green-200">
-                          {{ selectedVariant.size }}
+                          {{ selectedVariant.size?.name || selectedVariant.size }}
                         </span>
                       </div>
                     </div>
@@ -343,7 +354,8 @@
                       </button>
                       <input type="number" v-model.number="quantity"
                         class="quantity__input border-0 text-center w-48 fw-bold text-gray-900"
-                        :max="selectedVariant?.stock || mainProduct.stock" min="0" @input="(e) => quantity = validateQuantity(Number((e.target as HTMLInputElement).value))" />
+                        :max="selectedVariant?.stock || mainProduct.stock" min="0"
+                        @input="(e) => quantity = validateQuantity(Number((e.target as HTMLInputElement).value))" />
                       <button type="button" @click="increaseQuantity"
                         class="quantity__plus w-32 h-32 flex-center rounded-full hover:bg-gray-50 transition-colors"
                         :disabled="quantity >= (selectedVariant?.stock || mainProduct.stock)"
@@ -497,239 +509,676 @@
             </div>
           </div>
         </div>
-      </div>
 
+        <!-- Sidebar -->
+        <div class="col-lg-3 order-lg-2">
+          <div class="product-details__sidebar border border-gray-100 rounded-16 overflow-hidden shadow-sm">
+            <!-- Store Info -->
+            <div class="p-24 bg-yellow-400">
+              <div class="flex-between rounded-full p-8">
+                <div class="flex-align gap-8">
+                  <span class="w-44 h-44 bg-white rounded-full flex-center text-2xl text-main-600">
+                    <i class="ph ph-storefront"></i>
+                  </span>
+                  <span class="text-Black fw-semibold">By Marketpro</span>
+                </div>
+                <NuxtLink to="/shop"
+                  class="btn btn-white rounded-full text-uppercase fw-semibold transition-all duration-300">
+                  View Store
+                </NuxtLink>
+              </div>
+            </div>
 
-      <!-- Sidebar -->
-      <div class="col-lg-3">
-        <div class="product-details__sidebar border border-gray-100 rounded-16 overflow-hidden shadow-sm">
-          <!-- Store Info -->
-          <div class="p-24 bg-yellow-400">
-            <div class="flex-between rounded-full p-8">
-              <div class="flex-align gap-8">
-                <span class="w-44 h-44 bg-white rounded-full flex-center text-2xl text-main-600">
-                  <i class="ph ph-storefront"></i>
+            <!-- Features Section -->
+            <div class="sidebar-features">
+              <!-- Fast Delivery -->
+              <div
+                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300">
+                <span
+                  class="w-44 h-44 bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-truck"></i>
                 </span>
-                <span class="text-white fw-semibold">by Marketpro</span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Fast Delivery</h6>
+                  <p class="text-gray-700 text-sm">Lightning-fast shipping, guaranteed.</p>
+                </div>
               </div>
-              <NuxtLink to="/shop"
-                class="btn btn-white rounded-full text-uppercase fw-semibold transition-all duration-300">
-                View Store
-              </NuxtLink>
-            </div>
-          </div>
 
-          <!-- Features Section -->
-          <div class="sidebar-features">
-            <!-- Fast Delivery -->
-            <div
-              class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300">
-              <span
-                class="w-44 h-44 bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                <i class="ph-fill ph-truck"></i>
-              </span>
-              <div class="">
-                <h6 class="text-sm mb-8 fw-semibold text-gray-900">Fast Delivery</h6>
-                <p class="text-gray-700 text-sm">Lightning-fast shipping, guaranteed.</p>
+              <!-- Free Returns -->
+              <div
+                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300">
+                <span
+                  class="w-44 h-44 bg-gradient-to-br from-green-100 to-green-50 text-green-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-arrow-u-up-left"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Free 90-day returns</h6>
+                  <p class="text-gray-700 text-sm">Shop risk-free with easy returns.</p>
+                </div>
               </div>
-            </div>
 
-            <!-- Free Returns -->
-            <div
-              class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300">
-              <span
-                class="w-44 h-44 bg-gradient-to-br from-green-100 to-green-50 text-green-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                <i class="ph-fill ph-arrow-u-up-left"></i>
-              </span>
-              <div class="">
-                <h6 class="text-sm mb-8 fw-semibold text-gray-900">Free 90-day returns</h6>
-                <p class="text-gray-700 text-sm">Shop risk-free with easy returns.</p>
+              <!-- Pickup Available -->
+              <div
+                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300">
+                <span
+                  class="w-44 h-44 bg-gradient-to-br from-purple-100 to-purple-50 text-purple-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-check-circle"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Pickup available at Shop location</h6>
+                  <p class="text-gray-700 text-sm">Usually ready in 24 hours</p>
+                </div>
               </div>
-            </div>
 
-            <!-- Pickup Available -->
-            <div
-              class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300">
-              <span
-                class="w-44 h-44 bg-gradient-to-br from-purple-100 to-purple-50 text-purple-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                <i class="ph-fill ph-check-circle"></i>
-              </span>
-              <div class="">
-                <h6 class="text-sm mb-8 fw-semibold text-gray-900">Pickup available at Shop location</h6>
-                <p class="text-gray-700 text-sm">Usually ready in 24 hours</p>
+              <!-- Payment -->
+              <div
+                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-all duration-300">
+                <span
+                  class="w-44 h-44 bg-gradient-to-br from-yellow-100 to-yellow-50 text-yellow-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-credit-card"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Payment</h6>
+                  <p class="text-gray-700 text-sm">Payment upon receipt of goods, Payment by card in the department,
+                    Google Pay, Online card.</p>
+                </div>
               </div>
-            </div>
 
-            <!-- Payment -->
-            <div
-              class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-all duration-300">
-              <span
-                class="w-44 h-44 bg-gradient-to-br from-yellow-100 to-yellow-50 text-yellow-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                <i class="ph-fill ph-credit-card"></i>
-              </span>
-              <div class="">
-                <h6 class="text-sm mb-8 fw-semibold text-gray-900">Payment</h6>
-                <p class="text-gray-700 text-sm">Payment upon receipt of goods, Payment by card in the department,
-                  Google Pay, Online card.</p>
+              <!-- Warranty -->
+              <div
+                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300">
+                <span
+                  class="w-44 h-44 bg-gradient-to-br from-red-100 to-red-50 text-red-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-check-circle"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Warranty</h6>
+                  <p class="text-gray-700 text-sm">The Consumer Protection Act does not provide for the return of this
+                    product of proper quality.</p>
+                </div>
               </div>
-            </div>
 
-            <!-- Warranty -->
-            <div
-              class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300">
-              <span
-                class="w-44 h-44 bg-gradient-to-br from-red-100 to-red-50 text-red-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                <i class="ph-fill ph-check-circle"></i>
-              </span>
-              <div class="">
-                <h6 class="text-sm mb-8 fw-semibold text-gray-900">Warranty</h6>
-                <p class="text-gray-700 text-sm">The Consumer Protection Act does not provide for the return of this
-                  product of proper quality.</p>
+              <!-- Packaging -->
+              <div
+                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 transition-all duration-300">
+                <span
+                  class="w-44 h-44 bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
+                  <i class="ph-fill ph-package"></i>
+                </span>
+                <div class="">
+                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Packaging</h6>
+                  <p class="text-gray-700 text-sm">Research & development value proposition graphical user interface
+                    investor.</p>
+                </div>
               </div>
             </div>
 
-            <!-- Packaging -->
-            <div
-              class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 transition-all duration-300">
-              <span
-                class="w-44 h-44 bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                <i class="ph-fill ph-package"></i>
-              </span>
-              <div class="">
-                <h6 class="text-sm mb-8 fw-semibold text-gray-900">Packaging</h6>
-                <p class="text-gray-700 text-sm">Research & development value proposition graphical user interface
-                  investor.</p>
+            <!-- Enhanced Cart Summary -->
+            <div class="p-24 border-t border-gray-100 bg-gradient-to-b from-white to-gray-50">
+              <div class="flex-between items-center mb-20">
+                <div class="flex items-center gap-8">
+                  <div class="w-8 h-8 bg-main-600 rounded-full flex items-center justify-center">
+                    <span class="text-white text-xs font-bold">{{ cartItemCount }}</span>
+                  </div>
+                  <h6 class="text-sm fw-bold text-gray-900">Your Cart</h6>
+                </div>
+                <button @click="refreshCartSummary" 
+                  class="text-xs text-main-600 hover:text-main-800 transition-all duration-200 flex items-center gap-4 px-8 py-4 rounded-full hover:bg-main-50">
+                  <i class="ph ph-arrows-clockwise text-sm"></i> 
+                  <span>Refresh</span>
+                </button>
               </div>
-            </div>
-          </div>
 
-          <!-- Cart Summary (LIVE UPDATES) -->
-          <div class="p-24 border-t border-gray-100">
-            <div class="flex-between mb-16">
-              <h6 class="text-sm fw-semibold text-gray-900">Cart Summary</h6>
-              <button @click="refreshCartSummary" class="text-xs text-main-600 hover:text-main-800 transition-colors">
-                <i class="ph ph-arrows-clockwise"></i> Refresh
-              </button>
-            </div>
-
-            <div v-if="cartItems.length > 0" class="space-y-4">
-              <!-- Cart Items List -->
-              <div class="max-h-60 overflow-y-auto pr-2 space-y-3">
-                <div v-for="item in cartItems" :key="item.id"
-                  class="cart-item border border-gray-100 rounded-lg p-12 bg-white">
-                  <div class="flex items-start gap-12">
-                    <div class="flex-shrink-0">
-                      <div class="w-40 h-40 rounded-lg overflow-hidden">
-                        <img :src="safeLoadImage(item.image)" :alt="item.name" class="w-full h-full object-cover" loading="lazy" decoding="async" @error="handleImageError" />
+              <div v-if="cartItems.length > 0" class="space-y-4">
+                <!-- Cart Items List with Enhanced UI -->
+                <div class="max-h-80 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                  <div v-for="item in cartItems" :key="item.id"
+                    class="cart-item border border-gray-100 rounded-xl p-16 bg-white shadow-sm hover:shadow-md transition-all duration-300">
+                    <div class="flex items-start gap-12">
+                      <div class="flex-shrink-0">
+                        <div class="w-48 h-48 rounded-lg overflow-hidden border border-gray-200">
+                          <img :src="safeLoadImage(item.image)" :alt="item.name" 
+                            class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            loading="lazy" decoding="async" @error="handleImageError" />
+                        </div>
                       </div>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="flex-between items-start">
-                        <div>
-                          <p class="text-xs font-medium text-gray-800 truncate">{{ item.name }}</p>
-                          <div class="flex items-center gap-2 mt-1">
-                            <span v-if="item.color" class="text-xs text-gray-600">{{ item.color }}</span>
-                            <span v-if="item.size" class="text-xs text-gray-600">| {{ item.size }}</span>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex-between items-start">
+                          <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-800 line-clamp-2 mb-4">{{ item.name }}</p>
+                            <div class="flex items-center gap-8 flex-wrap">
+                              <span v-if="item.color" 
+                                class="inline-flex items-center gap-4 px-6 py-2 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                                <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: getColorHex(item.color) }"></span>
+                                {{ item.color }}
+                              </span>
+                              <span v-if="item.size" 
+                                class="px-6 py-2 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                                {{ item.size }}
+                              </span>
+                            </div>
+                          </div>
+                          <button @click="removeFromCart(item.id)"
+                            class="text-gray-400 hover:text-red-500 transition-all duration-200 p-4 rounded-full hover:bg-red-50">
+                            <i class="ph ph-trash text-sm"></i>
+                          </button>
+                        </div>
+
+                        <div class="flex-between items-center mt-12">
+                          <div class="flex items-center gap-8">
+                            <div class="flex items-center border border-gray-200 rounded-full overflow-hidden">
+                              <button @click="updateCartItemQuantity(item.id, -1)" :disabled="item.quantity <= 1"
+                                :class="['w-28 h-28 flex-center transition-colors',
+                                  item.quantity <= 1 ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-600 hover:bg-gray-100']">
+                                <i class="ph ph-minus text-sm"></i>
+                              </button>
+                              <span class="text-sm font-bold w-32 text-center border-x border-gray-200 py-4 bg-gray-50">{{ item.quantity }}</span>
+                              <button @click="updateCartItemQuantity(item.id, 1)" 
+                                :class="['w-28 h-28 flex-center transition-colors',
+                                  'text-main-600 hover:bg-main-100']">
+                                <i class="ph ph-plus text-sm"></i>
+                              </button>
+                            </div>
+                          </div>
+                          <div class="text-right">
+                            <p class="text-sm font-bold text-main-600">₹{{ (item.price * item.quantity).toFixed(2) }}</p>
+                            <p v-if="item.quantity > 1" class="text-xs text-gray-500">₹{{ item.price.toFixed(2) }} each</p>
                           </div>
                         </div>
-                        <button @click="removeFromCart(item.id)"
-                          class="text-gray-400 hover:text-red-500 transition-colors">
-                          <i class="ph ph-x text-sm"></i>
-                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Enhanced Cart Totals -->
+                <div class="pt-20 border-t border-gray-200 space-y-3 bg-white rounded-xl p-16">
+                  <!-- Savings Badge -->
+                  <div v-if="cartSavings > 0" 
+                    class="flex items-center justify-between p-12 bg-green-50 border border-green-200 rounded-lg mb-16">
+                    <div class="flex items-center gap-8">
+                      <i class="ph ph-piggy-bank text-green-600 text-lg"></i>
+                      <span class="text-sm font-semibold text-green-700">You're saving!</span>
+                    </div>
+                    <span class="text-sm font-bold text-green-600">₹{{ cartSavings.toFixed(2) }}</span>
+                  </div>
+
+                  <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Items ({{ cartItemCount }})</span>
+                      <span class="text-sm font-medium">{{ cartItems.length }} products</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Subtotal</span>
+                      <span class="text-sm font-semibold">₹{{ cartSubtotal.toFixed(2) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Shipping</span>
+                      <div class="text-right">
+                        <span class="text-sm font-semibold text-green-600">FREE</span>
+                        <p class="text-xs text-gray-500">On orders above ₹499</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex justify-between items-center pt-12 border-t border-gray-200">
+                    <div>
+                      <span class="text-sm font-bold text-gray-900">Total</span>
+                      <p class="text-xs text-gray-500">Inclusive of all taxes</p>
+                    </div>
+                    <div class="text-right">
+                      <span class="text-xl font-bold text-main-600">₹{{ cartTotalPrice.toFixed(2) }}</span>
+                      <p v-if="cartTotalPrice >= 499" class="text-xs text-green-600 font-medium">Free Shipping Applied</p>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="space-y-8 mt-16">
+                    <NuxtLink to="/cart/cart" 
+                      class="btn btn-outline-main w-100 flex items-center justify-center gap-8 py-12 transition-all duration-300 hover:shadow-lg">
+                      <i class="ph ph-shopping-cart-simple"></i> 
+                      <span>View Cart ({{ cartItemCount }})</span>
+                    </NuxtLink>
+                    <NuxtLink to="/cart/checkout" 
+                      class="btn btn-main w-100 flex items-center justify-center gap-8 py-12 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+                      <i class="ph ph-lock-simple"></i> 
+                      <span>Secure Checkout</span>
+                    </NuxtLink>
+                  </div>
+
+                  <!-- Trust Badges -->
+                  <div class="flex items-center justify-center gap-16 mt-16 pt-16 border-t border-gray-100">
+                    <div class="flex items-center gap-6 text-xs text-gray-500">
+                      <i class="ph ph-shield-check text-green-600"></i>
+                      <span>Secure</span>
+                    </div>
+                    <div class="flex items-center gap-6 text-xs text-gray-500">
+                      <i class="ph ph-truck text-blue-600"></i>
+                      <span>Fast Delivery</span>
+                    </div>
+                    <div class="flex items-center gap-6 text-xs text-gray-500">
+                      <i class="ph ph-arrow-u-up-left text-purple-600"></i>
+                      <span>Easy Returns</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Enhanced Empty Cart -->
+              <div v-else class="text-center py-16">
+                <div class="mb-16 relative">
+                  <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                    <i class="ph ph-shopping-cart text-4xl text-gray-300"></i>
+                  </div>
+                  <div class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                    <span class="text-white text-xs font-bold">0</span>
+                  </div>
+                </div>
+                <h6 class="text-lg font-semibold text-gray-700 mb-8">Your cart is empty</h6>
+                <p class="text-sm text-gray-500 mb-16">Add items to get started!</p>
+                <div class="space-y-8">
+                  <button @click="addToCart" 
+                    :disabled="!selectedVariant || (selectedVariant?.stock || mainProduct.stock) <= 0"
+                    :class="['btn btn-main w-100 transition-all duration-300',
+                      !selectedVariant || (selectedVariant?.stock || mainProduct.stock) <= 0 ? 'btn-secondary' : 'hover:shadow-lg hover:-translate-y-0.5']">
+                    <i class="ph ph-plus-circle me-2"></i> 
+                    Add This Product to Cart
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Variants Summary -->
+            <div v-if="variants.length > 0" class="p-24 border-t border-gray-100">
+              <h6 class="text-sm mb-16 fw-semibold text-gray-900">Available Variants</h6>
+              <div class="space-y-3 max-h-200 overflow-y-auto pr-2">
+                <div v-for="variant in variants" :key="variant.id" @click="selectVariant(variant)" :class="[
+                  'variant-item p-12 rounded-lg border cursor-pointer transition-all duration-300',
+                  selectedVariant?.id === variant.id
+                    ? 'border-main-600 bg-main-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                ]">
+                  <div class="flex-between items-center">
+                    <div>
+                      <div class="flex-align gap-2 mb-2">
+                        <span class="text-xs text-gray-600">SKU:</span>
+                        <span class="text-xs font-medium">{{ variant.sku }}</span>
+                      </div>
+                      <div class="flex-align gap-2">
+                        <span class="text-xs text-gray-600">Color:</span>
+                        <span class="text-xs font-medium">{{ variant.color?.name || variant.color }}</span>
+                        <span class="text-xs text-gray-400 mx-2">•</span>
+                        <span class="text-xs text-gray-600">Size:</span>
+                        <span class="text-xs font-medium">{{ variant.size?.name || variant.size }}</span>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div :class="[
+                        'text-xs font-medium',
+                        variant.stock > 10 ? 'text-green-600' :
+                          variant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
+                      ]">
+                        {{ variant.stock }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Tabs Section -->
+      <div v-if="!loading && !error && mainProduct" class="pt-80">
+        <div class="product-dContent border border-gray-100 rounded-24 shadow-sm">
+          <div class="product-dContent__header border-bottom border-gray-100 flex-between flex-wrap gap-16 p-24">
+            <ul class="nav common-tab nav-pills mb-3" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button :class="['nav-link fw-semibold', activeTab === 'description' ? 'active' : '']"
+                  @click="activeTab = 'description'" type="button">
+                  Description
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button :class="['nav-link fw-semibold', activeTab === 'attributes' ? 'active' : '']"
+                  @click="activeTab = 'attributes'" type="button">
+                  Attributes
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button :class="['nav-link fw-semibold', activeTab === 'reviews' ? 'active' : '']"
+                  @click="activeTab = 'reviews'" type="button">
+                  Reviews ({{ mainProduct.reviews?.length || 0 }})
+                </button>
+              </li>
+            </ul>
+            <div
+              class="bg-gradient-to-r from-green-50 to-emerald-50 text-green-600 rounded-12 flex-align gap-8 hover:from-green-100 hover:to-emerald-100 hover:text-green-700 transition-all duration-300 border border-green-200">
+              <img :src="safeLoadImage('/assets/images/icon/satisfaction-icon.png')" alt="Satisfaction Guaranteed"
+                class="w-24 h-24" loading="lazy" decoding="async" @error="handleImageError" />
+              100% Satisfaction Guaranteed
+            </div>
+          </div>
+
+          <div class="product-dContent__box p-24">
+            <!-- Description Tab -->
+            <div v-if="activeTab === 'description'" class="tab-content">
+              <div class="mb-40">
+                <h6 class="mb-24 fw-bold">Product Description</h6>
+                <p class="text-gray-700">{{ mainProduct.description }}</p>
+
+                <div v-if="mainProduct.category" class="mt-32">
+                  <h6 class="mb-16 fw-semibold">Product Categories</h6>
+                  <div class="d-flex flex-wrap gap-12">
+                    <span class="badge bg-black text-white border border-black">
+                      {{ mainProduct.category.name }}
+                    </span>
+                    <span v-if="mainProduct.subCategory" class="badge bg-black text-white border border-black">
+                      {{ mainProduct.subCategory.name }}
+                    </span>
+                    <span v-if="mainProduct.subSubCategory" class="badge bg-black text-white border border-black">
+                      {{ mainProduct.subSubCategory.name }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Product Information -->
+                <div class="mt-40">
+                  <h6 class="mb-24 fw-bold">Product Information</h6>
+                  <ul class="mt-32">
+                    <li class="text-gray-400 mb-14 flex-align gap-14">
+                      <span
+                        class="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 text-xs flex-center rounded-full shadow-sm">
+                        <i class="ph ph-check"></i>
+                      </span>
+                      <span class="text-heading fw-medium">
+                        SKU: <span class="text-gray-500">{{ selectedVariant?.sku || mainProduct.sku }}</span>
+                      </span>
+                    </li>
+                    <li class="text-gray-400 mb-14 flex-align gap-14">
+                      <span
+                        class="w-20 h-20 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 text-xs flex-center rounded-full shadow-sm">
+                        <i class="ph ph-check"></i>
+                      </span>
+                      <span class="text-heading fw-medium">
+                        Barcode: <span class="text-gray-500">{{ mainProduct.barcode || 'N/A' }}</span>
+                      </span>
+                    </li>
+                    <li class="text-gray-400 mb-14 flex-align gap-14">
+                      <span
+                        class="w-20 h-20 bg-gradient-to-br from-green-50 to-green-100 text-green-600 text-xs flex-center rounded-full shadow-sm">
+                        <i class="ph ph-check"></i>
+                      </span>
+                      <span class="text-heading fw-medium">
+                        Unit: <span class="text-gray-500">{{ mainProduct.unit?.name }} ({{ mainProduct.unit?.shortName
+                          }})</span>
+                      </span>
+                    </li>
+                    <li v-if="mainProduct.manufacturedDate" class="text-gray-400 mb-14 flex-align gap-14">
+                      <span
+                        class="w-20 h-20 bg-gradient-to-br from-yellow-50 to-yellow-100 text-yellow-600 text-xs flex-center rounded-full shadow-sm">
+                        <i class="ph ph-check"></i>
+                      </span>
+                      <span class="text-heading fw-medium">
+                        Manufactured: <span class="text-gray-500">{{ formatDate(mainProduct.manufacturedDate) }}</span>
+                      </span>
+                    </li>
+                    <li v-if="mainProduct.expiryDate" class="text-gray-400 mb-14 flex-align gap-14">
+                      <span
+                        class="w-20 h-20 bg-gradient-to-br from-red-50 to-red-100 text-red-600 text-xs flex-center rounded-full shadow-sm">
+                        <i class="ph ph-check"></i>
+                      </span>
+                      <span class="text-heading fw-medium">
+                        Expiry: <span class="text-gray-500">{{ formatDate(mainProduct.expiryDate) }}</span>
+                      </span>
+                    </li>
+                    <li v-if="mainProduct.origin" class="text-gray-400 mb-14 flex-align gap-14">
+                      <span
+                        class="w-20 h-20 bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 text-xs flex-center rounded-full shadow-sm">
+                        <i class="ph ph-check"></i>
+                      </span>
+                      <span class="text-heading fw-medium">
+                        Origin: <span class="text-gray-500">{{ mainProduct.origin }}</span>
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Manufacturer Details -->
+                <div v-if="mainProduct.manufacturerDetails || mainProduct.packerDetails" class="mt-40">
+                  <h6 class="mb-24 fw-bold">Manufacturing & Packaging Details</h6>
+                  <div class="space-y-4">
+                    <div v-if="mainProduct.manufacturerDetails" class="bg-gray-50 rounded-lg p-4">
+                      <h6 class="text-sm font-semibold text-gray-700 mb-2">Manufacturer Details:</h6>
+                      <p class="text-gray-600 text-sm">{{ mainProduct.manufacturerDetails }}</p>
+                    </div>
+                    <div v-if="mainProduct.packerDetails" class="bg-gray-50 rounded-lg p-4">
+                      <h6 class="text-sm font-semibold text-gray-700 mb-2">Packer Details:</h6>
+                      <p class="text-gray-600 text-sm">{{ mainProduct.packerDetails }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attributes Tab -->
+            <div v-else-if="activeTab === 'attributes'" class="tab-content">
+              <div class="mb-40">
+                <h6 class="mb-24 fw-bold">Product Attributes</h6>
+
+                <div v-if="selectedVariant"
+                  class="mb-32 p-24 border border-gray-100 rounded-16 bg-gradient-to-r from-gray-50 to-white">
+                  <h6 class="text-md fw-semibold mb-16">Selected Variant</h6>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-24">
+                    <!-- Basic Attributes -->
+                    <div class="space-y-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-20 h-20 rounded-lg overflow-hidden border border-gray-300">
+                          <img :src="safeLoadImage(getColorFirstImage(selectedVariant.color?.name || selectedVariant.color))"
+                            :alt="selectedVariant.color?.name || selectedVariant.color" class="w-full h-full object-cover" loading="lazy"
+                            decoding="async" @error="handleImageError" />
+                        </div>
+                        <div>
+                          <span class="text-gray-500 text-sm">Color:</span>
+                          <span class="text-gray-800 font-medium ml-2">{{ selectedVariant.color?.name || selectedVariant.color }}</span>
+                        </div>
                       </div>
 
-                      <div class="flex-between items-center mt-8">
-                        <div class="flex items-center gap-2">
-                          <button @click="updateCartItemQuantity(item.id, -1)" :disabled="item.quantity <= 1"
-                            :class="['w-20 h-20 flex-center rounded-full text-xs transition-colors',
-                              item.quantity <= 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100']">
-                            <i class="ph ph-minus"></i>
-                          </button>
-                          <span class="text-sm font-medium w-24 text-center">{{ item.quantity }}</span>
-                          <button @click="updateCartItemQuantity(item.id, 1)" :class="['w-20 h-20 flex-center rounded-full text-xs transition-colors',
-                            'text-gray-600 hover:bg-gray-100']">
-                            <i class="ph ph-plus"></i>
-                          </button>
+                      <div class="flex items-center gap-3">
+                        <span
+                          class="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-full flex-center text-xs shadow-sm">
+                          <i class="ph ph-ruler"></i>
+                        </span>
+                        <div>
+                          <span class="text-gray-500 text-sm">Size:</span>
+                          <span class="text-gray-800 font-medium ml-2">{{ selectedVariant.size?.name || selectedVariant.size }}</span>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-3">
+                        <span
+                          class="w-20 h-20 bg-gradient-to-br from-green-50 to-green-100 text-green-600 rounded-full flex-center text-xs shadow-sm">
+                          <i class="ph ph-fabric"></i>
+                        </span>
+                        <div>
+                          <span class="text-gray-500 text-sm">SKU:</span>
+                          <span class="text-gray-800 font-medium ml-2">{{ selectedVariant.sku }}</span>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-3">
+                        <span
+                          class="w-20 h-20 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 rounded-full flex-center text-xs shadow-sm">
+                          <i class="ph ph-package"></i>
+                        </span>
+                        <div>
+                          <span class="text-gray-500 text-sm">Stock:</span>
+                          <span :class="[
+                            'font-medium ml-2',
+                            selectedVariant.stock > 10 ? 'text-green-600' :
+                              selectedVariant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
+                          ]">
+                            {{ selectedVariant.stock }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Price Information -->
+                    <div class="space-y-3">
+                      <h6 class="text-sm font-semibold text-gray-700 mb-8">Pricing</h6>
+
+                      <div class="bg-white p-3 rounded-lg border border-gray-100">
+                        <span class="text-gray-500 text-xs">Price</span>
+                        <p class="text-gray-800 font-medium">₹{{ selectedVariant.price }}</p>
+                      </div>
+
+                      <div v-if="mainProduct.discountValue > 0" class="bg-white p-3 rounded-lg border border-gray-100">
+                        <span class="text-gray-500 text-xs">Discount</span>
+                        <p class="text-green-600 font-medium">{{ mainProduct.discountValue }}% OFF</p>
+                      </div>
+
+                      <div class="bg-white p-3 rounded-lg border border-gray-100">
+                        <span class="text-gray-500 text-xs">Discounted Price</span>
+                        <p class="text-main-600 font-medium">₹{{ discountedPrice }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- All Variants -->
+                <div v-if="variants.length > 0">
+                  <h6 class="text-md fw-semibold mb-16">All Variants</h6>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-24">
+                    <div v-for="variant in variants" :key="variant.id"
+                      class="border border-gray-200 rounded-lg p-16 hover:border-gray-300 transition-colors">
+                      <div class="flex-between items-start mb-12">
+                        <div>
+                          <span class="text-xs text-gray-500">SKU</span>
+                          <p class="text-sm font-medium">{{ variant.sku }}</p>
                         </div>
                         <div class="text-right">
-                          <p class="text-xs font-semibold text-main-600">₹{{ (item.price * item.quantity).toFixed(2) }}
+                          <span class="text-xs text-gray-500">Stock</span>
+                          <p :class="[
+                            'text-sm font-medium',
+                            variant.stock > 10 ? 'text-green-600' :
+                              variant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
+                          ]">
+                            {{ variant.stock }}
                           </p>
                         </div>
                       </div>
+                      <div class="flex-align gap-8">
+                        <span class="badge bg-blue-100 text-blue-800">{{ variant.color?.name || variant.color }}</span>
+                        <span class="badge bg-green-100 text-green-800">{{ variant.size?.name || variant.size }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Cart Totals -->
-              <div class="pt-16 border-t border-gray-100 space-y-3">
-                <div class="flex-between">
-                  <span class="text-sm text-gray-600">Total Items:</span>
-                  <span class="text-sm font-semibold">{{ cartItemCount }}</span>
+                <div v-else class="text-center py-40 border border-gray-100 rounded-12 bg-gray-50">
+                  <div class="mb-16">
+                    <i class="ph ph-list-checks text-4xl text-gray-400"></i>
+                  </div>
+                  <p class="text-gray-500 mb-8">No variants available for this product.</p>
                 </div>
-                <div class="flex-between">
-                  <span class="text-sm text-gray-600">Subtotal:</span>
-                  <span class="text-sm font-semibold">₹{{ cartSubtotal.toFixed(2) }}</span>
-                </div>
-                <div class="flex-between">
-                  <span class="text-sm text-gray-600">Shipping:</span>
-                  <span class="text-sm font-semibold text-green-600">FREE</span>
-                </div>
-                <div class="flex-between pt-8 border-t border-gray-200">
-                  <span class="text-sm font-semibold text-gray-900">Total:</span>
-                  <span class="text-lg font-bold text-main-600">₹{{ cartTotalPrice.toFixed(2) }}</span>
-                </div>
-
-                <NuxtLink to="/cart/cart" class="btn btn-main w-100 mt-16">
-                  <i class="ph ph-shopping-cart me-2"></i> View Cart
-                </NuxtLink>
-
-                <NuxtLink to="/cart/checkout" class="btn btn-outline-main w-100">
-                  <i class="ph ph-credit-card me-2"></i> Checkout
-                </NuxtLink>
               </div>
             </div>
 
-            <div v-else class="text-center py-8">
-              <div class="mb-12">
-                <i class="ph ph-shopping-cart text-3xl text-gray-300"></i>
-              </div>
-              <p class="text-sm text-gray-500 mb-4">Your cart is empty</p>
-              <p class="text-xs text-gray-400">Add items to your cart to see them here</p>
-            </div>
-          </div>
+            <!-- Reviews Tab -->
+            <div v-else-if="activeTab === 'reviews'" class="tab-content">
+              <div class="row g-4">
+                <div class="col-lg-6">
+                  <h6 class="mb-24 fw-bold">Customer Reviews ({{ mainProduct.reviews?.length || 0 }})</h6>
 
-          <!-- Variants Summary -->
-          <div v-if="variants.length > 0" class="p-24 border-t border-gray-100">
-            <h6 class="text-sm mb-16 fw-semibold text-gray-900">Available Variants</h6>
-            <div class="space-y-3 max-h-200 overflow-y-auto pr-2">
-              <div v-for="variant in variants" :key="variant.id" @click="selectVariant(variant)" :class="[
-                'variant-item p-12 rounded-lg border cursor-pointer transition-all duration-300',
-                selectedVariant?.id === variant.id
-                  ? 'border-main-600 bg-main-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              ]">
-                <div class="flex-between items-center">
-                  <div>
-                    <div class="flex-align gap-2 mb-2">
-                      <span class="text-xs text-gray-600">SKU:</span>
-                      <span class="text-xs font-medium">{{ variant.sku }}</span>
-                    </div>
-                    <div class="flex-align gap-2">
-                      <span class="text-xs text-gray-600">Color:</span>
-                      <span class="text-xs font-medium">{{ variant.color }}</span>
-                      <span class="text-xs text-gray-400 mx-2">•</span>
-                      <span class="text-xs text-gray-600">Size:</span>
-                      <span class="text-xs font-medium">{{ variant.size }}</span>
+                  <!-- Reviews List -->
+                  <div v-if="mainProduct.reviews && mainProduct.reviews.length > 0">
+                    <div v-for="(review, index) in mainProduct.reviews" :key="index"
+                      class="d-flex align-items-start gap-24 pb-44 border-bottom border-gray-100 mb-44">
+                      <img src="/assets/images/thumbs/comment-img1.png" alt=""
+                        class="w-52 h-52 object-fit-cover rounded-full flex-shrink-0 shadow-sm" loading="lazy"
+                        decoding="async" @error="handleImageError" />
+                      <div class="flex-grow-1">
+                        <div class="flex-between align-items-start gap-8">
+                          <div class="">
+                            <h6 class="mb-12 text-md fw-semibold">Customer {{ Number(index) + 1 }}</h6>
+                            <div class="flex-align gap-8">
+                              <span v-for="star in 5" :key="star" class="text-xs fw-medium d-flex">
+                                <i class="ph"
+                                  :class="star <= review.rating ? 'ph-fill ph-star text-warning-600' : 'ph-star text-gray-300'"></i>
+                              </span>
+                            </div>
+                          </div>
+                          <span class="text-gray-800 text-xs">{{ formatDate(review.createdAt) }}</span>
+                        </div>
+                        <p class="text-gray-700 mt-16">{{ review.comment || 'No comment provided' }}</p>
+                        <div class="mt-16 flex-align gap-16">
+                          <span class="text-sm text-gray-500">
+                            <i class="ph ph-thumbs-up"></i>
+                            {{ review.helpfulVotes || 0 }} helpful
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div class="text-right">
-                    <div :class="[
-                      'text-xs font-medium',
-                      variant.stock > 10 ? 'text-green-600' :
-                        variant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
-                    ]">
-                      {{ variant.stock }}
+                  <div v-else class="text-center py-40 border border-gray-100 rounded-12 bg-gray-50">
+                    <div class="mb-16">
+                      <i class="ph ph-chat-circle-text text-4xl text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-500 mb-8">No reviews yet.</p>
+                    <p class="text-gray-400 text-sm">Be the first to review this product!</p>
+                  </div>
+
+                  <!-- Review Form -->
+                  <div class="mt-56 border border-gray-100 rounded-12 p-24 bg-gradient-to-br from-gray-50 to-white">
+                    <div class="mb-24">
+                      <h6 class="mb-24 fw-bold">Write a Review</h6>
+                      <span class="text-heading mb-8 d-block fw-medium">What is it like to Product?</span>
+                      <div class="flex-align gap-8 mb-24">
+                        <span v-for="star in 5" :key="star" @click="setRating(star)" :class="['text-2xl cursor-pointer transition-transform hover:scale-110',
+                          star <= rating ? 'text-warning-500' : 'text-gray-300']">
+                          <i class="ph" :class="star <= rating ? 'ph-fill ph-star' : 'ph-star'"></i>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="mt-32">
+                      <form @submit.prevent="submitReview">
+                        <div class="mb-32">
+                          <label for="title" class="text-neutral-600 mb-8 d-block fw-medium">Review Title</label>
+                          <input type="text" v-model="reviewTitle"
+                            class="common-input rounded-8 w-100 p-12 border border-gray-200 focus:border-main-600 focus:ring-2 focus:ring-main-500/20 transition-all duration-300"
+                            id="title" placeholder="Great Products" required>
+                        </div>
+                        <div class="mb-32">
+                          <label for="desc" class="text-neutral-600 mb-8 d-block fw-medium">Review Content</label>
+                          <textarea v-model="reviewContent"
+                            class="common-input rounded-8 w-100 p-12 border border-gray-200 focus:border-main-600 focus:ring-2 focus:ring-main-500/20 transition-all duration-300"
+                            id="desc" rows="5" placeholder="Share your experience with this product..."
+                            required></textarea>
+                        </div>
+                        <button type="submit"
+                          class="btn btn-main rounded-full mt-48 px-32 py-12 fw-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+                          Submit Review
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="ms-xxl-5">
+                    <h6 class="mb-24 fw-bold">Customer Feedback Summary</h6>
+                    <div class="border border-gray-100 rounded-12 p-24 bg-gradient-to-br from-gray-50 to-white">
+                      <div class="text-center mb-32">
+                        <div class="text-5xl fw-bold text-gray-900 mb-8">{{ calculateAverageRating() }}</div>
+                        <div class="flex-align justify-center gap-8 mb-8">
+                          <span v-for="star in 5" :key="star" class="text-xl">
+                            <i class="ph"
+                              :class="star <= Math.round(calculateAverageRating()) ? 'ph-fill ph-star text-warning-600' : 'ph-star text-gray-300'"></i>
+                          </span>
+                        </div>
+                        <p class="text-gray-600">Based on {{ mainProduct.reviews?.length || 0 }} reviews</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -738,422 +1187,65 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Product Tabs Section -->
-    <div v-if="!loading && !error && mainProduct" class="pt-80">
-      <div class="product-dContent border border-gray-100 rounded-24 shadow-sm">
-        <div class="product-dContent__header border-bottom border-gray-100 flex-between flex-wrap gap-16 p-24">
-          <ul class="nav common-tab nav-pills mb-3" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button :class="['nav-link fw-semibold', activeTab === 'description' ? 'active' : '']"
-                @click="activeTab = 'description'" type="button">
-                Description
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button :class="['nav-link fw-semibold', activeTab === 'attributes' ? 'active' : '']"
-                @click="activeTab = 'attributes'" type="button">
-                Attributes
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button :class="['nav-link fw-semibold', activeTab === 'reviews' ? 'active' : '']"
-                @click="activeTab = 'reviews'" type="button">
-                Reviews ({{ mainProduct.reviews?.length || 0 }})
-              </button>
-            </li>
-          </ul>
-          <div
-            class="bg-gradient-to-r from-green-50 to-emerald-50 text-green-600 rounded-12 flex-align gap-8 hover:from-green-100 hover:to-emerald-100 hover:text-green-700 transition-all duration-300 border border-green-200">
-            <img :src="safeLoadImage('/assets/images/icon/satisfaction-icon.png')" alt="Satisfaction Guaranteed" class="w-24 h-24" loading="lazy" decoding="async" @error="handleImageError" />
-            100% Satisfaction Guaranteed
+      <!-- Size Guide Modal -->
+      <div v-if="showSizeGuide" class="modal-overlay" @click.self="closeSizeGuide">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Size Guide</h5>
+            <button @click="closeSizeGuide" class="close-btn">&times;</button>
           </div>
-        </div>
-
-        <div class="product-dContent__box p-24">
-          <!-- Description Tab -->
-          <div v-if="activeTab === 'description'" class="tab-content">
-            <div class="mb-40">
-              <h6 class="mb-24 fw-bold">Product Description</h6>
-              <p class="text-gray-700">{{ mainProduct.description }}</p>
-
-              <div v-if="mainProduct.category" class="mt-32">
-                <h6 class="mb-16 fw-semibold">Product Categories</h6>
-                <div class="d-flex flex-wrap gap-12">
-                  <span class="badge bg-black text-white border border-black">
-                    {{ mainProduct.category.name }}
-                  </span>
-                  <span v-if="mainProduct.subCategory" class="badge bg-black text-white border border-black">
-                    {{ mainProduct.subCategory.name }}
-                  </span>
-                  <span v-if="mainProduct.subSubCategory" class="badge bg-black text-white border border-black">
-                    {{ mainProduct.subSubCategory.name }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Product Information -->
-              <div class="mt-40">
-                <h6 class="mb-24 fw-bold">Product Information</h6>
-                <ul class="mt-32">
-                  <li class="text-gray-400 mb-14 flex-align gap-14">
-                    <span
-                      class="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 text-xs flex-center rounded-full shadow-sm">
-                      <i class="ph ph-check"></i>
-                    </span>
-                    <span class="text-heading fw-medium">
-                      SKU: <span class="text-gray-500">{{ selectedVariant?.sku || mainProduct.sku }}</span>
-                    </span>
+          <div class="modal-body">
+            <div v-if="getSizeChartData().clothing.length > 0">
+              <div class="mb-24">
+                <h6 class="text-sm font-semibold mb-8">How to measure:</h6>
+                <ul class="text-sm text-gray-600 space-y-2">
+                  <li class="flex items-start gap-2">
+                    <i class="ph ph-check-circle text-green-500 mt-0.5"></i>
+                    <span>Measure around the fullest part of your chest</span>
                   </li>
-                  <li class="text-gray-400 mb-14 flex-align gap-14">
-                    <span
-                      class="w-20 h-20 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 text-xs flex-center rounded-full shadow-sm">
-                      <i class="ph ph-check"></i>
-                    </span>
-                    <span class="text-heading fw-medium">
-                      Barcode: <span class="text-gray-500">{{ mainProduct.barcode || 'N/A' }}</span>
-                    </span>
+                  <li class="flex items-start gap-2">
+                    <i class="ph ph-check-circle text-green-500 mt-0.5"></i>
+                    <span>Measure around your natural waistline</span>
                   </li>
-                  <li class="text-gray-400 mb-14 flex-align gap-14">
-                    <span
-                      class="w-20 h-20 bg-gradient-to-br from-green-50 to-green-100 text-green-600 text-xs flex-center rounded-full shadow-sm">
-                      <i class="ph ph-check"></i>
-                    </span>
-                    <span class="text-heading fw-medium">
-                      Unit: <span class="text-gray-500">{{ mainProduct.unit?.name }} ({{ mainProduct.unit?.shortName
-                        }})</span>
-                    </span>
-                  </li>
-                  <li v-if="mainProduct.manufacturedDate" class="text-gray-400 mb-14 flex-align gap-14">
-                    <span
-                      class="w-20 h-20 bg-gradient-to-br from-yellow-50 to-yellow-100 text-yellow-600 text-xs flex-center rounded-full shadow-sm">
-                      <i class="ph ph-check"></i>
-                    </span>
-                    <span class="text-heading fw-medium">
-                      Manufactured: <span class="text-gray-500">{{ formatDate(mainProduct.manufacturedDate) }}</span>
-                    </span>
-                  </li>
-                  <li v-if="mainProduct.expiryDate" class="text-gray-400 mb-14 flex-align gap-14">
-                    <span
-                      class="w-20 h-20 bg-gradient-to-br from-red-50 to-red-100 text-red-600 text-xs flex-center rounded-full shadow-sm">
-                      <i class="ph ph-check"></i>
-                    </span>
-                    <span class="text-heading fw-medium">
-                      Expiry: <span class="text-gray-500">{{ formatDate(mainProduct.expiryDate) }}</span>
-                    </span>
-                  </li>
-                  <li v-if="mainProduct.origin" class="text-gray-400 mb-14 flex-align gap-14">
-                    <span
-                      class="w-20 h-20 bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 text-xs flex-center rounded-full shadow-sm">
-                      <i class="ph ph-check"></i>
-                    </span>
-                    <span class="text-heading fw-medium">
-                      Origin: <span class="text-gray-500">{{ mainProduct.origin }}</span>
-                    </span>
+                  <li class="flex items-start gap-2">
+                    <i class="ph ph-check-circle text-green-500 mt-0.5"></i>
+                    <span>Measure from shoulder to hem</span>
                   </li>
                 </ul>
               </div>
 
-              <!-- Manufacturer Details -->
-              <div v-if="mainProduct.manufacturerDetails || mainProduct.packerDetails" class="mt-40">
-                <h6 class="mb-24 fw-bold">Manufacturing & Packaging Details</h6>
-                <div class="space-y-4">
-                  <div v-if="mainProduct.manufacturerDetails" class="bg-gray-50 rounded-lg p-4">
-                    <h6 class="text-sm font-semibold text-gray-700 mb-2">Manufacturer Details:</h6>
-                    <p class="text-gray-600 text-sm">{{ mainProduct.manufacturerDetails }}</p>
-                  </div>
-                  <div v-if="mainProduct.packerDetails" class="bg-gray-50 rounded-lg p-4">
-                    <h6 class="text-sm font-semibold text-gray-700 mb-2">Packer Details:</h6>
-                    <p class="text-gray-600 text-sm">{{ mainProduct.packerDetails }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Attributes Tab -->
-          <div v-else-if="activeTab === 'attributes'" class="tab-content">
-            <div class="mb-40">
-              <h6 class="mb-24 fw-bold">Product Attributes</h6>
-
-              <div v-if="selectedVariant"
-                class="mb-32 p-24 border border-gray-100 rounded-16 bg-gradient-to-r from-gray-50 to-white">
-                <h6 class="text-md fw-semibold mb-16">Selected Variant</h6>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-24">
-                  <!-- Basic Attributes -->
-                  <div class="space-y-3">
-                    <div class="flex items-center gap-3">
-                      <div class="w-20 h-20 rounded-lg overflow-hidden border border-gray-300">
-                        <img :src="safeLoadImage(getColorFirstImage(selectedVariant.color))" :alt="selectedVariant.color"
-                          class="w-full h-full object-cover" loading="lazy" decoding="async" @error="handleImageError" />
-                      </div>
-                      <div>
-                        <span class="text-gray-500 text-sm">Color:</span>
-                        <span class="text-gray-800 font-medium ml-2">{{ selectedVariant.color }}</span>
-                      </div>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-full flex-center text-xs shadow-sm">
-                        <i class="ph ph-ruler"></i>
-                      </span>
-                      <div>
-                        <span class="text-gray-500 text-sm">Size:</span>
-                        <span class="text-gray-800 font-medium ml-2">{{ selectedVariant.size }}</span>
-                      </div>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="w-20 h-20 bg-gradient-to-br from-green-50 to-green-100 text-green-600 rounded-full flex-center text-xs shadow-sm">
-                        <i class="ph ph-fabric"></i>
-                      </span>
-                      <div>
-                        <span class="text-gray-500 text-sm">SKU:</span>
-                        <span class="text-gray-800 font-medium ml-2">{{ selectedVariant.sku }}</span>
-                      </div>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                      <span
-                        class="w-20 h-20 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 rounded-full flex-center text-xs shadow-sm">
-                        <i class="ph ph-package"></i>
-                      </span>
-                      <div>
-                        <span class="text-gray-500 text-sm">Stock:</span>
-                        <span :class="[
-                          'font-medium ml-2',
-                          selectedVariant.stock > 10 ? 'text-green-600' :
-                            selectedVariant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
-                        ]">
-                          {{ selectedVariant.stock }}
+              <div class="overflow-x-auto">
+                <table class="size-guide-table">
+                  <thead>
+                    <tr>
+                      <th>Size</th>
+                      <th>Chest (inches)</th>
+                      <th>Waist (inches)</th>
+                      <th>Length (inches)</th>
+                      <th>Fit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(item, index) in getSizeChartData().clothing" :key="index">
+                      <td class="font-semibold">{{ item.size }}</td>
+                      <td>{{ item.chest }}</td>
+                      <td>{{ item.waist }}</td>
+                      <td>{{ item.length }}</td>
+                      <td>
+                        <span class="badge" :class="getFitClass(item.size)">
+                          {{ getFitText(item.size) }}
                         </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Price Information -->
-                  <div class="space-y-3">
-                    <h6 class="text-sm font-semibold text-gray-700 mb-8">Pricing</h6>
-
-                    <div class="bg-white p-3 rounded-lg border border-gray-100">
-                      <span class="text-gray-500 text-xs">Price</span>
-                      <p class="text-gray-800 font-medium">₹{{ selectedVariant.price }}</p>
-                    </div>
-
-                    <div v-if="mainProduct.discountValue > 0" class="bg-white p-3 rounded-lg border border-gray-100">
-                      <span class="text-gray-500 text-xs">Discount</span>
-                      <p class="text-green-600 font-medium">{{ mainProduct.discountValue }}% OFF</p>
-                    </div>
-
-                    <div class="bg-white p-3 rounded-lg border border-gray-100">
-                      <span class="text-gray-500 text-xs">Discounted Price</span>
-                      <p class="text-main-600 font-medium">₹{{ discountedPrice }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- All Variants -->
-              <div v-if="variants.length > 0">
-                <h6 class="text-md fw-semibold mb-16">All Variants</h6>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-24">
-                  <div v-for="variant in variants" :key="variant.id"
-                    class="border border-gray-200 rounded-lg p-16 hover:border-gray-300 transition-colors">
-                    <div class="flex-between items-start mb-12">
-                      <div>
-                        <span class="text-xs text-gray-500">SKU</span>
-                        <p class="text-sm font-medium">{{ variant.sku }}</p>
-                      </div>
-                      <div class="text-right">
-                        <span class="text-xs text-gray-500">Stock</span>
-                        <p :class="[
-                          'text-sm font-medium',
-                          variant.stock > 10 ? 'text-green-600' :
-                            variant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
-                        ]">
-                          {{ variant.stock }}
-                        </p>
-                      </div>
-                    </div>
-                    <div class="flex-align gap-8">
-                      <span class="badge bg-blue-100 text-blue-800">{{ variant.color }}</span>
-                      <span class="badge bg-green-100 text-green-800">{{ variant.size }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div v-else class="text-center py-40 border border-gray-100 rounded-12 bg-gray-50">
-                <div class="mb-16">
-                  <i class="ph ph-list-checks text-4xl text-gray-400"></i>
-                </div>
-                <p class="text-gray-500 mb-8">No variants available for this product.</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
-          </div>
-
-          <!-- Reviews Tab -->
-          <div v-else-if="activeTab === 'reviews'" class="tab-content">
-            <div class="row g-4">
-              <div class="col-lg-6">
-                <h6 class="mb-24 fw-bold">Customer Reviews ({{ mainProduct.reviews?.length || 0 }})</h6>
-
-                <!-- Reviews List -->
-                <div v-if="mainProduct.reviews && mainProduct.reviews.length > 0">
-                  <div v-for="(review, index) in mainProduct.reviews" :key="index"
-                    class="d-flex align-items-start gap-24 pb-44 border-bottom border-gray-100 mb-44">
-                    <img src="/assets/images/thumbs/comment-img1.png" alt=""
-                      class="w-52 h-52 object-fit-cover rounded-full flex-shrink-0 shadow-sm" loading="lazy" decoding="async" @error="handleImageError" />
-                    <div class="flex-grow-1">
-                      <div class="flex-between align-items-start gap-8">
-                        <div class="">
-                          <h6 class="mb-12 text-md fw-semibold">Customer {{ Number(index) + 1 }}</h6>
-                          <div class="flex-align gap-8">
-                            <span v-for="star in 5" :key="star" class="text-xs fw-medium d-flex">
-                              <i class="ph"
-                                :class="star <= review.rating ? 'ph-fill ph-star text-warning-600' : 'ph-star text-gray-300'"></i>
-                            </span>
-                          </div>
-                        </div>
-                        <span class="text-gray-800 text-xs">{{ formatDate(review.createdAt) }}</span>
-                      </div>
-                      <p class="text-gray-700 mt-16">{{ review.comment || 'No comment provided' }}</p>
-                      <div class="mt-16 flex-align gap-16">
-                        <span class="text-sm text-gray-500">
-                          <i class="ph ph-thumbs-up"></i>
-                          {{ review.helpfulVotes || 0 }} helpful
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div v-else class="text-center py-40 border border-gray-100 rounded-12 bg-gray-50">
-                  <div class="mb-16">
-                    <i class="ph ph-chat-circle-text text-4xl text-gray-400"></i>
-                  </div>
-                  <p class="text-gray-500 mb-8">No reviews yet.</p>
-                  <p class="text-gray-400 text-sm">Be the first to review this product!</p>
-                </div>
-
-                <!-- Review Form -->
-                <div class="mt-56 border border-gray-100 rounded-12 p-24 bg-gradient-to-br from-gray-50 to-white">
-                  <div class="mb-24">
-                    <h6 class="mb-24 fw-bold">Write a Review</h6>
-                    <span class="text-heading mb-8 d-block fw-medium">What is it like to Product?</span>
-                    <div class="flex-align gap-8 mb-24">
-                      <span v-for="star in 5" :key="star" @click="setRating(star)" :class="['text-2xl cursor-pointer transition-transform hover:scale-110',
-                        star <= rating ? 'text-warning-500' : 'text-gray-300']">
-                        <i class="ph" :class="star <= rating ? 'ph-fill ph-star' : 'ph-star'"></i>
-                      </span>
-                    </div>
-                  </div>
-                  <div class="mt-32">
-                    <form @submit.prevent="submitReview">
-                      <div class="mb-32">
-                        <label for="title" class="text-neutral-600 mb-8 d-block fw-medium">Review Title</label>
-                        <input type="text" v-model="reviewTitle"
-                          class="common-input rounded-8 w-100 p-12 border border-gray-200 focus:border-main-600 focus:ring-2 focus:ring-main-500/20 transition-all duration-300"
-                          id="title" placeholder="Great Products" required>
-                      </div>
-                      <div class="mb-32">
-                        <label for="desc" class="text-neutral-600 mb-8 d-block fw-medium">Review Content</label>
-                        <textarea v-model="reviewContent"
-                          class="common-input rounded-8 w-100 p-12 border border-gray-200 focus:border-main-600 focus:ring-2 focus:ring-main-500/20 transition-all duration-300"
-                          id="desc" rows="5" placeholder="Share your experience with this product..."
-                          required></textarea>
-                      </div>
-                      <button type="submit"
-                        class="btn btn-main rounded-full mt-48 px-32 py-12 fw-semibold shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
-                        Submit Review
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="ms-xxl-5">
-                  <h6 class="mb-24 fw-bold">Customer Feedback Summary</h6>
-                  <div class="border border-gray-100 rounded-12 p-24 bg-gradient-to-br from-gray-50 to-white">
-                    <div class="text-center mb-32">
-                      <div class="text-5xl fw-bold text-gray-900 mb-8">{{ calculateAverageRating() }}</div>
-                      <div class="flex-align justify-center gap-8 mb-8">
-                        <span v-for="star in 5" :key="star" class="text-xl">
-                          <i class="ph"
-                            :class="star <= Math.round(calculateAverageRating()) ? 'ph-fill ph-star text-warning-600' : 'ph-star text-gray-300'"></i>
-                        </span>
-                      </div>
-                      <p class="text-gray-600">Based on {{ mainProduct.reviews?.length || 0 }} reviews</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              <i class="ph ph-ruler text-3xl mb-4"></i>
+              <p>No size guide available for this product</p>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Size Guide Modal -->
-    <div v-if="showSizeGuide" class="modal-overlay" @click.self="closeSizeGuide">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Size Guide</h5>
-          <button @click="closeSizeGuide" class="close-btn">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div v-if="getSizeChartData().clothing.length > 0">
-            <div class="mb-24">
-              <h6 class="text-sm font-semibold mb-8">How to measure:</h6>
-              <ul class="text-sm text-gray-600 space-y-2">
-                <li class="flex items-start gap-2">
-                  <i class="ph ph-check-circle text-green-500 mt-0.5"></i>
-                  <span>Measure around the fullest part of your chest</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <i class="ph ph-check-circle text-green-500 mt-0.5"></i>
-                  <span>Measure around your natural waistline</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <i class="ph ph-check-circle text-green-500 mt-0.5"></i>
-                  <span>Measure from shoulder to hem</span>
-                </li>
-              </ul>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="size-guide-table">
-                <thead>
-                  <tr>
-                    <th>Size</th>
-                    <th>Chest (inches)</th>
-                    <th>Waist (inches)</th>
-                    <th>Length (inches)</th>
-                    <th>Fit</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(item, index) in getSizeChartData().clothing" :key="index">
-                    <td class="font-semibold">{{ item.size }}</td>
-                    <td>{{ item.chest }}</td>
-                    <td>{{ item.waist }}</td>
-                    <td>{{ item.length }}</td>
-                    <td>
-                      <span class="badge" :class="getFitClass(item.size)">
-                        {{ getFitText(item.size) }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div v-else class="text-center py-8 text-gray-500">
-            <i class="ph ph-ruler text-3xl mb-4"></i>
-            <p>No size guide available for this product</p>
           </div>
         </div>
       </div>
@@ -1277,12 +1369,12 @@ const mainImages = computed(() => {
   if (selectedVariant.value?.images?.length) {
     return selectedVariant.value.images.map((i: any) => safeLoadImage(i.imageUrl))
   }
-  
+
   // Second try: Main product images
   if (mainProduct.value?.images?.length) {
     return mainProduct.value.images.map((i: any) => safeLoadImage(i.imageUrl))
   }
-  
+
   // Fallback: Return empty array to prevent errors
   return []
 })
@@ -1329,7 +1421,7 @@ const selectColor = (colorName: string) => {
       v.color?.name === colorName &&
       v.size?.name === selectedSize.value
   )
-  
+
   // If no variant matches current size, pick the first variant with the selected color
   if (!match) {
     match = variants.value.find(
@@ -1340,9 +1432,9 @@ const selectColor = (colorName: string) => {
   if (match) {
     // Set loading state
     isChangingColor.value = true
-    
+
     selectedVariant.value = match
-    
+
     // Force immediate update of computed properties
     nextTick(() => {
       // Preload all images for this color
@@ -1350,7 +1442,7 @@ const selectColor = (colorName: string) => {
       colorVariants.forEach(variant => {
         preloadVariantImages(variant)
       })
-      
+
       // Force Swiper to completely reinitialize
       setTimeout(() => {
         if (mainSwiper.value) {
@@ -1365,7 +1457,7 @@ const selectColor = (colorName: string) => {
           mobileMainSwiper.value.updateSize()
           mobileMainSwiper.value.updateSlides()
         }
-        
+
         // Reset loading state
         isChangingColor.value = false
       }, 100)
@@ -1416,10 +1508,10 @@ const safeLoadImage = (src: string, fallback: string = FALLBACK_IMAGE): string =
 // Image error handler with infinite loop protection
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
-  
+
   // Prevent infinite loops
   if (img.dataset.fallbackSet === 'true') return
-  
+
   // Set fallback and mark as handled
   img.src = FALLBACK_IMAGE
   img.dataset.fallbackSet = 'true'
@@ -1427,20 +1519,20 @@ const handleImageError = (event: Event) => {
 
 const preloadVariantImages = (variant: any) => {
   if (!variant?.images?.length) return
-  
+
   // Create image elements with proper error handling
   variant.images.forEach((imageObj: any, index: number) => {
     const img = new Image()
-    
+
     // Set up load and error handlers
     img.onload = () => {
       console.log(`Image loaded: ${imageObj.imageUrl}`)
     }
-    
+
     img.onerror = (error) => {
       console.error(`Image failed to load: ${imageObj.imageUrl}`, error)
     }
-    
+
     // Start loading the image
     img.src = safeLoadImage(imageObj.imageUrl)
   })
@@ -1460,13 +1552,13 @@ const preloadColorImages = (colorName: string) => {
 // Progressive image loading
 const loadImagesProgressively = () => {
   if (!mainImages.value.length) return
-  
+
   // Load first image immediately (above the fold)
   if (mainImages.value[0]) {
     const img = new Image()
     img.src = safeLoadImage(mainImages.value[0])
   }
-  
+
   // Load remaining images after a delay
   setTimeout(() => {
     mainImages.value.slice(1).forEach((src: string, index: number) => {
@@ -1482,7 +1574,7 @@ const loadImagesProgressively = () => {
 onMounted(() => {
   // Load images progressively instead of all at once
   loadImagesProgressively()
-  
+
   // Preload first variant only
   if (variants.value.length > 0) {
     preloadVariantImages(variants.value[0])
@@ -1568,6 +1660,14 @@ const reviewContent = ref('')
 const cartItemCount = computed(() => cartItems.value.reduce((sum, item) => sum + item.quantity, 0))
 const cartSubtotal = computed(() => cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0))
 const cartTotalPrice = computed(() => cartSubtotal.value)
+const cartSavings = computed(() => {
+  // Calculate potential savings from discounts (mock calculation)
+  return cartItems.value.reduce((sum, item) => {
+    const originalPrice = item.price * 1.1 // Assume 10% original price
+    const savings = (originalPrice - item.price) * item.quantity
+    return sum + Math.max(0, savings)
+  }, 0)
+})
 
 // Size functions
 const isClothingCategory = () => mainProduct.value?.category?.name?.toLowerCase().includes('clothing')
@@ -1583,12 +1683,12 @@ const getSizeChartData = () => ({
     { size: 'S', chest: '36-38', waist: '30-32', length: '26-27' },
     { size: 'M', chest: '39-41', waist: '33-35', length: '27-28' },
     { size: 'L', chest: '42-44', waist: '36-38', length: '28-29' }
-  ] as Array<{size: string, chest: string, waist: string, length: string}>,
+  ] as Array<{ size: string, chest: string, waist: string, length: string }>,
   shoes: [
     { size: '8', length: '25.5', width: '10' },
     { size: '9', length: '26', width: '10.5' },
     { size: '10', length: '26.5', width: '11' }
-  ] as Array<{size: string, length: string, width: string}>
+  ] as Array<{ size: string, length: string, width: string }>
 })
 
 const getFitClass = (fit: string) => {
@@ -1661,7 +1761,7 @@ const removeFromCart = (itemId: number) => {
 }
 
 const updateCartItemQuantity = (itemId: number, newQuantity: number) => {
-  const cart = cartItems.value.map(item => 
+  const cart = cartItems.value.map(item =>
     item.id === itemId ? { ...item, quantity: newQuantity } : item
   )
   saveCart(cart)
@@ -2101,6 +2201,29 @@ onMounted(() => {
   background: #94a3b8;
 }
 
+/* Sticky Image Gallery */
+.sticky-image-gallery {
+  position: sticky;
+  top: 20px;
+  align-self: flex-start;
+  z-index: 10;
+}
+
+/* Ensure sidebar is always on the right side */
+@media (min-width: 992px) {
+  .product-details .row {
+    flex-direction: row;
+  }
+
+  .product-details .col-lg-9 {
+    order: 1;
+  }
+
+  .product-details .col-lg-3 {
+    order: 2;
+  }
+}
+
 /* Color Option */
 .color-option {
   transition: all 0.3s ease;
@@ -2257,5 +2380,33 @@ onMounted(() => {
 
 .ring-offset-2 {
   margin: 2px;
+}
+
+/* Custom Scrollbar for Cart Items */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Line Clamp Utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

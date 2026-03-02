@@ -10,6 +10,12 @@ export default defineNuxtConfig({
   ssr: false,
   components: true,
 
+  typescript: {
+    strict: false,
+    typeCheck: false,
+    shim: false
+  },
+
   modules: [
     '@nuxt/image',
     '@pinia/nuxt',

@@ -69,6 +69,17 @@ export interface ProductAttribute {
   material?: string
 }
 
+export interface ProductReview {
+  rating: number
+  review: string
+}
+
+export interface ProductImage {
+  id?: number
+  imageUrl: string
+  isPrimary: boolean
+}
+
 export interface MainProduct {
   id: string
   name: string
@@ -95,12 +106,7 @@ export interface ProductVariant {
   name: string
   price: number
   images: ProductImage[]
-  attributes: {
-    id: string
-    color?: string
-    size?: string
-    material?: string
-  }
+  attributes: ProductAttribute
 }
 
 export interface ProductBrand {
@@ -171,4 +177,5 @@ export interface GraphQLResponse {
       }
     }
   }
+  errors?: any[]
 }

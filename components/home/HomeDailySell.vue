@@ -16,7 +16,7 @@
               <div class="product-card style-two h-100 p-8 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2 flex-align gap-16">
                 <div class="">
                   <span class="product-card__badge bg-danger-600 px-8 py-4 text-sm text-white">Sale {{ product.discount }}%</span>
-                  <NuxtLink :to="`/shop-all/${product.id}`" class="product-card__thumb flex-center overflow-hidden">
+                  <NuxtLink :to="`/shop-all/${product.id}/default`" class="product-card__thumb flex-center overflow-hidden">
                     <img :src="product.image" :alt="product.name">
                   </NuxtLink>
                   <div class="countdown">
@@ -47,7 +47,7 @@
                     <span class="text-xs fw-bold text-gray-600">({{ product.reviews }})</span>
                   </div>
                   <h6 class="title text-lg fw-semibold mt-12 mb-8">
-                    <NuxtLink :to="`/shop-all/${product.id}`" class="link text-line-2">{{ product.name }}</NuxtLink>
+                    <NuxtLink :to="`/shop-all/${product.id}/default`" class="link text-line-2">{{ product.name }}</NuxtLink>
                   </h6>
                   <div class="flex-align gap-4">
                     <span class="text-main-600 text-md d-flex"><i class="ph-fill ph-storefront"></i></span>

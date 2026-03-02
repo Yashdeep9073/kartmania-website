@@ -1545,7 +1545,10 @@ const formatPrice = (price) => {
 }
 
 const handleProductImageError = (event) => {
-  event.target.src = '/assets/images/thumbs/placeholder.png'
+  if (!event.target.dataset.fallbackSet) {
+    event.target.src = '/assets/images/thumbs/placeholder.png'
+    event.target.dataset.fallbackSet = 'true'
+  }
 }
 
 // ==================== INITIALIZATION ====================
@@ -1874,11 +1877,17 @@ const onInputBlur = () => {
 }
 
 const handleLogoError = (e) => {
-  e.target.src = '/assets/images/logo/favicon.png'
+  if (!e.target.dataset.fallbackSet) {
+    e.target.src = '/assets/images/logo/favicon.png'
+    e.target.dataset.fallbackSet = 'true'
+  }
 }
 
 const handleImageError = (e) => {
-  e.target.src = '/assets/images/placeholder.jpg'
+  if (!e.target.dataset.fallbackSet) {
+    e.target.src = '/assets/images/placeholder.jpg'
+    e.target.dataset.fallbackSet = 'true'
+  }
 }
 
 const getProductImage = (product) => {

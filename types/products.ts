@@ -28,7 +28,7 @@ export interface FetchProductsParams {
 }
 
 export interface ProductImage {
-  id: number
+  id?: number
   imageUrl: string
   isPrimary: boolean
 }
@@ -58,5 +58,117 @@ export interface ProductsApiResponse {
     limit: number
     hasNextPage: boolean
     hasPrevPage: boolean
+  }
+}
+
+// Extended product types for the store
+export interface ProductAttribute {
+  id: string
+  color?: string
+  size?: string
+  material?: string
+}
+
+export interface MainProduct {
+  id: string
+  name: string
+  price: number
+  discountValue?: number
+  description?: string
+  stock: number
+  popularity: number
+  createdAt?: string
+  images: ProductImage[]
+  reviews?: ProductReview[]
+  attributes?: ProductAttribute[]
+  categoryName?: string
+  brandName?: string
+}
+
+export interface ProductReview {
+  rating: number
+  review: string
+}
+
+export interface ProductVariant {
+  id: string
+  name: string
+  price: number
+  images: ProductImage[]
+  attributes: {
+    id: string
+    color?: string
+    size?: string
+    material?: string
+  }
+}
+
+export interface ProductBrand {
+  id: string
+  name: string
+  logo?: string
+  description?: string
+  Seller?: {
+    name: string
+  }
+  seller?: string
+}
+
+export interface ProductCategory {
+  id: string
+  name: string
+  image?: string
+  logo?: string
+}
+
+export interface StoreProduct {
+  groupId: string
+  name: string
+  category?: ProductCategory
+  mainProduct: MainProduct
+  variants?: ProductVariant[]
+  brand?: ProductBrand
+  variantId?: string
+  variantIndex?: number
+}
+
+export interface GraphQLFilters {
+  color?: string
+  size?: string
+  category?: string
+  brand?: string
+  page: number
+  limit: number
+}
+
+export interface GraphQLProductFilterResponse {
+  data: {
+    productFilter: {
+      data: StoreProduct[]
+      pagination: {
+        currentPage: number
+        lastPage: number
+        perPage: number
+        total: number
+        from: number
+        to: number
+      }
+    }
+  }
+}
+
+export interface GraphQLResponse {
+  data?: {
+    productFilter?: {
+      data?: StoreProduct[]
+      pagination?: {
+        currentPage: number
+        lastPage: number
+        total: number
+        perPage: number
+        from: number
+        to: number
+      }
+    }
   }
 }

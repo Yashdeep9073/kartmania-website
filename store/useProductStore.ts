@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import type { StoreProduct, ProductSort, GraphQLFilters, GraphQLResponse } from '~/types/products'
 
 export const useProductStore = defineStore('productStore', () => {
   const route = useRoute()
@@ -10,31 +11,31 @@ export const useProductStore = defineStore('productStore', () => {
   // ==================== STATE ==================== 
   const state = ref({
     // Product data 
-    products: [],
-    filteredAndSortedProducts: [],
-    allProducts: [],
+    products: [] as StoreProduct[],
+    filteredAndSortedProducts: [] as StoreProduct[],
+    allProducts: [] as StoreProduct[],
     pagination: {
       currentPage: 1,
       lastPage: 1,
       total: 0,
-      perPage: 1000, // Increased perPage to match limit
+      perPage: 24, // Reduced to show pagination
       from: 0,
       to: 0
     },
 
     // Category data with nested structure
-    categories: [],
-    categoryTree: [],
-    colors: [],
-    sizes: [],
-    brands: [],
+    categories: [] as any[],
+    categoryTree: [] as any[],
+    colors: [] as (string | { name: string; color?: string; [key: string]: any })[],
+    sizes: [] as (string | { id: string; size: string; name?: string; [key: string]: any })[],
+    brands: [] as (string | { id: string; name: string; logo?: string; description?: string; Seller?: { name: string }; seller?: string; [key: string]: any })[],
 
     // Current filters for GraphQL queries
     filters: {
       category: '',
       sortBy: 'popularity',
       page: 1,
-      limit: 1000, // Increased limit to fetch more products
+      limit: 24, // Reduced limit to enable pagination
       color: '',
       size: '',
       brand: '',
@@ -51,24 +52,24 @@ export const useProductStore = defineStore('productStore', () => {
 
   // ==================== CATEGORY FUNCTIONS ====================
 
-  const buildCategoryTree = (categories) => {
-    return categories.map(category => ({
+  const buildCategoryTree = (categories: any[]) => {
+    return categories.map((category: any) => ({
       id: category.id,
       name: category.name,
       image: category.image,
       logo: category.logo,
       productCount: category._count?.products || 0,
-      subCategories: category.subCategories?.map(subCat => ({
+      subCategories: category.subCategories?.map((subCat: any) => ({
         id: subCat.id,
         name: subCat.name,
         image: subCat.image,
         logo: subCat.logo,
-        subSubCategories: subCat.subSubCategories?.map(subSubCat => ({
+        subSubCategories: subCat.subSubCategories?.map((subSubCat: any) => ({
           id: subSubCat.id,
           name: subSubCat.name,
           image: subSubCat.image,
           logo: subSubCat.logo,
-          subSubSubCategories: subSubCat.subSubSubCategory?.map(subSubSubCat => ({
+          subSubSubCategories: subSubCat.subSubSubCategory?.map((subSubSubCat: any) => ({
             id: subSubSubCat.id,
             name: subSubSubCat.name,
             logo: subSubSubCat.logo,
@@ -106,7 +107,7 @@ export const useProductStore = defineStore('productStore', () => {
         state.value.categories = data.data
         state.value.categoryTree = buildCategoryTree(data.data)
 
-        const totalProducts = data.data.reduce((sum, category) => {
+        const totalProducts = data.data.reduce((sum: number, category: any) => {
           return sum + (category._count?.products || 0)
         }, 0)
         return {
@@ -160,7 +161,7 @@ export const useProductStore = defineStore('productStore', () => {
 
     return colorList.map(color => ({
       name: typeof color === 'string' ? color : color.name || color.color,
-      hex: getColorHex(typeof color === 'string' ? color : color.name || color.color)
+      hex: getColorHex(typeof color === 'string' ? color : color.name || color.color || 'Unknown')
     }))
   })
 
@@ -302,35 +303,93 @@ export const useProductStore = defineStore('productStore', () => {
     colors: config.public.api?.colors || null,
     sizes: config.public.api?.sizes || null,
     brands: config.public.api?.brands || null,
-    graphql: config.public.api?.graphql || 'https://your-new-api-url.com/graphql'
+    graphql: config.public.api?.graphql
   }
 
   // ==================== HELPER FUNCTIONS ====================
 
-  const getProductColor = (product) => {
-    const attributes = product.mainProduct?.attributes
+  const getProductColor = (product: StoreProduct) => {
+    // For main products, try to get color from main product attributes first
+    const mainAttributes = product.mainProduct?.attributes
+    if (mainAttributes && Array.isArray(mainAttributes)) {
+      const colorAttr = mainAttributes.find(attr => attr && attr.color !== null && attr.color !== undefined && attr.color !== '')
+      if (colorAttr?.color) return colorAttr.color
+    }
 
-    if (!attributes || !Array.isArray(attributes)) return null
+    // If no color in main product, get first available color from variants
+    if (product.variants && product.variants.length > 0) {
+      const variantWithColor = product.variants.find(variant => 
+        variant.attributes && variant.attributes.color
+      )
+      if (variantWithColor?.attributes?.color) {
+        return variantWithColor.attributes.color
+      }
+    }
 
-    // Find first attribute with non-null color
-    const colorAttr = attributes.find(attr => attr && attr.color !== null && attr.color !== undefined && attr.color !== '')
-    if (colorAttr?.color) return colorAttr.color
-
-    // Fallback: try to extract from product name or use default
-    return null // or return a default color like 'Black'
+    return null
   }
 
-  const getProductSize = (product) => {
-    const attributes = product.mainProduct?.attributes
+  const getProductSize = (product: StoreProduct) => {
+    // For main products, try to get size from main product attributes first
+    const mainAttributes = product.mainProduct?.attributes
+    if (mainAttributes && Array.isArray(mainAttributes)) {
+      const sizeAttr = mainAttributes.find(attr => attr && attr.size !== null && attr.size !== undefined && attr.size !== '')
+      if (sizeAttr?.size) return sizeAttr.size
+    }
 
-    if (!attributes || !Array.isArray(attributes)) return null
+    // If no size in main product, get first available size from variants
+    if (product.variants && product.variants.length > 0) {
+      const variantWithSize = product.variants.find(variant => 
+        variant.attributes && variant.attributes.size
+      )
+      if (variantWithSize?.attributes?.size) {
+        return variantWithSize.attributes.size
+      }
+    }
 
-    // Find first attribute with non-null size
-    const sizeAttr = attributes.find(attr => attr && attr.size !== null && attr.size !== undefined && attr.size !== '')
-    return sizeAttr?.size || null
+    return null
   }
 
-  const getProductMaterial = (product) => {
+  // New functions to get all available colors and sizes for main products
+  const getAllAvailableColors = (product: StoreProduct) => {
+    const colors = new Set<string>()
+    
+    // Add color from main product if available
+    const mainColor = getProductColor(product)
+    if (mainColor) colors.add(mainColor)
+    
+    // Add colors from all variants
+    if (product.variants && product.variants.length > 0) {
+      product.variants.forEach(variant => {
+        if (variant.attributes?.color) {
+          colors.add(variant.attributes.color)
+        }
+      })
+    }
+    
+    return Array.from(colors)
+  }
+
+  const getAllAvailableSizes = (product: StoreProduct) => {
+    const sizes = new Set<string>()
+    
+    // Add size from main product if available
+    const mainSize = getProductSize(product)
+    if (mainSize) sizes.add(mainSize)
+    
+    // Add sizes from all variants
+    if (product.variants && product.variants.length > 0) {
+      product.variants.forEach(variant => {
+        if (variant.attributes?.size) {
+          sizes.add(variant.attributes.size)
+        }
+      })
+    }
+    
+    return Array.from(sizes)
+  }
+
+  const getProductMaterial = (product: StoreProduct) => {
     const attributes = product.mainProduct?.attributes
 
     if (!attributes || !Array.isArray(attributes)) return null
@@ -340,15 +399,15 @@ export const useProductStore = defineStore('productStore', () => {
     return materialAttr?.material || null
   }
 
-  const getDescription = (product) => {
+  const getDescription = (product: StoreProduct) => {
     return product.mainProduct?.description || ''
   }
 
-  const getProductBrand = (product) => {
+  const getProductBrand = (product: StoreProduct) => {
     return product.brand?.name || product.mainProduct?.brandName || null
   }
 
-  const getDiscountedPrice = (product) => {
+  const getDiscountedPrice = (product: StoreProduct) => {
     const mainProduct = product.mainProduct
     if (!mainProduct?.price) return 0
 
@@ -359,25 +418,25 @@ export const useProductStore = defineStore('productStore', () => {
     return price
   }
 
-  const getOriginalPrice = (product) => {
+  const getOriginalPrice = (product:StoreProduct) => {
     return product.mainProduct?.price || 0
   }
 
-  const getProductRating = (product) => {
+  const getProductRating = (product: StoreProduct) => {
     const mainProduct = product.mainProduct
     if (!mainProduct?.reviews?.length) return 3.5 // Default rating
     const total = mainProduct.reviews.reduce((sum, review) => sum + (review.rating || 0), 0)
     return total / mainProduct.reviews.length
   }
 
-  const getReviewCount = (product) => {
+  const getReviewCount = (product: StoreProduct) => {
     return product.mainProduct?.reviews?.length || Math.floor(Math.random() * 100) + 1
   }
 
-  const getColorHex = (colorName) => {
+  const getColorHex = (colorName: string) => {
     if (!colorName) return '#007bff'
 
-    const colorMap = {
+    const colorMap: { [key: string]: string } = {
       'Red': '#dc3545',
       'Blue': '#007bff',
       'Green': '#28a745',
@@ -401,7 +460,7 @@ export const useProductStore = defineStore('productStore', () => {
     return colorMap[colorName] || '#007bff'
   }
 
-  const getProductImage = (product) => {
+  const getProductImage = (product: StoreProduct) => {
     // Try main product images first
     const mainImages = product.mainProduct?.images || []
     if (mainImages.length > 0) {
@@ -437,7 +496,7 @@ export const useProductStore = defineStore('productStore', () => {
     return '/assets/images/placeholder.jpg'
   }
 
-  const fixImageUrl = (url) => {
+  const fixImageUrl = (url: string) => {
     if (!url) return '/assets/images/placeholder.jpg'
 
     if (url.startsWith('http')) {
@@ -451,49 +510,49 @@ export const useProductStore = defineStore('productStore', () => {
     return `https://kartmania-api.vibrantick.org/${url}`
   }
 
-  const getProductStock = (product) => {
+  const getProductStock = (product: StoreProduct) => {
     return product.mainProduct?.stock || Math.floor(Math.random() * 100) + 1
   }
 
-  const getProductName = (product) => {
+  const getProductName = (product: StoreProduct) => {
     return product.name || product.mainProduct?.name || 'Unnamed Product'
   }
 
-  const ProductSize = (product) => {
+  const ProductSize = (product: StoreProduct) => {
     if (!product?.variants) return []
 
     return [
       ...new Set(
         product.variants
-          .map(v => v?.attributes?.[0]?.size)
+          .map(v => v?.attributes?.size)
           .filter(Boolean)
       )
     ]
   }
 
-  const ProductColor = (product) => {
+  const ProductColor = (product: StoreProduct) => {
     if (!product?.variants) return []
 
     return [
       ...new Set(
         product.variants
-          .map(v => v?.attributes?.[0]?.color)
+          .map(v => v?.attributes?.color)
           .filter(Boolean)
       )
     ]
   }
 
-  const getProductCategory = (product) => {
+  const getProductCategory = (product: StoreProduct) => {
     return product.category?.name || product.mainProduct?.categoryName || null
   }
 
-  const getProductId = (product) => {
+  const getProductId = (product: StoreProduct) => {
     return product.mainProduct?.id || product.groupId
   }
 
   // ==================== CLIENT-SIDE SORTING ====================
 
-  const applySorting = (products, sortType) => {
+  const applySorting = (products: StoreProduct[], sortType: ProductSort | string) => {
     if (!products.length || !sortType || sortType === 'popularity') {
       return [...products].sort((a, b) =>
         (b.mainProduct?.popularity || 0) - (a.mainProduct?.popularity || 0)
@@ -521,7 +580,7 @@ export const useProductStore = defineStore('productStore', () => {
         return sorted.sort((a, b) => {
           const dateA = new Date(a.mainProduct?.createdAt || 0)
           const dateB = new Date(b.mainProduct?.createdAt || 0)
-          return dateB - dateA
+          return dateB.getTime() - dateA.getTime()
         })
 
       case 'brand':
@@ -547,7 +606,7 @@ export const useProductStore = defineStore('productStore', () => {
         currentPage: 1,
         lastPage: 1,
         total: 0,
-        perPage: state.value.filters.limit || 1000, // Use current limit
+        perPage: state.value.filters.limit || 24, // Use current limit
         from: 0,
         to: 0
       }
@@ -601,7 +660,7 @@ export const useProductStore = defineStore('productStore', () => {
       category: '',
       sortBy: 'popularity',
       page: 1,
-      limit: 1000, // Increased limit to fetch more products
+      limit: 24, // Reduced limit to enable pagination
       color: '',
       size: '',
       brand: '',
@@ -611,66 +670,85 @@ export const useProductStore = defineStore('productStore', () => {
 
     // Parse from URL - SINGLE DECODE ONLY
     if (query.category) {
-      // First, check if it's already a simple string
-      if (typeof query.category === 'string' && !query.category.includes('%')) {
-        newFilters.category = query.category
-      } else {
-        // Try to decode only once
-        try {
-          const decoded = decodeURIComponent(query.category)
-          // Replace any double encoded spaces
-          newFilters.category = decoded.replace(/%20/g, ' ').trim()
-        } catch (error) {
-          newFilters.category = query.category
+      // Handle both string and array cases
+      const categoryValue = Array.isArray(query.category) ? query.category[0] : query.category
+      
+      // Ensure we have a string value
+      if (categoryValue) {
+        // First, check if it's already a simple string
+        if (typeof categoryValue === 'string' && !categoryValue.includes('%')) {
+          newFilters.category = categoryValue
+        } else {
+          // Try to decode only once
+          try {
+            const decoded = decodeURIComponent(categoryValue)
+            // Replace any double encoded spaces
+            newFilters.category = decoded.replace(/%20/g, ' ').trim()
+          } catch (error) {
+            newFilters.category = categoryValue
+          }
         }
       }
     }
 
     if (query.color) {
-      newFilters.color = query.color
+      const colorValue = Array.isArray(query.color) ? query.color[0] : query.color
+      if (colorValue) {
+        newFilters.color = colorValue
+      }
     }
 
     if (query.size) {
-      newFilters.size = query.size
+      const sizeValue = Array.isArray(query.size) ? query.size[0] : query.size
+      if (sizeValue) {
+        newFilters.size = sizeValue
+      }
     }
 
     if (query.brand) {
-      if (typeof query.brand === 'string' && !query.brand.includes('%')) {
-        newFilters.brand = query.brand
-      } else {
+      const brandValue = Array.isArray(query.brand) ? query.brand[0] : query.brand
+      if (brandValue && typeof brandValue === 'string' && !brandValue.includes('%')) {
+        newFilters.brand = brandValue
+      } else if (brandValue && typeof brandValue === 'string') {
         try {
-          newFilters.brand = decodeURIComponent(query.brand)
+          newFilters.brand = decodeURIComponent(brandValue)
         } catch (error) {
-          newFilters.brand = query.brand
+          newFilters.brand = brandValue
         }
       }
     }
 
     if (query.sort) {
-      newFilters.sortBy = query.sort
+      const sortValue = Array.isArray(query.sort) ? query.sort[0] : query.sort
+      if (sortValue) {
+        newFilters.sortBy = sortValue
+      }
     }
 
     if (query.page) {
-      newFilters.page = parseInt(query.page) || 1
+      const pageValue = Array.isArray(query.page) ? query.page[0] : query.page
+      newFilters.page = parseInt(pageValue as string) || 1
     }
 
     if (query.min_price) {
-      newFilters.minPrice = parseInt(query.min_price) || 0
+      const minPriceValue = Array.isArray(query.min_price) ? query.min_price[0] : query.min_price
+      newFilters.minPrice = parseInt(minPriceValue as string) || 0
     }
 
     if (query.max_price) {
-      newFilters.maxPrice = parseInt(query.max_price) || defaultMaxPrice.value
+      const maxPriceValue = Array.isArray(query.max_price) ? query.max_price[0] : query.max_price
+      newFilters.maxPrice = parseInt(maxPriceValue as string) || defaultMaxPrice.value
     }
 
     return newFilters
   }
 
-  const updateURLFromFilters = (filters) => {
+  const updateURLFromFilters = (filters: typeof state.value.filters) => {
     if (state.value.urlUpdateInProgress) {
       return
     }
 
-    const query = {}
+    const query: Record<string, any> = {}
 
     // Only add to URL if filter is active - SINGLE ENCODE ONLY
     if (filters.category && filters.category !== 'all') {
@@ -698,8 +776,6 @@ export const useProductStore = defineStore('productStore', () => {
     router.push({
       path: route.path,
       query
-    }, undefined, {
-      shallow: true
     }).finally(() => {
       setTimeout(() => {
         state.value.urlUpdateInProgress = false
@@ -709,7 +785,7 @@ export const useProductStore = defineStore('productStore', () => {
 
   // ==================== EXTERNAL LINK HANDLING ====================
 
-  const applyFiltersFromExternalLink = async (filtersObj) => {
+  const applyFiltersFromExternalLink = async (filtersObj: Partial<typeof state.value.filters>) => {
     try {
       state.value.isLoading = true;
 
@@ -722,7 +798,7 @@ export const useProductStore = defineStore('productStore', () => {
         category: '',
         sortBy: 'popularity',
         page: 1,
-        limit: 1000, // Increased limit to fetch more products
+        limit: 24, // Reduced limit to enable pagination
         color: '',
         size: '',
         brand: '',
@@ -789,7 +865,7 @@ export const useProductStore = defineStore('productStore', () => {
 
   // ==================== BUILD GRAPHQL QUERY WITH MULTIPLE FILTERS ====================
 
-  const buildGraphQLQuery = (filters) => {
+  const buildGraphQLQuery = (filters: GraphQLFilters) => {
     // Start building filter parameters
     let filterParams = []
 
@@ -807,7 +883,7 @@ export const useProductStore = defineStore('productStore', () => {
     if (filters.category && filters.category !== 'all') {
       // Find category in categories array to get ID
       const categoryObj = state.value.categories.find(cat =>
-        cat.name === filters.category || cat.name.toLowerCase() === filters.category.toLowerCase()
+        cat.name === filters.category! || cat.name.toLowerCase() === filters.category!.toLowerCase()
       )
 
       if (categoryObj) {
@@ -898,7 +974,7 @@ export const useProductStore = defineStore('productStore', () => {
 
   // ==================== FETCH PRODUCTS WITH MULTIPLE FILTERS ====================
 
-  const fetchProductsWithFilters = async (filtersToApply = {}) => {
+  const fetchProductsWithFilters = async (filtersToApply: Partial<typeof state.value.filters> = {}) => {
     state.value.isLoading = true
 
     try {
@@ -940,7 +1016,7 @@ export const useProductStore = defineStore('productStore', () => {
       const query = buildGraphQLQuery(mergedFilters)
 
 
-      let response;
+      let response: GraphQLResponse | undefined;
       let apiFailed = false;
 
       try {
@@ -987,68 +1063,52 @@ export const useProductStore = defineStore('productStore', () => {
       }
 
 
-      // Process API response - flatten variants into individual products
-      const realProducts = []
+      // Process API response - keep only main products
+      const realProducts: StoreProduct[] = []
 
       response.data.productFilter.data.forEach(product => {
-        // Create a separate product entry for each variant
-        if (product.variants && product.variants.length > 0) {
-          product.variants.forEach((variant, index) => {
-            // Fix image URLs for variant
-            const fixImageUrl = (url) => {
-              if (url && !url.startsWith('http')) {
-                if (url.startsWith('/')) {
-                  return `https://kartmania-api.vibrantick.org${url}`
-                } else {
-                  return `https://kartmania-api.vibrantick.org/${url}`
-                }
-              }
-              return url
-            }
-
-            // Fix variant images
-            const fixedVariantImages = variant.images ? variant.images.map(img => ({
+        // Add only the main product (not individual variants)
+        const mainProductWithFixedImages = {
+          ...product,
+          // Fix image URLs for main product
+          mainProduct: {
+            ...product.mainProduct,
+            images: product.mainProduct.images ? product.mainProduct.images.map(img => ({
               ...img,
-              imageUrl: fixImageUrl(img.imageUrl)
+              imageUrl: img.imageUrl ? (img.imageUrl.startsWith('http') ? img.imageUrl : 
+                (img.imageUrl.startsWith('/') ? `https://kartmania-api.vibrantick.org${img.imageUrl}` : 
+                `https://kartmania-api.vibrantick.org/${img.imageUrl}`)) : img.imageUrl
             })) : []
-
-            const variantProduct = {
-              ...product,
-              // Use variant as main product for display
-              mainProduct: {
-                ...product.mainProduct,
-                // Override with variant-specific data
-                id: variant.id,
-                name: variant.name,
-                price: variant.price,
-                images: fixedVariantImages.length > 0 ? fixedVariantImages : product.mainProduct.images,
-                // Use variant attributes directly, not from main product
-                attributes: variant.attributes || product.mainProduct.attributes
-              },
-              // Keep track of variant info
-              variantId: variant.id,
-              variantIndex: index,
-              // For product link and identification
-              groupId: product.groupId,
-              name: variant.name
-            }
-            realProducts.push(variantProduct)
-          })
-        } else {
-          // If no variants, add the main product as-is
-          realProducts.push(product)
+          }
         }
+        realProducts.push(mainProductWithFixedImages)
       })
 
 
       // Update state with real products only (no mock data)
       state.value.allProducts = realProducts
 
-      // Update pagination to reflect actual variant count
-      state.value.pagination = {
-        ...response.data.productFilter.pagination,
-        total: realProducts.length,
-        lastPage: Math.ceil(realProducts.length / response.data.productFilter.pagination.perPage)
+      // Update pagination to reflect actual main product count
+      if (response.data?.productFilter?.pagination) {
+        const pagination = response.data.productFilter.pagination
+        state.value.pagination = {
+          currentPage: pagination.currentPage || 1,
+          lastPage: pagination.lastPage || 1,
+          total: realProducts.length,
+          perPage: pagination.perPage || 24,
+          from: pagination.from || 0,
+          to: pagination.to || realProducts.length
+        }
+      } else {
+        // Fallback pagination if API response doesn't include pagination
+        state.value.pagination = {
+          currentPage: mergedFilters.page || 1,
+          lastPage: Math.ceil(realProducts.length / (mergedFilters.limit || 24)),
+          total: realProducts.length,
+          perPage: mergedFilters.limit || 24,
+          from: 0,
+          to: realProducts.length
+        }
       }
 
       // Apply client-side price filtering and sorting
@@ -1074,7 +1134,7 @@ export const useProductStore = defineStore('productStore', () => {
         currentPage: 1,
         lastPage: 1,
         total: 0,
-        perPage: 1000, // Increased perPage to match limit
+        perPage: 24, // Reduced perPage to match limit
         from: 0,
         to: 0
       }
@@ -1092,14 +1152,14 @@ export const useProductStore = defineStore('productStore', () => {
 
   // ==================== UPDATE FILTERS (MULTIPLE) ====================
 
-  const updateFilters = async (newFilters) => {
+  const updateFilters = async (newFilters: Partial<typeof state.value.filters>) => {
     const result = await fetchProductsWithFilters(newFilters)
     return result
   }
 
   // ====================TOGGLE FILTER FUNCTIONS====================
 
-  const toggleColorFilter = async (color) => {
+  const toggleColorFilter = async (color: string) => {
     const currentFilters = { ...state.value.filters }
 
     if (currentFilters.color === color) {
@@ -1113,7 +1173,7 @@ export const useProductStore = defineStore('productStore', () => {
     await fetchProductsWithFilters(currentFilters)
   }
 
-  const toggleSizeFilter = async (size) => {
+  const toggleSizeFilter = async (size: string) => {
     const currentFilters = { ...state.value.filters }
 
     if (currentFilters.size === size) {
@@ -1127,7 +1187,7 @@ export const useProductStore = defineStore('productStore', () => {
     await fetchProductsWithFilters(currentFilters)
   }
 
-  const toggleCategoryFilter = async (category) => {
+  const toggleCategoryFilter = async (category: string) => {
     const currentFilters = { ...state.value.filters }
 
     // Check if same category (case insensitive)
@@ -1152,7 +1212,7 @@ export const useProductStore = defineStore('productStore', () => {
     await fetchProductsWithFilters(currentFilters)
   }
 
-  const toggleBrandFilter = async (brand) => {
+  const toggleBrandFilter = async (brand: string) => {
     const currentFilters = { ...state.value.filters }
 
     if (currentFilters.brand === brand) {
@@ -1174,7 +1234,7 @@ export const useProductStore = defineStore('productStore', () => {
       category: '',
       sortBy: 'popularity',
       page: 1,
-      limit: 1000, // Increased limit to fetch more products
+      limit: 24, // Reduced limit to enable pagination
       color: '',
       size: '',
       brand: '',
@@ -1185,7 +1245,7 @@ export const useProductStore = defineStore('productStore', () => {
     await fetchProductsWithFilters(resetFilters)
   }
 
-  const clearFilter = async (filterName) => {
+  const clearFilter = async (filterName: string) => {
     const newFilters = { ...state.value.filters }
 
     if (filterName === 'category') {
@@ -1329,6 +1389,8 @@ export const useProductStore = defineStore('productStore', () => {
     getDescription,
     getProductColor,
     getProductSize,
+    getAllAvailableColors,
+    getAllAvailableSizes,
     getProductMaterial,
     getProductBrand,
     getDiscountedPrice,

@@ -66,10 +66,8 @@
       <!-- Products Swiper Carousel -->
       <div v-else-if="filteredProducts.length > 0" class="products-swiper-container">
         <Swiper
-          :modules="[Pagination]"
           :slides-per-view="1"
           :space-between="20"
-          :pagination="{ clickable: true }"
           :breakpoints="{
             400: { slidesPerView: 2, spaceBetween: 10 },
             576: { slidesPerView: 3, spaceBetween: 12 },

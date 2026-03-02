@@ -88,6 +88,7 @@
                           loading="lazy"
                           class="brand-logo"
                           @error="handleImageError"
+                          decoding="async"
                         />
                       </div>
                       <div class="brand-name text-center text-xs text-md-sm">{{ brand.name }}</div>
@@ -125,14 +126,26 @@ const API_URL_BRAND = config.public.api.brands
 // Handle image loading errors
 const handleImageError = (event) => {
   const img = event.target
-  // Fallback to local image
-  img.src = '/assets/images/festivel.jpg'
+  // Prevent infinite loop - only set fallback once
+  if (!img.dataset.fallbackSet) {
+    img.src = '/assets/images/nowcategory/festivel.jpg'
+    img.dataset.fallbackSet = 'true'
+  }
   img.onerror = null // Prevent infinite loop
 }
 
 const fetchBrands = async () => {
   try {
     loading.value = true
+    
+    // Check if API URL is available
+    if (!API_URL_BRAND) {
+      console.log('Brands API not configured, using fallback brands')
+      brands.value = getFallbackBrands()
+      loading.value = false
+      return
+    }
+    
     const res = await $fetch(API_URL_BRAND, { timeout: 5000 })
     
     if (res?.data && res.data.length > 0) {
@@ -140,22 +153,34 @@ const fetchBrands = async () => {
       brands.value = res.data.map(brand => ({
         id: brand.id,
         name: brand.name || `Brand ${brand.id}`,
-        logo: brand.logo || '/assets/images/festivel.jpg'
+        logo: brand.logo || '/assets/images/nowcategory/festivel.jpg'
       }))
       error.value = null
     } else {
       // API returned empty data, use fallback
-      brands.value = []
+      brands.value = getFallbackBrands()
       //console.log('API returned empty data, using fallback brands')
     }
   } catch (err) {
     console.error('API failed, using fallback brands:', err.message)
     // Use fallback brands on error
-    brands.value = []
+    brands.value = getFallbackBrands()
     error.value = null // Don't show error to user
   } finally {
     loading.value = false
   }
+}
+
+// Fallback brands to prevent API failures
+const getFallbackBrands = () => {
+  return [
+    { id: 1, name: 'Brand A', logo: '/assets/images/nowcategory/festivel.jpg' },
+    { id: 2, name: 'Brand B', logo: '/assets/images/nowcategory/festivel.jpg' },
+    { id: 3, name: 'Brand C', logo: '/assets/images/nowcategory/festivel.jpg' },
+    { id: 4, name: 'Brand D', logo: '/assets/images/nowcategory/festivel.jpg' },
+    { id: 5, name: 'Brand E', logo: '/assets/images/nowcategory/festivel.jpg' },
+    { id: 6, name: 'Brand F', logo: '/assets/images/nowcategory/festivel.jpg' }
+  ]
 }
 
 onMounted(() => {

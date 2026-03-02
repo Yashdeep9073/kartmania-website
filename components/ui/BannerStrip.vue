@@ -54,8 +54,11 @@ const offerDisplayName = computed(() => {
 // Image fallback
 
 const handleImageError = (e: Event) => {
-  ;(e.target as HTMLImageElement).src =
-    '/assets/images/buysection/t-shirt1.jpg'
+  const img = e.target as HTMLImageElement
+  if (!img.dataset.fallbackSet) {
+    img.src = '/assets/images/buysection/t-shirt1.jpg'
+    img.dataset.fallbackSet = 'true'
+  }
 }
 </script>
 

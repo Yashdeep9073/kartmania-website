@@ -26,14 +26,14 @@
                   <!-- LEFT: VERTICAL THUMBNAILS (Desktop only) -->
                   <div class="thumbnail-container me-3">
                     <Swiper direction="vertical" @swiper="setThumbsSwiper" :spaceBetween="12" :slidesPerView="4"
-                      :freeMode="true" :watchSlidesProgress="true" class="thumbnail-swiper h-100">
-                      <SwiperSlide v-for="(thumb, index) in thumbnailImages" :key="index" @click="goToSlide(index)">
+                      :freeMode="true" :watchSlidesProgress="true" :lazy="true" :preloadImages="false" class="thumbnail-swiper h-100">
+                      <SwiperSlide v-for="(thumb, index) in thumbnailImages" :key="index" @click="goToSlide(Number(index))">
                         <div :class="[
                           'thumbnail-item',
                           activeThumb === index ? 'active-thumbnail' : ''
                         ]">
                           <div class="thumbnail-image-wrapper">
-                            <img :src="thumb" :alt="`Thumbnail ${index + 1}`" class="thumbnail-image" />
+                            <img :src="safeLoadImage(thumb)" :alt="`Thumbnail ${Number(index) + 1}`" class="thumbnail-image" loading="lazy" decoding="async" @error="handleImageError" />
                           </div>
                         </div>
                       </SwiperSlide>
@@ -43,10 +43,11 @@
                   <!-- RIGHT: MAIN IMAGE -->
                   <div class="product-details__thumb-slider overflow-hidden flex-grow-1">
                     <Swiper :modules="[Thumbs]" :thumbs="{ swiper: thumbsSwiper }" :spaceBetween="0" :slidesPerView="1"
-                      class="main-swiper h-100" @swiper="setMainSwiper" @slideChange="onSlideChange">
+                      :lazy="true" :preloadImages="false" :loadOnTransitionStart="true" class="main-swiper h-100" @swiper="setMainSwiper" @slideChange="onSlideChange">
                       <SwiperSlide v-for="(image, index) in mainImages" :key="index" class="main-image-slide h-100">
                         <div class="main-image-container h-100 d-flex align-items-center justify-content-center">
-                          <img :src="image" :alt="`Product image ${index + 1}`" class="main-product-image" />
+                          <img :src="safeLoadImage(image)" :alt="`Product image ${Number(index) + 1}`" class="main-product-image" 
+                            :loading="index === 0 ? 'eager' : 'lazy'" decoding="async" :preload="index === 0" @error="handleImageError" />
                         </div>
 
                       </SwiperSlide>
@@ -57,7 +58,7 @@
                 <div class="d-xl-none">
                   <!-- Main Image with Dots -->
                   <div class="mobile-main-slider">
-                    <Swiper :modules="[Pagination]" :spaceBetween="0" :slidesPerView="1" :pagination="{
+                    <Swiper :modules="[Pagination]" :spaceBetween="0" :slidesPerView="1" :lazy="true" :preloadImages="false" :pagination="{
                       clickable: true,
                       el: '.mobile-pagination',
                       bulletClass: 'mobile-dot',
@@ -65,7 +66,7 @@
                     }" @swiper="setMobileMainSwiper" @slideChange="onMobileSlideChange" class="mobile-main-swiper">
                       <SwiperSlide v-for="(image, index) in mainImages" :key="index">
                         <div class="mobile-main-image-container">
-                          <img :src="image" :alt="`Product image ${index + 1}`" class="mobile-main-product-image" />
+                          <img :src="safeLoadImage(image)" :alt="`Product image ${Number(index) + 1}`" class="mobile-main-product-image" :loading="index === 0 ? 'eager' : 'lazy'" decoding="async" :preload="index === 0" @error="handleImageError" />
                         </div>
                       </SwiperSlide>
                     </Swiper>
@@ -75,16 +76,16 @@
 
                   <!-- Horizontal Thumbnails Slider for Mobile -->
                   <div class="mobile-thumbnails-slider mt-4">
-                    <Swiper :spaceBetween="10" :slidesPerView="4" :freeMode="true" :watchSlidesProgress="true"
+                    <Swiper :spaceBetween="10" :slidesPerView="4" :freeMode="true" :watchSlidesProgress="true" :lazy="true" :preloadImages="false"
                       class="mobile-thumbnail-swiper" @swiper="setMobileThumbsSwiper">
                       <SwiperSlide v-for="(thumb, index) in thumbnailImages" :key="index"
-                        @click="goToMobileSlide(index)">
+                        @click="goToMobileSlide(Number(index))">
                         <div :class="[
                           'mobile-thumbnail-item',
                           mobileActiveThumb === index ? 'mobile-active-thumbnail' : ''
                         ]">
                           <div class="mobile-thumbnail-image-wrapper">
-                            <img :src="thumb" :alt="`Thumbnail ${index + 1}`" class="mobile-thumbnail-image" />
+                            <img :src="safeLoadImage(thumb)" :alt="`Thumbnail ${Number(index) + 1}`" class="mobile-thumbnail-image" loading="lazy" decoding="async" @error="handleImageError" />
                           </div>
                         </div>
                       </SwiperSlide>
@@ -123,17 +124,23 @@
                   <span class="text-gray-900 d-block mb-8 fw-semibold">Color:</span>
                   <div class="flex-align flex-wrap gap-16">
                     <div v-for="color in availableColorsWithImages" :key="color.name" @click="selectColor(color.name)"
-                      class="flex flex-col items-center cursor-pointer">
+                      @mouseenter="preloadColorImages(color.name)"
+                      :class="['flex flex-col items-center cursor-pointer', 
+                        isChangingColor ? 'pointer-events-none opacity-50' : '']">
                       <div :class="[
                         'color-option w-48 h-48 rounded-lg border-2 transition-all duration-300 overflow-hidden relative',
                         selectedColor === color.name
                           ? 'border-main-600 scale-110 shadow-lg ring-2 ring-main-600 ring-offset-2'
                           : 'border-gray-300 hover:border-gray-400 hover:scale-105'
                       ]" :title="color.name">
-                        <img :src="color.imageUrl" :alt="color.name" class="w-full h-full object-cover" />
+                        <img :src="safeLoadImage(color.imageUrl)" :alt="color.name" class="w-full h-full object-cover" loading="lazy" decoding="async" @error="handleImageError" />
                         <div v-if="selectedColor === color.name"
                           class="absolute top-2 right-2 bg-main-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md">
                           <i class="ph-fill ph-check text-xs"></i>
+                        </div>
+                        <div v-if="isChangingColor && selectedColor === color.name" 
+                          class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
+                          <div class="w-6 h-6 border-2 border-main-600 border-t-transparent rounded-full animate-spin"></div>
                         </div>
                       </div>
                       <span class="text-xs text-gray-700 mt-2 font-medium">{{ color.name }}</span>
@@ -336,7 +343,7 @@
                       </button>
                       <input type="number" v-model.number="quantity"
                         class="quantity__input border-0 text-center w-48 fw-bold text-gray-900"
-                        :max="selectedVariant?.stock || mainProduct.stock" min="0" @input="validateQuantity" />
+                        :max="selectedVariant?.stock || mainProduct.stock" min="0" @input="(e) => quantity = validateQuantity(Number((e.target as HTMLInputElement).value))" />
                       <button type="button" @click="increaseQuantity"
                         class="quantity__plus w-32 h-32 flex-center rounded-full hover:bg-gray-50 transition-colors"
                         :disabled="quantity >= (selectedVariant?.stock || mainProduct.stock)"
@@ -356,7 +363,7 @@
                   <!-- Category-Specific Features -->
                   <div class="mt-24">
                     <!-- Clothing Features -->
-                    <div v-if="isClothingCategory" class="space-y-16">
+                    <div v-if="isClothingCategory()" class="space-y-16">
                       <div class="flex items-center gap-12 text-sm">
                         <i class="ph ph-fabric text-main-600 text-lg"></i>
                         <span class="text-gray-700">Premium fabric quality</span>
@@ -372,12 +379,14 @@
                     </div>
 
                     <!-- Shoes Features -->
-                    <div v-else-if="isShoesCategory" class="space-y-16">
+                    <div v-else-if="isShoesCategory()" class="space-y-16">
                       <div class="flex items-center gap-12 text-sm">
                         <i class="ph ph-footprints text-main-600 text-lg"></i>
-                        <span class="text-gray-700">Comfortable fit</span>
+                        <span class="text-gray-700">Ergonomic design</span>
                       </div>
                       <div class="flex items-center gap-12 text-sm">
+                        <i class="ph ph-drop text-main-600 text-lg"></i>
+                        <span class="text-gray-700">Water resistant</span>
                         <i class="ph ph-breadcrumb text-main-600 text-lg"></i>
                         <span class="text-gray-700">Non-slip sole</span>
                       </div>
@@ -388,7 +397,7 @@
                     </div>
 
                     <!-- Electronics Features -->
-                    <div v-else-if="isElectronicsCategory" class="space-y-16">
+                    <div v-else-if="isElectronicsCategory()" class="space-y-16">
                       <div class="flex items-center gap-12 text-sm">
                         <i class="ph ph-shield-check text-main-600 text-lg"></i>
                         <span class="text-gray-700">1 Year Warranty</span>
@@ -611,7 +620,7 @@
                   <div class="flex items-start gap-12">
                     <div class="flex-shrink-0">
                       <div class="w-40 h-40 rounded-lg overflow-hidden">
-                        <img :src="item.image" :alt="item.name" class="w-full h-full object-cover">
+                        <img :src="safeLoadImage(item.image)" :alt="item.name" class="w-full h-full object-cover" loading="lazy" decoding="async" @error="handleImageError" />
                       </div>
                     </div>
                     <div class="flex-1 min-w-0">
@@ -757,7 +766,7 @@
           </ul>
           <div
             class="bg-gradient-to-r from-green-50 to-emerald-50 text-green-600 rounded-12 flex-align gap-8 hover:from-green-100 hover:to-emerald-100 hover:text-green-700 transition-all duration-300 border border-green-200">
-            <img src="/assets/images/icon/satisfaction-icon.png" alt="Satisfaction Guaranteed" class="w-24 h-24">
+            <img :src="safeLoadImage('/assets/images/icon/satisfaction-icon.png')" alt="Satisfaction Guaranteed" class="w-24 h-24" loading="lazy" decoding="async" @error="handleImageError" />
             100% Satisfaction Guaranteed
           </div>
         </div>
@@ -877,8 +886,8 @@
                   <div class="space-y-3">
                     <div class="flex items-center gap-3">
                       <div class="w-20 h-20 rounded-lg overflow-hidden border border-gray-300">
-                        <img :src="getColorFirstImage(selectedVariant.color)" :alt="selectedVariant.color"
-                          class="w-full h-full object-cover" />
+                        <img :src="safeLoadImage(getColorFirstImage(selectedVariant.color))" :alt="selectedVariant.color"
+                          class="w-full h-full object-cover" loading="lazy" decoding="async" @error="handleImageError" />
                       </div>
                       <div>
                         <span class="text-gray-500 text-sm">Color:</span>
@@ -998,11 +1007,11 @@
                   <div v-for="(review, index) in mainProduct.reviews" :key="index"
                     class="d-flex align-items-start gap-24 pb-44 border-bottom border-gray-100 mb-44">
                     <img src="/assets/images/thumbs/comment-img1.png" alt=""
-                      class="w-52 h-52 object-fit-cover rounded-full flex-shrink-0 shadow-sm">
+                      class="w-52 h-52 object-fit-cover rounded-full flex-shrink-0 shadow-sm" loading="lazy" decoding="async" @error="handleImageError" />
                     <div class="flex-grow-1">
                       <div class="flex-between align-items-start gap-8">
                         <div class="">
-                          <h6 class="mb-12 text-md fw-semibold">Customer {{ index + 1 }}</h6>
+                          <h6 class="mb-12 text-md fw-semibold">Customer {{ Number(index) + 1 }}</h6>
                           <div class="flex-align gap-8">
                             <span v-for="star in 5" :key="star" class="text-xs fw-medium d-flex">
                               <i class="ph"
@@ -1096,7 +1105,7 @@
           <button @click="closeSizeGuide" class="close-btn">&times;</button>
         </div>
         <div class="modal-body">
-          <div v-if="getSizeChartData().length > 0">
+          <div v-if="getSizeChartData().clothing.length > 0">
             <div class="mb-24">
               <h6 class="text-sm font-semibold mb-8">How to measure:</h6>
               <ul class="text-sm text-gray-600 space-y-2">
@@ -1127,7 +1136,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(item, index) in getSizeChartData()" :key="index">
+                  <tr v-for="(item, index) in getSizeChartData().clothing" :key="index">
                     <td class="font-semibold">{{ item.size }}</td>
                     <td>{{ item.chest }}</td>
                     <td>{{ item.waist }}</td>
@@ -1154,10 +1163,11 @@
 
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Thumbs, Pagination } from 'swiper/modules'
+import type { Swiper as SwiperType } from 'swiper'
 import { useProductGroupApi } from '~/composables/api/useProductGroupApi'
 
 import 'swiper/css'
@@ -1181,6 +1191,7 @@ const { data, loading, error } = useProductGroupApi(styleGroupId)
    CORE STATE
 -----------------------------------*/
 
+const isChangingColor = ref(false)
 const groupID = ref<string | number | null>(null)
 const mainProduct = ref<any>(null)
 const variants = ref<any[]>([])
@@ -1190,9 +1201,34 @@ const selectedVariant = ref<any>(null)
    SWIPER STATE
 -----------------------------------*/
 
-const thumbsSwiper = ref(null)
-const mainSwiper = ref(null)
+const thumbsSwiper = ref<SwiperType | null>(null)
+const mainSwiper = ref<SwiperType | null>(null)
 const activeThumb = ref(0)
+
+/* ----------------------------------
+   MOBILE SWIPER STATE
+-----------------------------------*/
+
+const mobileMainSwiper = ref<SwiperType | null>(null)
+const mobileThumbsSwiper = ref<SwiperType | null>(null)
+const mobileActiveThumb = ref(0)
+
+const setMobileMainSwiper = (swiper: SwiperType) => {
+  mobileMainSwiper.value = swiper
+}
+
+const setMobileThumbsSwiper = (swiper: SwiperType) => {
+  mobileThumbsSwiper.value = swiper
+}
+
+const goToMobileSlide = (index: number) => {
+  mobileActiveThumb.value = index
+  if (mobileMainSwiper.value && mobileMainSwiper.value.slideTo) mobileMainSwiper.value.slideTo(index)
+}
+
+const onMobileSlideChange = (swiper: SwiperType) => {
+  mobileActiveThumb.value = swiper.activeIndex
+}
 
 /* ----------------------------------
    QUANTITY
@@ -1237,14 +1273,17 @@ const selectedSize = computed(
 -----------------------------------*/
 
 const mainImages = computed(() => {
+  // First try: Selected variant images
   if (selectedVariant.value?.images?.length) {
-    return selectedVariant.value.images.map((i: any) => i.imageUrl)
+    return selectedVariant.value.images.map((i: any) => safeLoadImage(i.imageUrl))
   }
-
+  
+  // Second try: Main product images
   if (mainProduct.value?.images?.length) {
-    return mainProduct.value.images.map((i: any) => i.imageUrl)
+    return mainProduct.value.images.map((i: any) => safeLoadImage(i.imageUrl))
   }
-
+  
+  // Fallback: Return empty array to prevent errors
   return []
 })
 
@@ -1284,13 +1323,54 @@ const selectVariant = (variant: any) => {
 }
 
 const selectColor = (colorName: string) => {
-  const match = variants.value.find(
+  // Find any variant with the selected color (prioritize current size if available)
+  let match = variants.value.find(
     v =>
       v.color?.name === colorName &&
       v.size?.name === selectedSize.value
   )
+  
+  // If no variant matches current size, pick the first variant with the selected color
+  if (!match) {
+    match = variants.value.find(
+      v => v.color?.name === colorName
+    )
+  }
 
-  if (match) selectedVariant.value = match
+  if (match) {
+    // Set loading state
+    isChangingColor.value = true
+    
+    selectedVariant.value = match
+    
+    // Force immediate update of computed properties
+    nextTick(() => {
+      // Preload all images for this color
+      const colorVariants = variants.value.filter(v => v.color?.name === colorName)
+      colorVariants.forEach(variant => {
+        preloadVariantImages(variant)
+      })
+      
+      // Force Swiper to completely reinitialize
+      setTimeout(() => {
+        if (mainSwiper.value) {
+          mainSwiper.value.slideTo(0)
+          mainSwiper.value.update()
+          mainSwiper.value.updateSize()
+          mainSwiper.value.updateSlides()
+        }
+        if (mobileMainSwiper.value) {
+          mobileMainSwiper.value.slideTo(0)
+          mobileMainSwiper.value.update()
+          mobileMainSwiper.value.updateSize()
+          mobileMainSwiper.value.updateSlides()
+        }
+        
+        // Reset loading state
+        isChangingColor.value = false
+      }, 100)
+    })
+  }
 }
 
 const selectSize = (sizeName: string) => {
@@ -1321,6 +1401,95 @@ const discountedPrice = computed(() => {
 })
 
 /* ----------------------------------
+   IMAGE PRELOADING & ERROR HANDLING
+-----------------------------------*/
+
+// Fallback image path
+const FALLBACK_IMAGE = '/assets/images/placeholder.jpg'
+
+// Safe image loading with error handling
+const safeLoadImage = (src: string, fallback: string = FALLBACK_IMAGE): string => {
+  if (!src || src.trim() === '') return fallback
+  return src
+}
+
+// Image error handler with infinite loop protection
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  
+  // Prevent infinite loops
+  if (img.dataset.fallbackSet === 'true') return
+  
+  // Set fallback and mark as handled
+  img.src = FALLBACK_IMAGE
+  img.dataset.fallbackSet = 'true'
+}
+
+const preloadVariantImages = (variant: any) => {
+  if (!variant?.images?.length) return
+  
+  // Create image elements with proper error handling
+  variant.images.forEach((imageObj: any, index: number) => {
+    const img = new Image()
+    
+    // Set up load and error handlers
+    img.onload = () => {
+      console.log(`Image loaded: ${imageObj.imageUrl}`)
+    }
+    
+    img.onerror = (error) => {
+      console.error(`Image failed to load: ${imageObj.imageUrl}`, error)
+    }
+    
+    // Start loading the image
+    img.src = safeLoadImage(imageObj.imageUrl)
+  })
+}
+
+const preloadColorImages = (colorName: string) => {
+  const colorVariants = variants.value.filter(v => v.color?.name === colorName)
+  // Preload only first image of each variant for color switching
+  colorVariants.forEach(variant => {
+    if (variant.images?.[0]?.imageUrl) {
+      const img = new Image()
+      img.src = safeLoadImage(variant.images[0].imageUrl)
+    }
+  })
+}
+
+// Progressive image loading
+const loadImagesProgressively = () => {
+  if (!mainImages.value.length) return
+  
+  // Load first image immediately (above the fold)
+  if (mainImages.value[0]) {
+    const img = new Image()
+    img.src = safeLoadImage(mainImages.value[0])
+  }
+  
+  // Load remaining images after a delay
+  setTimeout(() => {
+    mainImages.value.slice(1).forEach((src: string, index: number) => {
+      setTimeout(() => {
+        const img = new Image()
+        img.src = safeLoadImage(src)
+      }, index * 200) // Stagger loading by 200ms
+    })
+  }, 500)
+}
+
+// Preload images for all variants when component mounts
+onMounted(() => {
+  // Load images progressively instead of all at once
+  loadImagesProgressively()
+  
+  // Preload first variant only
+  if (variants.value.length > 0) {
+    preloadVariantImages(variants.value[0])
+  }
+})
+
+/* ----------------------------------
    STOCK
 -----------------------------------*/
 
@@ -1348,20 +1517,20 @@ const decreaseQuantity = () => {
    SWIPER METHODS
 -----------------------------------*/
 
-const setThumbsSwiper = (swiper: any) => {
+const setThumbsSwiper = (swiper: SwiperType) => {
   thumbsSwiper.value = swiper
 }
 
-const setMainSwiper = (swiper: any) => {
+const setMainSwiper = (swiper: SwiperType) => {
   mainSwiper.value = swiper
 }
 
 const goToSlide = (index: number) => {
   activeThumb.value = index
-  if (mainSwiper.value) mainSwiper.value.slideTo(index)
+  if (mainSwiper.value && mainSwiper.value.slideTo) mainSwiper.value.slideTo(index)
 }
 
-const onSlideChange = (swiper: any) => {
+const onSlideChange = (swiper: SwiperType) => {
   activeThumb.value = swiper.activeIndex
 }
 
@@ -1381,6 +1550,126 @@ const loadCartFromStorage = () => {
 const saveCart = (cart: any[]) => {
   localStorage.setItem('shopping_cart', JSON.stringify(cart))
   loadCartFromStorage()
+}
+
+/* ----------------------------------
+   MISSING FUNCTIONS & PROPERTIES
+-----------------------------------*/
+
+const activeTab = ref('description')
+const showSizeGuide = ref(false)
+const successMessage = ref('')
+const showSuccessMessage = ref(false)
+const rating = ref(0)
+const reviewTitle = ref('')
+const reviewContent = ref('')
+
+// Cart computed properties
+const cartItemCount = computed(() => cartItems.value.reduce((sum, item) => sum + item.quantity, 0))
+const cartSubtotal = computed(() => cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0))
+const cartTotalPrice = computed(() => cartSubtotal.value)
+
+// Size functions
+const isClothingCategory = () => mainProduct.value?.category?.name?.toLowerCase().includes('clothing')
+const isShoesCategory = () => mainProduct.value?.category?.name?.toLowerCase().includes('shoes')
+const isElectronicsCategory = () => mainProduct.value?.category?.name?.toLowerCase().includes('electronics')
+
+const getClothingSizes = () => ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+const getShoeSizes = () => ['6', '7', '8', '9', '10', '11', '12']
+const getElectronicsSizes = () => ['Standard', 'Large', 'Extra Large']
+
+const getSizeChartData = () => ({
+  clothing: [
+    { size: 'S', chest: '36-38', waist: '30-32', length: '26-27' },
+    { size: 'M', chest: '39-41', waist: '33-35', length: '27-28' },
+    { size: 'L', chest: '42-44', waist: '36-38', length: '28-29' }
+  ] as Array<{size: string, chest: string, waist: string, length: string}>,
+  shoes: [
+    { size: '8', length: '25.5', width: '10' },
+    { size: '9', length: '26', width: '10.5' },
+    { size: '10', length: '26.5', width: '11' }
+  ] as Array<{size: string, length: string, width: string}>
+})
+
+const getFitClass = (fit: string) => {
+  const fits: Record<string, string> = { 'tight': 'text-red-600', 'regular': 'text-green-600', 'loose': 'text-blue-600' }
+  return fits[fit] || 'text-gray-600'
+}
+
+const getFitText = (fit: string) => {
+  const fits: Record<string, string> = { 'tight': 'Tight Fit', 'regular': 'Regular Fit', 'loose': 'Loose Fit' }
+  return fits[fit] || 'Unknown Fit'
+}
+
+// Image functions
+const getColorFirstImage = (colorName: string) => {
+  const color = mainProduct.value?.colors?.find((c: any) => c.name === colorName)
+  return color?.imageUrl || '/assets/images/placeholder.jpg'
+}
+
+// Utility functions
+const formatDate = (date: string) => new Date(date).toLocaleDateString()
+
+const calculateAverageRating = () => {
+  if (!mainProduct.value?.reviews?.length) return 0
+  const sum = mainProduct.value.reviews.reduce((acc: number, review: any) => acc + review.rating, 0)
+  return Number((sum / mainProduct.value.reviews.length).toFixed(1))
+}
+
+// Action functions
+const openSizeGuide = () => showSizeGuide.value = true
+const closeSizeGuide = () => showSizeGuide.value = false
+
+const setRating = (value: number) => rating.value = value
+
+const orderOnWhatsapp = () => {
+  const message = `I want to order: ${mainProduct.value?.name} - ${selectedVariant.value?.name}`
+  window.open(`https://wa.me/1234567890?text=${encodeURIComponent(message)}`, '_blank')
+}
+
+const validateQuantity = (value: number) => {
+  const max = selectedVariant.value?.stock || 1
+  return Math.min(Math.max(1, value), max)
+}
+
+const toggleWishlist = () => {
+  // Wishlist toggle logic
+}
+
+const isInWishlist = computed(() => false) // Simplified for now
+
+const compareProduct = () => {
+  // Compare logic
+}
+
+const shareProduct = () => {
+  if (navigator.share) {
+    navigator.share({
+      title: mainProduct.value?.name,
+      url: window.location.href
+    })
+  }
+}
+
+const refreshCartSummary = () => {
+  loadCartFromStorage()
+}
+
+const removeFromCart = (itemId: number) => {
+  const cart = cartItems.value.filter(item => item.id !== itemId)
+  saveCart(cart)
+}
+
+const updateCartItemQuantity = (itemId: number, newQuantity: number) => {
+  const cart = cartItems.value.map(item => 
+    item.id === itemId ? { ...item, quantity: newQuantity } : item
+  )
+  saveCart(cart)
+}
+
+const submitReview = () => {
+  // Review submission logic
+  console.log('Review submitted:', { rating: rating.value, title: reviewTitle.value, content: reviewContent.value })
 }
 
 const addToCart = () => {

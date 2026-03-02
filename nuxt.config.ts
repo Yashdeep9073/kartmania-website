@@ -1,7 +1,7 @@
 
 export default defineNuxtConfig({
   plugins: [
-    '~/plugins/toast.client.js',
+    '~/plugins/toast.client.ts',
     '~/plugins/scroll.client.ts'
   ],
 
@@ -31,7 +31,7 @@ export default defineNuxtConfig({
         {
           rel: 'icon',
           type: 'image/png',
-          href: '/icons/icon-192.png'
+          href: '/pranzo-fevicon.png'
         },
         {
           rel: 'stylesheet',
@@ -70,6 +70,34 @@ export default defineNuxtConfig({
     transpile: ['@urql/vue', 'graphql']
   },
 
+  // Performance optimizations
+  nitro: {
+    compressPublicAssets: true
+  },
+
+  // Image optimization
+  image: {
+    format: ['webp', 'avif', 'jpg'],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536
+    },
+    densities: [1, 2],
+    quality: 80
+  },
+
+  // Performance optimizations
+  routeRules: {
+    '/': { prerender: true },
+    '/shop-all/**': { isr: 60 },
+    '/cart/**': { isr: 30 },
+    '/account/**': { isr: 30 }
+  },
+
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE,
@@ -100,8 +128,8 @@ export default defineNuxtConfig({
       display: 'standalone',
       start_url: '/',
       icons: [
-        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+        { src: '/pranzo fevicon.png', sizes: '192x192', type: 'image/png' },
+        { src: '/pranzo fevicon.png', sizes: '512x512', type: 'image/png' }
       ]
     }
   }

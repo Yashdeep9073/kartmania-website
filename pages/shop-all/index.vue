@@ -571,15 +571,34 @@
                           {{ product.mainProduct?.description || '' }}
                         </p> -->
 
-                        <div v-if="getProductColor(product) || getProductSize(product)" class="variant-info">
-                          <span v-if="getProductColor(product)" class="variant-chip">
-                            <span class="color-dot"
-                              :style="{ backgroundColor: getColorHex(getProductColor(product)) }"></span>
-                            {{ getProductColor(product) }}
-                          </span>
-                          <span v-if="getProductSize(product)" class="variant-chip size-chip">
-                            Size {{ getProductSize(product) }}
-                          </span>
+                        <div v-if="getAllAvailableColors(product).length > 0 || getAllAvailableSizes(product).length > 0" class="variant-info">
+                          <!-- Show available colors -->
+                          <div v-if="getAllAvailableColors(product).length > 0" class="available-colors">
+                            <span class="variant-label">Colors:</span>
+                            <div class="color-options">
+                              <span v-for="color in getAllAvailableColors(product).slice(0, 3)" :key="color" class="variant-chip">
+                                <span class="color-dot" :style="{ backgroundColor: getColorHex(color) }"></span>
+                                {{ color }}
+                              </span>
+                              <span v-if="getAllAvailableColors(product).length > 3" class="more-count">
+                                +{{ getAllAvailableColors(product).length - 3 }}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <!-- Show available sizes -->
+                          <div v-if="getAllAvailableSizes(product).length > 0" class="available-sizes">
+                            <span class="variant-label">Sizes:</span>
+                            <div class="size-options">
+                              <span v-for="size in getAllAvailableSizes(product).slice(0, 4)" :key="size" class="variant-chip size-chip">
+                                {{ size }}
+                              </span>
+                              <span v-if="getAllAvailableSizes(product).length > 4" class="more-count">
+                                +{{ getAllAvailableSizes(product).length - 4 }}
+                              </span>
+                            </div>
+                          </div>
+                          
                           <span class="review-badge">
                             <i class="ph ph-eye-bold"></i>
                             {{ (getReviewCount(product) || 12) + Math.floor(Math.random() * 5) + 1 }} Reviews
@@ -633,13 +652,30 @@
                       </h3>
 
                       <div class="list-meta">
-                        <div v-if="getProductColor(product)" class="color-meta">
-                          <span class="color-indicator-sm"
-                            :style="{ backgroundColor: getColorHex(getProductColor(product)) }"></span>
-                          <span>{{ getProductColor(product) }}</span>
+                        <div v-if="getAllAvailableColors(product).length > 0" class="color-meta">
+                          <span class="variant-label">Colors:</span>
+                          <div class="color-list">
+                            <span v-for="color in getAllAvailableColors(product).slice(0, 3)" :key="color" class="color-item">
+                              <span class="color-indicator-sm" :style="{ backgroundColor: getColorHex(color) }"></span>
+                              {{ color }}
+                            </span>
+                            <span v-if="getAllAvailableColors(product).length > 3" class="more-count">
+                              +{{ getAllAvailableColors(product).length - 3 }}
+                            </span>
+                          </div>
                         </div>
                         <span v-if="getProductBrand(product)">Brand: {{ getProductBrand(product) }}</span>
-                        <span v-if="getProductSize(product)">Size: {{ getProductSize(product) }}</span>
+                        <div v-if="getAllAvailableSizes(product).length > 0" class="size-meta">
+                          <span class="variant-label">Sizes:</span>
+                          <div class="size-list">
+                            <span v-for="size in getAllAvailableSizes(product).slice(0, 4)" :key="size" class="size-item">
+                              {{ size }}
+                            </span>
+                            <span v-if="getAllAvailableSizes(product).length > 4" class="more-count">
+                              +{{ getAllAvailableSizes(product).length - 4 }}
+                            </span>
+                          </div>
+                        </div>
                       </div>
 
                       <div class="list-price">
@@ -671,6 +707,13 @@
 
               <!-- Pagination -->
               <div v-if="pagination.lastPage > 1" class="pagination-container">
+                <!-- Debug Info (remove in production) -->
+                <div class="text-center mb-16 text-sm text-gray-600">
+                  Page {{ pagination.currentPage }} of {{ pagination.lastPage }} | 
+                  Total: {{ pagination.total }} products | 
+                  Showing: {{ pagination.from }}-{{ pagination.to }}
+                </div>
+                
                 <div class="pagination">
                   <button @click="goToPage(filters.page - 1)" :disabled="filters.page === 1 || isLoading"
                     class="pagination-btn prev">
@@ -838,6 +881,8 @@ const handleChipImageError = (event) => {
 
 const getProductColor = (product) => productStore.getProductColor(product)
 const getProductSize = (product) => productStore.getProductSize(product)
+const getAllAvailableColors = (product) => productStore.getAllAvailableColors(product)
+const getAllAvailableSizes = (product) => productStore.getAllAvailableSizes(product)
 const getProductRating = (product) => productStore.getProductRating(product) || 3.5
 const getReviewCount = (product) => productStore.getReviewCount(product) || Math.floor(Math.random() * 100) + 1
 const getPrimaryImage = (product) => productStore.getProductImage(product)
@@ -2943,4 +2988,85 @@ h6 {
     color: #f9fafb;
   }
 } */
+
+/* Variant Display Styles */
+.variant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.variant-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 6px;
+}
+
+.available-colors,
+.available-sizes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.color-options,
+.size-options {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.more-count {
+  font-size: 11px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* List View Variant Styles */
+.list-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.color-meta,
+.size-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-list,
+.size-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.color-item,
+.size-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #374151;
+}
+
+.color-indicator-sm {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+}
 </style>

@@ -228,16 +228,22 @@ const getCategoryLink = (category) => {
 // Handle image error for desktop
 const handleImageError = (event) => {
   const imgElement = event.target
-  const categoryName = imgElement.alt || ''
-  imgElement.src = getFallbackImage(categoryName)
+  if (!imgElement.dataset.fallbackSet) {
+    const categoryName = imgElement.alt || ''
+    imgElement.src = getFallbackImage(categoryName)
+    imgElement.dataset.fallbackSet = 'true'
+  }
 }
 
 // Handle image error for mobile
 const handleMobileImageError = (event) => {
   const imgElement = event.target
-  const categoryName = imgElement.alt || ''
-  imgElement.src = getFallbackImage(categoryName)
-  imgElement.classList.add('error-fallback')
+  if (!imgElement.dataset.fallbackSet) {
+    const categoryName = imgElement.alt || ''
+    imgElement.src = getFallbackImage(categoryName)
+    imgElement.classList.add('error-fallback')
+    imgElement.dataset.fallbackSet = 'true'
+  }
 }
 
 

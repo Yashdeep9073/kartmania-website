@@ -17,15 +17,21 @@ export const useProductGroupApi = (
         try {
             let url: string
 
-            if (groupId && unref(groupId)) {
+            // Skip API call if groupId is "default" (placeholder value)
+            if (groupId && unref(groupId) && unref(groupId) !== 'default') {
                 // ✅ Single group
                 url = api.products.group.single(unref(groupId)!)
+            } else if (groupId && unref(groupId) === 'default') {
+                // Skip API call for "default" placeholder
+                data.value = null
+                loading.value = false
+                return
             } else {
                 // ✅ All groups
                 url = api.products.group.list()
             }
 
-            const res = await $fetch(url)
+            const res = await $fetch<{ data: any }>(url)
 
             data.value = res?.data ?? null
         } catch (e) {

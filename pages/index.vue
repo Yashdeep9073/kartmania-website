@@ -8,43 +8,79 @@ import HomeFeature from "~/components/home/HomeFeature.vue"
 import HomeFlashm from "~/components/home/HomeFlashm.vue"
 import LazySection from "~/components/ui/LazySection.vue"
 
-/* Heavy components (ASYNC) */
-const HomePromotion = defineAsyncComponent(() => 
-  import("~/components/home/HomePromotion.vue")
-)
-const HomeFlash = defineAsyncComponent(() =>
-  import("~/components/home/HomeFlash.vue")
-)
-const HomeBrand = defineAsyncComponent(() =>
-  import("~/components/home/HomeBrand.vue")
-)
-const HomeCategory = defineAsyncComponent(() =>
-  import("~/components/home/HomeCategory.vue")
-)
-const HomeRecomend = defineAsyncComponent(() =>
-  import("~/components/home/HomeRecomend.vue")
-)
-const HomeOffer = defineAsyncComponent(() =>
-  import("~/components/home/HomeOffer.vue") 
-)
-const HomeHotdeal = defineAsyncComponent(() =>
-  import("~/components/home/HomeHotdeal.vue") 
-)
-const HomeDiscount = defineAsyncComponent(() =>
-  import("~/components/home/HomeDiscount.vue")
-)
-const HomeShortProduct = defineAsyncComponent(() =>   
-  import("~/components/home/HomeShortProduct.vue")
-)
-const HomeDailySell = defineAsyncComponent(() =>
-  import("~/components/home/HomeDailySell.vue")
-)
-const ProductNews = defineAsyncComponent(() =>
-  import("~/components/product/ProductNews.vue")
-)
-const HomeOffersGrid = defineAsyncComponent(() =>
-  import("~/components/home/HomeOffersGrid.vue")
-)
+/* Heavy components (ASYNC with error handling) */
+const HomePromotion = defineAsyncComponent({ 
+  loader: () => import("~/components/home/HomePromotion.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeFlash = defineAsyncComponent({
+  loader: () => import("~/components/home/HomeFlash.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeBrand = defineAsyncComponent({
+  loader: () => import("~/components/home/HomeBrand.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeCategory = defineAsyncComponent({
+  loader: () => import("~/components/home/HomeCategory.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeRecomend = defineAsyncComponent({
+  loader: () => import("~/components/home/HomeRecomend.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeOffer = defineAsyncComponent({
+  loader: () => import("~/components/home/HomeOffer.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeHotdeal = defineAsyncComponent({
+  loader: () => import("~/components/home/HomeHotdeal.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeDiscount = defineAsyncComponent({
+  loader: () => import("~/components/home/HomeDiscount.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeShortProduct = defineAsyncComponent({   
+  loader: () => import("~/components/home/HomeShortProduct.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeDailySell = defineAsyncComponent({
+  loader: () => import("~/components/home/HomeDailySell.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const ProductNews = defineAsyncComponent({
+  loader: () => import("~/components/product/ProductNews.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
+const HomeOffersGrid = defineAsyncComponent({
+  loader: () => import("~/components/home/HomeOffersGrid.vue"),
+  errorComponent: () => import("~/components/ui/LazySection.vue"),
+  delay: 200,
+  timeout: 3000
+})
 
 useHead({ title: "Home" })
 </script>
@@ -57,19 +93,19 @@ useHead({ title: "Home" })
     <HomeFeature />
 
     <!-- BELOW THE FOLD (LAZY) -->
-    <LazySection :component="HomePromotion"/>
-    <LazySection :component="HomeFlash" />
-    <LazySection :component="HomeBrand" />
-    <LazySection :component="HomeFlashm" /> 
-    <LazySection :component="HomeOffersGrid" />
-    <LazySection :component="HomeCategory" /> 
-    <LazySection :component="HomeRecomend" /> 
-    <LazySection :component="HomeOffer" /> 
-    <LazySection :component="HomeHotdeal" /> 
-    <LazySection :component="HomeDiscount" />
-    <LazySection :component="HomeShortProduct" />
-    <LazySection :component="HomeDailySell" /> 
-    <LazySection :component="ProductNews" /> 
+    <LazySection :component="HomePromotion" root-margin="100px" />
+    <LazySection :component="HomeFlash" root-margin="100px" />
+    <LazySection :component="HomeBrand" root-margin="100px" />
+    <LazySection :component="HomeFlashm" root-margin="100px" /> 
+    <LazySection :component="HomeOffersGrid" root-margin="150px" />
+    <LazySection :component="HomeCategory" root-margin="150px" /> 
+    <LazySection :component="HomeRecomend" root-margin="200px" /> 
+    <LazySection :component="HomeOffer" root-margin="200px" /> 
+    <LazySection :component="HomeHotdeal" root-margin="200px" /> 
+    <LazySection :component="HomeDiscount" root-margin="250px" />
+    <LazySection :component="HomeShortProduct" root-margin="250px" />
+    <LazySection :component="HomeDailySell" root-margin="300px" /> 
+    <LazySection :component="ProductNews" root-margin="300px" /> 
   </div>
 </template>
 

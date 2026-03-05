@@ -648,13 +648,13 @@
                             <p class="text-sm font-semibold text-gray-800 line-clamp-2 mb-4">{{ item.name }}</p>
                             <div class="flex items-center gap-8">
                               <span v-if="item.color" 
-                                class="inline-flex items-center gap-4 px-6 py-2 bg-blue-50 rounded-full font-medium">
+                                class="inline-flex items-center gap-4 px-6 py-2 bg-blue-50 rounded-full font-medium force-color-red">
                                 <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: getColorHex(item.color) }"></span>
-                                <span class="cart-label-text">{{ item.color }}</span>
+                                {{ item.color }}
                               </span>
                               <span v-if="item.size" 
-                                class="px-6 py-2 bg-green-50 rounded-full font-medium">
-                                <span class="cart-label-text">{{ item.size }}</span>
+                                class="px-6 py-2 bg-green-50 rounded-full font-medium force-color-red">
+                                {{ item.size }}
                               </span>
                             </div>
                           </div>
@@ -2431,6 +2431,17 @@ span.cart-label-text {
 }
 
 div[class*="bg-"] span.cart-label-text {
+  color: #CA2D52 !important;
+  font-size: 0.75rem !important;
+}
+
+/* Final attempt - new class name */
+.force-color-red {
+  color: #CA2D52 !important;
+  font-size: 0.75rem !important;
+}
+
+span.force-color-red {
   color: #CA2D52 !important;
   font-size: 0.75rem !important;
 }

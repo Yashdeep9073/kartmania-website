@@ -46,7 +46,7 @@
                     Add <i class="ph ph-shopping-cart"></i>
                   </button>
 
-                  <NuxtLink :to="`/shop-all/--${product.id}`" class="product-image-container">
+                  <NuxtLink :to="generateProductUrl(product)" class="product-image-container">
                     <img :src="getProductImage(product)" :alt="product.name" class="product-image"
                       @error="handleImageError($event)" loading="lazy" width="280" height="210" />
                   </NuxtLink>
@@ -71,7 +71,7 @@
                     </div>
 
                     <h6 class="product-title">
-                      <NuxtLink :to="`/shop-all/--${product.id}`" class="product-link">
+                      <NuxtLink :to="generateProductUrl(product)" class="product-link">
                         {{ product.name }}
                       </NuxtLink>
                     </h6>
@@ -257,6 +257,26 @@ export default {
   }
   event.target.onerror = null // Prevent infinite loop
 }
+
+    // Generate SEO-friendly URL for products
+    const generateProductUrl = (product: any) => {
+      if (!product) return '/shop-all'
+      
+      // Get product name and slugify it
+      const name = product.name || product.title || 'product'
+      const slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .trim()
+      
+      // Get product ID
+      const productId = product.id || product.groupId || product.productId || ''
+      
+      // Return SEO-friendly URL
+      return `/shop-all/${slug}/${productId}`
+    }
     const addToCart = (product: any) => { 
       const { addToCart: cartAdd } = useCart()
       cartAdd(product)
@@ -280,6 +300,7 @@ export default {
       getRandomSoldPercentage,
       getRandomAvailable,
       handleImageError,
+      generateProductUrl,
       addToCart,
       getCountdown,
       formatDiscountText,

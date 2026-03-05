@@ -37,7 +37,7 @@
               </div>
             </div>
             
-            <div class="overflow-x-auto scroll-sm scroll-sm-horizontal">
+            <div class="overflow-x-auto scroll-sm scroll-sm-horizontal scrollbar-hide">
               <table class="table style-three">
                 <thead>
                   <tr>
@@ -575,6 +575,41 @@ onUnmounted(() => {
   .up{
     margin-top: 50px;
   }
+
+  /* Hide scrollbar while keeping scrollability */
+  .scrollbar-hide {
+    /* Firefox */
+    scrollbar-width: none;
+    -moz-scrollbar-width: none;
+    
+    /* Internet Explorer 10+ */
+    -ms-overflow-style: none;
+    -ms-scrollbar-width: none;
+    
+    /* Chrome, Safari, Opera */
+    scrollbar-color: transparent transparent;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    background: transparent;
+    display: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar-thumb {
+    background: transparent;
+    display: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
   .variant-info {
   font-size: 13px;
 }

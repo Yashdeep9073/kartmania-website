@@ -631,7 +631,7 @@
 
               <div v-if="cartItems.length > 0" class="space-y-4">
                 <!-- Cart Items List with Enhanced UI -->
-                <div class="max-h-80 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                <div class="max-h-80 overflow-y-auto overflow-x-hidden pr-2 space-y-3 custom-scrollbar">
                   <div v-for="item in cartItems" :key="item.id"
                     class="cart-item border border-gray-100 rounded-xl p-16 bg-white shadow-sm hover:shadow-md transition-all duration-300">
                     <div class="flex items-start gap-12">
@@ -646,15 +646,15 @@
                         <div class="flex-between items-start">
                           <div class="flex-1">
                             <p class="text-sm font-semibold text-gray-800 line-clamp-2 mb-4">{{ item.name }}</p>
-                            <div class="flex items-center gap-8 flex-wrap">
+                            <div class="flex items-center gap-8">
                               <span v-if="item.color" 
-                                class="inline-flex items-center gap-4 px-6 py-2 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                                class="inline-flex items-center gap-4 px-6 py-2 bg-blue-50 rounded-full font-medium">
                                 <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: getColorHex(item.color) }"></span>
-                                {{ item.color }}
+                                <span class="cart-label-text">{{ item.color }}</span>
                               </span>
                               <span v-if="item.size" 
-                                class="px-6 py-2 bg-green-50 text-green-700 rounded-full text-xs font-medium">
-                                {{ item.size }}
+                                class="px-6 py-2 bg-green-50 rounded-full font-medium">
+                                <span class="cart-label-text">{{ item.size }}</span>
                               </span>
                             </div>
                           </div>
@@ -1674,7 +1674,7 @@ const isClothingCategory = () => mainProduct.value?.category?.name?.toLowerCase(
 const isShoesCategory = () => mainProduct.value?.category?.name?.toLowerCase().includes('shoes')
 const isElectronicsCategory = () => mainProduct.value?.category?.name?.toLowerCase().includes('electronics')
 
-const getClothingSizes = () => ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+const getClothingSizes = () => ['S', 'M', 'L', 'XL', 'XXL']
 const getShoeSizes = () => ['6', '7', '8', '9', '10', '11', '12']
 const getElectronicsSizes = () => ['Standard', 'Large', 'Extra Large']
 
@@ -1824,6 +1824,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Cart item label colors */
+.cart-label-text {
+  color: #CA2D52 !important;
+  font-size: 0.75rem !important;
+}
+
 /* Product Gallery Wrapper */
 .product-gallery-wrapper {
   display: flex;
@@ -2408,5 +2414,24 @@ onMounted(() => {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+</style>
+
+<style>
+/* Force cart label colors - non-scoped to override everything */
+.cart-label-text {
+  color: #CA2D52 !important;
+  font-size: 0.75rem !important;
+}
+
+/* Additional override for any potential conflicts */
+span.cart-label-text {
+  color: #CA2D52 !important;
+  font-size: 0.75rem !important;
+}
+
+div[class*="bg-"] span.cart-label-text {
+  color: #CA2D52 !important;
+  font-size: 0.75rem !important;
 }
 </style>

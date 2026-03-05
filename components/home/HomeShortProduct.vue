@@ -22,7 +22,7 @@
                   <div class="flex-align gap-16">
                     <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
                       <!-- Fix this link -->
-                      <NuxtLink to="/shop-all/--1" class="link">
+                      <NuxtLink :to="getProductLink(product)" class="link">
                         <img :src="product.image" :alt="product.name" loading="lazy">
                       </NuxtLink>
                     </div>
@@ -35,7 +35,7 @@
                         <span class="text-xs fw-bold text-gray-500">({{ product.reviews }})</span>
                       </div>
                       <h6 class="title text-lg fw-semibold mt-8 mb-8">
-                        <NuxtLink to="/shop-all/--1" class="link text-line-1">
+                        <NuxtLink :to="getProductLink(product)" class="link text-line-1">
                           {{ product.name }}
                         </NuxtLink>
                       </h6>
@@ -70,7 +70,7 @@
                 <SwiperSlide v-for="product in topSellingProducts" :key="product.id">
                   <div class="flex-align gap-16">
                     <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
-                      <NuxtLink to="/shop-all/--1" class="link">
+                      <NuxtLink :to="getProductLink(product)" class="link">
                         <img :src="product.image" :alt="product.name" loading="lazy">
                       </NuxtLink>
                     </div>
@@ -83,7 +83,7 @@
                         <span class="text-xs fw-bold text-gray-500">({{ product.reviews }})</span>
                       </div>
                       <h6 class="title text-lg fw-semibold mt-8 mb-8">
-                        <NuxtLink to="/shop-all/--1" class="link text-line-1">
+                        <NuxtLink :to="getProductLink(product)" class="link text-line-1">
                           {{ product.name }}
                         </NuxtLink>
                       </h6>
@@ -118,7 +118,7 @@
                 <SwiperSlide v-for="product in onSaleProducts" :key="product.id">
                   <div class="flex-align gap-16">
                     <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
-                      <NuxtLink to="/shop-all/--1" class="link">
+                      <NuxtLink :to="getProductLink(product)" class="link">
                         <img :src="product.image" :alt="product.name" loading="lazy">
                       </NuxtLink>
                     </div>
@@ -131,7 +131,7 @@
                         <span class="text-xs fw-bold text-gray-500">({{ product.reviews }})</span>
                       </div>
                       <h6 class="title text-lg fw-semibold mt-8 mb-8">
-                        <NuxtLink to="/shop-all/--1" class="link text-line-1">
+                        <NuxtLink :to="getProductLink(product)" class="link text-line-1">
                           {{ product.name }}
                         </NuxtLink>
                       </h6>
@@ -174,7 +174,7 @@
               <p class="text-neutral-300 fw-medium text-sm">Don't miss this opportunity at a special</p>
             </div>
             
-            <NuxtLink to="/shop-all/--1" class="product-card__thumb flex-center overflow-hidden">
+            <NuxtLink :to="getProductLink(weekDealProduct)" class="product-card__thumb flex-center overflow-hidden">
               <img :src="weekDealProduct.image" :alt="weekDealProduct.name" loading="lazy" class="week-deal-image">
             </NuxtLink>
             
@@ -195,7 +195,7 @@
               </div>
               
               <h6 class="title text-md fw-semibold mt-10 mb-0">
-                <NuxtLink to="/shop-all/--1" class="link text-line-2 fw-bold">
+                <NuxtLink :to="getProductLink(weekDealProduct)" class="link text-line-2 fw-bold">
                   {{ weekDealProduct.name }}
                 </NuxtLink>
               </h6>   
@@ -463,6 +463,27 @@ onUnmounted(() => {
     clearInterval(countdownInterval)
   }
 })
+
+// Helper function to generate product links
+const getProductLink = (product) => {
+  const productName = product.name || 'product'
+  const productId = product.id || product.groupId
+  
+  if (!productId) {
+    console.warn('Invalid product ID for link generation:', product)
+    return '/shop/shop-all'
+  }
+  
+  // Create a URL-safe product name
+  const safeProductName = productName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, 50) || 'product'
+  
+  return `/shop-all/${safeProductName}--${productId}`
+}
+
 </script>
 
 <style scoped>

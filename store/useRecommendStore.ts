@@ -1,6 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useProductsApi } from '~/composables/api/useProductsApi'
+import { useProductGroupApi } from '~/composables/api/useProductGroupApi'
+import type { ProductSort } from '~/types/products'
+
+// Interface for product filters
+interface ProductFilters {
+  page?: number
+  limit?: number
+  category?: string | number | null
+  sortBy?: string
+}
 
 export const useRecommendStore = defineStore('recommend', () => {
   const config = useRuntimeConfig()
@@ -131,33 +140,17 @@ export const useRecommendStore = defineStore('recommend', () => {
     }
   }
 
-  // Main fetch function using useProductsApi hook
-  const fetchProducts = async (filters = {}, forceRefresh = false) => {
+  // Main fetch function using useProductGroupApi hook
+  const fetchProducts = async (filters: ProductFilters = {}, forceRefresh = false) => {
+    const { page = 1, limit = 10, category = null, sortBy = 'popularity' } = filters
+    
     try {
       isLoading.value = true
       error.value = null
-
-      const { page = 1, limit = 10, category = null, sortBy = 'popularity' } = filters
       
-      // Convert category name to categoryId if needed
-      let categoryId = null
-      if (category && typeof category === 'string') {
-        // Find category by name from categories array
-        const foundCategory = categories.value.find(cat => 
-          cat.name?.toLowerCase() === category.toLowerCase()
-        )
-        categoryId = foundCategory?.id || null
-      } else if (category && typeof category === 'number') {
-        categoryId = category
-      }
-
-      // Use the products API hook
-      const { products: apiProducts, loading: apiLoading, error: apiError, refresh } = useProductsApi({
-        categoryId: categoryId,
-        limit: limit,
-        page: page,
-        sort: sortBy === 'popularity' ? 'popular' : sortBy
-      })
+      // Use the product groups API hook to get main products with variants
+      // We call it without parameters to get all product groups
+      const { data: apiData, loading: apiLoading, error: apiError, refresh } = useProductGroupApi()
       
       // Call the fetch function
       await refresh()
@@ -167,39 +160,67 @@ export const useRecommendStore = defineStore('recommend', () => {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
       
-      // Check if we got product data
-      if (apiProducts.value && apiProducts.value.length > 0) {
-        // Convert products to the expected format for the store
-        const convertedProducts = apiProducts.value.map(product => ({
-          groupId: product.id?.toString() || `group-${product.id}`,
-          name: product.name,
-          category: product.category,
-          mainProduct: {
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            stock: product.stock,
-            popularity: product.popularity,
-            images: product.images || [],
-            description: product.description || '',
-            discountValue: 0, // Add if your API has discount info
-            reviews: [], // Add if your API has reviews
-            attributes: [] // Add if your API has attributes
-          },
-          variants: [] // Add if your API has variants
-        }))
+      // Check if we got product group data
+      if (apiData.value && Array.isArray(apiData.value) && apiData.value.length > 0) {
+        // Process product groups - these are already main products with variants
+        const processedProducts = apiData.value.map((productGroup, index) => {
+          // Try different possible ID fields
+          const possibleIds = [
+            productGroup.id,
+            productGroup.groupId,
+            productGroup.mainProduct?.id,
+            productGroup.product?.id,
+            `group-${index}` // fallback
+          ]
+          
+          const validId = possibleIds.find(id => id !== undefined && id !== null)
+          
+          const processed = {
+            groupId: validId?.toString() || `group-${index}`,
+            name: productGroup.name || productGroup.mainProduct?.name || productGroup.product?.name || 'Unnamed Product',
+            category: productGroup.category || productGroup.mainProduct?.category,
+            mainProduct: productGroup.mainProduct || productGroup.product || {
+              id: validId,
+              name: productGroup.name || productGroup.product?.name,
+              price: productGroup.price || productGroup.product?.price,
+              stock: productGroup.stock || productGroup.product?.stock,
+              popularity: productGroup.popularity || productGroup.product?.popularity,
+              images: productGroup.images || productGroup.product?.images || [],
+              description: productGroup.description || productGroup.product?.description || '',
+              discountValue: productGroup.discountValue || productGroup.product?.discountValue || 0,
+              reviews: productGroup.reviews || productGroup.product?.reviews || [],
+              attributes: productGroup.attributes || productGroup.product?.attributes || []
+            },
+            variants: productGroup.variants || []
+          }
+          
+          return processed
+        })
         
-        products.value = convertedProducts
+        // Apply category filter if specified
+        let filteredProducts = processedProducts
+        if (category && typeof category === 'string') {
+          filteredProducts = processedProducts.filter(product => 
+            product.category?.name?.toLowerCase() === category.toLowerCase()
+          )
+        }
+        
+        // Apply pagination
+        const startIndex = (page - 1) * limit
+        const endIndex = startIndex + limit
+        const paginatedProducts = filteredProducts.slice(startIndex, endIndex)
+        
+        products.value = paginatedProducts
         pagination.value = {
           currentPage: page,
-          lastPage: Math.ceil(convertedProducts.length / limit),
-          total: convertedProducts.length,
+          lastPage: Math.ceil(filteredProducts.length / limit),
+          total: filteredProducts.length,
           perPage: limit
         }
         
-        console.log(`Products fetched for category "${category || 'all'}": ${convertedProducts.length} items`)
+        console.log(`Product groups fetched for category "${category || 'all'}": ${paginatedProducts.length} items`)
       } else {
-        console.warn('API returned empty products array')
+        console.warn('API returned empty product groups array')
         products.value = []
         pagination.value = {
           currentPage: 1,
@@ -212,7 +233,7 @@ export const useRecommendStore = defineStore('recommend', () => {
       return products.value
     } catch (err) {
       error.value = err.message
-      console.error('Error fetching products:', err)
+      console.error('Error fetching product groups:', err)
       
       // Set empty state on error
       products.value = []
@@ -253,13 +274,27 @@ export const useRecommendStore = defineStore('recommend', () => {
       
       let response;
       try {
-        response = await fetch(API_URL_CATEGORY, { timeout: 10000 })
+        // Create AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        response = await fetch(API_URL_CATEGORY, { 
+          signal: controller.signal 
+        });
+        
+        // Clear timeout if request completes
+        clearTimeout(timeoutId);
+        
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
       } catch (fetchError) {
-        console.error('Network error fetching categories:', fetchError)
-        throw new Error('Network error: Unable to fetch categories')
+        if (fetchError.name === 'AbortError') {
+          console.error('Request timeout after 10 seconds');
+          throw new Error('Request timeout: Unable to fetch categories');
+        }
+        console.error('Network error fetching categories:', fetchError);
+        throw new Error('Network error: Unable to fetch categories');
       }
 
       const result = await response.json()

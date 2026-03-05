@@ -252,7 +252,12 @@ const allCategories = computed(() => {
   return recommendStore.categories || []
 })
 
-const filteredProducts = computed(() => recommendStore.products || [])
+const filteredProducts = computed(() => {
+  const products = recommendStore.products || []
+  
+  // API returns main products directly, no need to filter variants
+  return products
+})
 
 const pagination = computed(() => recommendStore.pagination || { total: 0, perPage: productsPerPage })
 
@@ -266,7 +271,31 @@ const handleImageError = (event, index) => {
 
 // Get product link
 const getProductLink = (product) => {
-  return `/shop/shop-all/${getProductName(product)}--${product.groupId}`
+  const productName = getProductName(product)
+  const groupId = product.groupId || product.mainProduct?.id || product.id
+  
+  // Ensure we have valid values
+  if (!groupId || groupId === 'undefined') {
+    console.warn('Invalid product ID for link generation:', product)
+    return '/shop/shop-all'
+  }
+  
+  // Create a URL-safe product name with fallback
+  let safeProductName = 'product' // default fallback
+  if (productName && productName.trim()) {
+    safeProductName = productName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 50) // limit length
+  }
+  
+  // Ensure we don't end up with an empty slug
+  if (!safeProductName || safeProductName === '') {
+    safeProductName = 'product'
+  }
+  
+  return `/shop-all/${safeProductName}--${groupId}`
 }
 
 // Initialize

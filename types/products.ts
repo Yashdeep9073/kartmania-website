@@ -39,6 +39,7 @@ export interface Product {
   price: number
   stock: number
   popularity: number
+  description?: string
   images: ProductImage[]
   category?: {
     id: number

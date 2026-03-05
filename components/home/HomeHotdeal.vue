@@ -50,7 +50,7 @@
               <div v-for="product in products" :key="product.id" class="col-6 col-md-4 col-lg-4 col-xl-3">
                 <div class="product-card border rounded-16 overflow-hidden h-100">
                   <div class="product-image-container">
-                    <NuxtLink :to="`/shop-all/--${product.id}`" class="product-link">
+                    <NuxtLink :to="getProductLink(product)" class="product-link">
                       <img :src="product.images?.[0]?.imageUrl || '/assets/images/thumbs/product-img26.png'" :alt="product.name" class="product-img w-100" />
                       <div class="product-overlay">
                         <button class="quick-view-btn">
@@ -61,7 +61,7 @@
                   </div>
                   <div class="product-content p-16">
                     <h6 class="mb-6 product-title">
-                      <NuxtLink :to="`/shop-all/--${product.id}`" class="product-name-link">
+                      <NuxtLink :to="getProductLink(product)" class="product-name-link">
                         {{ product.name }}
                       </NuxtLink>
                     </h6>                  
@@ -179,6 +179,25 @@ const getProductImage = (product: any) => {
 
   const primary = product.images.find((img: any) => img.isPrimary)
   return (primary || product.images[0]).imageUrl
+}
+
+const getProductLink = (product) => {
+  const productName = product.name || 'product'
+  const productId = product.id || product.groupId
+  
+  if (!productId) {
+    console.warn('Invalid product ID for link generation:', product)
+    return '/shop/shop-all'
+  }
+  
+  // Create a URL-safe product name
+  const safeProductName = productName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, 50) || 'product'
+  
+  return `/shop-all/${safeProductName}--${productId}`
 }
 
 </script>

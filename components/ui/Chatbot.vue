@@ -368,7 +368,7 @@ background: linear-gradient(
 }
 
 .message.bot {
-  background: #f1f1f1;
+  background: #ecedeb;
   color: #333;
 }
 

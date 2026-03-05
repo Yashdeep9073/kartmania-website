@@ -338,13 +338,13 @@ h5 {
 
 /* Offer Badge */
 .offer-badge {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
+  background: linear-gradient(135deg, var(--main-600), var(--main-700));
+  color: white;
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
-  border: 2px solid #fbbf24;
+  border: 2px solid var(--main-500);
 }
 
 .offer-timer {

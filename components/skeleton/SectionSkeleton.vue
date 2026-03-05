@@ -5,7 +5,7 @@
 <style scoped>
 .skeleton-section {
   height: 280px;
-  background: linear-gradient(90deg,#eee,#f5f5f5,#eee);
+  background: linear-gradient(90deg,#eee,#ecedeb,#eee);
   animation: pulse 1.5s infinite;
 }
 @keyframes pulse {

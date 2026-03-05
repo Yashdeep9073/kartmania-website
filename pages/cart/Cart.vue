@@ -626,7 +626,7 @@ onUnmounted(() => {
 }
 
 .table.style-three tr:hover {
-  background-color: #f9fafb;
+  background-color: #ecedeb;
 }
 
 .table-product__thumb {
@@ -739,7 +739,7 @@ onUnmounted(() => {
 }
 
 .scroll-sm::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #ecedeb;
   border-radius: 3px;
 }
 

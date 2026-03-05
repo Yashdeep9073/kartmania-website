@@ -407,7 +407,7 @@ onBeforeUnmount(() => {
   width: 80%;
 }
 .shimmer {
-  background: linear-gradient(90deg, #f3f4f6 25%, #f9fafb 50%, #f3f4f6 75%);
+  background: linear-gradient(90deg, #f3f4f6 25%, #ecedeb 50%, #f3f4f6 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -444,7 +444,7 @@ onBeforeUnmount(() => {
   border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
-  background: #f5f5f5;
+  background: #ecedeb;
 }
 
 /* Background image */

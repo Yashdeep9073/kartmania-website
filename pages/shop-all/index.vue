@@ -1740,7 +1740,7 @@ definePageMeta({
 }
 
 .chip:hover {
-  background: #f5f5f5;
+  background: #ecedeb;
 }
 
 .chip i {
@@ -1812,7 +1812,7 @@ definePageMeta({
   padding: 2px 8px;
   font-size: 12px;
   border-radius: 999px;
-  background: #f5f5f5;
+  background: #ecedeb;
   color: #444;
 }
 
@@ -1845,31 +1845,31 @@ definePageMeta({
 
 .skeleton-title {
   height: 24px;
-  background: #f5f5f5;
+  background: #ecedeb;
   border-radius: 4px;
 }
 
 .skeleton-item {
   height: 20px;
-  background: #f5f5f5;
+  background: #ecedeb;
   border-radius: 4px;
 }
 
 .skeleton-image {
   height: 200px;
-  background: #f5f5f5;
+  background: #ecedeb;
   border-radius: 8px;
 }
 
 .skeleton-line {
   height: 16px;
-  background: #f5f5f5;
+  background: #ecedeb;
   border-radius: 4px;
 }
 
 .skeleton-button {
   height: 40px;
-  background: #f5f5f5;
+  background: #ecedeb;
   border-radius: 6px;
 }
 
@@ -1894,7 +1894,7 @@ definePageMeta({
 }
 
 .shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #f5f5f5 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #f0f0f0 25%, #ecedeb 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -2162,7 +2162,7 @@ h6 {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   padding: 4px;
-  background: #f9fafb;
+  background: #ecedeb;
 }
 
 .view-toggle button {
@@ -2237,7 +2237,7 @@ h6 {
 }
 
 .custom-menu button:hover:not(:disabled) {
-  background: #f9fafb;
+  background: #ecedeb;
 }
 
 .custom-menu button.active {
@@ -2513,7 +2513,7 @@ h6 {
 .list-image {
   width: 200px;
   height: 200px;
-  background: #f9fafb;
+  background: #ecedeb;
   flex-shrink: 0;
 }
 
@@ -2677,7 +2677,7 @@ h6 {
 }
 
 .pagination-btn.disabled {
-  background: #f9fafb;
+  background: #ecedeb;
   cursor: default;
 }
 

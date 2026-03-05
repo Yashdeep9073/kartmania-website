@@ -9,7 +9,7 @@
           </div>
           <h3 class="mb-0">{{ title }}</h3>
         </div>
-        <NuxtLink to="/shop-all" class="btn btn-outline btn-sm">
+        <NuxtLink to="/shop-all" class="btn btn-main btn-sm">
           View All
           <i class="ph ph-arrow-right ms-2"></i>
         </NuxtLink>
@@ -31,7 +31,7 @@
     <div v-if="offers.length > 4" class="text-center mt-40">
       <button
         @click="toggleShowAll"
-        class="btn btn-outline"
+        class="btn btn-main"
       >
         {{ showAll ? 'Show Less' : `View All ${offers.length} Offers` }}
         <i :class="`ph ph-${showAll ? 'caret-up' : 'caret-down'} ms-2`"></i>

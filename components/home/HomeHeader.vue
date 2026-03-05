@@ -1968,7 +1968,7 @@ watch(() => route.path, () => {
     width: 100%;
     padding: 3px 9px;
     border-radius: 9px;
-    background: #f5f5f5;
+    background: #ecedeb;
     color: rgb(58, 58, 58);
     white-space: nowrap;   
     overflow: hidden;        
@@ -1998,7 +1998,7 @@ watch(() => route.path, () => {
     width: 100%;
     padding: 3px 9px;
     border-radius: 9px;
-    background: #f5f5f5;
+    background: #ecedeb;
     color: rgb(58, 58, 58);
     white-space: nowrap;   
     overflow: hidden;        
@@ -2019,7 +2019,7 @@ watch(() => route.path, () => {
   display: none;
   align-items: center;
   gap: 10px;
-  background: #f1f1f1;
+  background: #ecedeb;
   border-radius: 12px;
   height: 44px;
   padding: 0 12px;
@@ -2117,7 +2117,7 @@ watch(() => route.path, () => {
   align-items: center;
   gap: 10px;
 background-color: #e6e6e6;
-  background: #f1f1f1;
+  background: #ecedeb;
   border-radius: 12px;
   height: 30px;
   cursor: pointer;
@@ -2317,7 +2317,7 @@ background-color: #e6e6e6;
 }
 
 .category-grid::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #ecedeb;
   border-radius: 2px;
 }
 
@@ -2347,7 +2347,7 @@ background-color: #e6e6e6;
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: white;
+  background: #f7f7f7;
   border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   height: 60px;
@@ -2454,7 +2454,7 @@ background-color: #e6e6e6;
   transform: translateX(-50%);
   width: min(1200px, 95vw);
   max-width: calc(100vw - 40px);
-  background: white;
+  background: #f7f7f7;
   border-radius: 0 0 8px 8px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   opacity: 0;
@@ -2666,16 +2666,17 @@ background-color: #e6e6e6;
   width: 100%;
   padding: 0.625rem 3rem 0.625rem 1rem;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.875rem;
-  transition: all 0.2s;
-  background: #f9fafb;
+  transition: all 0.3s ease;
+  position: relative;
+  background: #ecedeb;
 }
 
 .search-input:focus {
   outline: none;
   border-color: var(--main-600);
-  background: white;
+  background: #ecedeb;
   box-shadow: 0 0 0 3px rgba(202, 45, 82, 0.1);
 }
 
@@ -2733,7 +2734,7 @@ background-color: #e6e6e6;
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
+  background: #f7f7f7;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -2770,7 +2771,7 @@ background-color: #e6e6e6;
 }
 
 .product-result:hover {
-  background-color: #f9fafb;
+  background-color: #ecedeb;
 }
 
 .product-image {
@@ -3068,7 +3069,7 @@ background-color: #e6e6e6;
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f8f8f8;
+  background: #ecedeb;
   border-radius: 8px;
   padding: 8px 12px;
 }
@@ -3203,7 +3204,7 @@ background-color: #e6e6e6;
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background: #f8f8f8;
+  background: #ecedeb;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s;
@@ -3410,7 +3411,7 @@ background-color: #e6e6e6;
 }
 
 .mobile-bottom-nav .nav-item:hover {
-  background-color: #f9fafb;
+  background-color: #ecedeb;
 }
 
 .mobile-bottom-nav .nav-item.active {

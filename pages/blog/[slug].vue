@@ -51,7 +51,7 @@
                   <div class="flex-align flex-wrap gap-8">
                     <span class="text-lg text-main-600"><i class="ph ph-calendar-dots"></i></span>
                     <span class="text-sm text-gray-500">
-                      <NuxtLink :to="`/person/${blogDetail.slug}`" class="text-gray-500 hover-text-main-600">
+                      <NuxtLink :to="`/blog/author/${blogDetail.slug}`" class="text-main-600 hover-text-main-700">
                         {{ formatDate(blogDetail.createdAt) }}
                       </NuxtLink>
                     </span>
@@ -59,7 +59,7 @@
                   <div class="flex-align flex-wrap gap-8">
                     <span class="text-lg text-main-600"><i class="ph ph-chats-circle"></i></span>
                     <span class="text-sm text-gray-500">
-                      <a href="#comments" class="text-gray-500 hover-text-main-600">
+                      <a href="#comments" class="text-main-600 hover-text-main-700">
                         {{ comments.length }} Comments
                       </a>
                     </span>
@@ -127,8 +127,8 @@
 
           <div class="my-48 flex-between flex-sm-nowrap flex-wrap gap-24">
             <div>
-              <NuxtLink to="/person" class="text-gray-500 hover-text-main-600">
-                <button type="button" class="mb-20 h6 text-gray-500 text-lg fw-normal hover-text-main-600">
+              <NuxtLink to="/blog" class="text-main-600 hover-text-main-700">
+                <button type="button" class="mb-20 h6 text-main-600 text-lg fw-normal hover-text-main-700">
                   ← All Blogs
                 </button>
               </NuxtLink>
@@ -472,6 +472,7 @@ watch(() => route.params.slug, (newSlug) => {
 .text-line-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

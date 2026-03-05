@@ -147,7 +147,7 @@ const getCategoryLink = (category) => {
   height: 60px;
   border-radius: 50%;
   overflow: hidden;
-  background: #f8f8f8;
+  background: #ecedeb;
   border: 2px solid #f0f0f0;
   margin-bottom: 8px;
   display: flex;

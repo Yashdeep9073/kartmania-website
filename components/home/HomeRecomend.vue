@@ -632,7 +632,7 @@ onUnmounted(() => {
 }
 
 .scroll-btn:hover:not(:disabled) {
-  background: #f9fafb;
+  background: #ecedeb;
   border-color: var(--main-600);
   color: var(--main-600);
   box-shadow: 0 4px 8px rgba(202, 45, 82, 0.1);
@@ -641,7 +641,7 @@ onUnmounted(() => {
 .scroll-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
-  background: #f9fafb;
+  background: #ecedeb;
 }
 
 .scroll-left {
@@ -691,7 +691,7 @@ onUnmounted(() => {
 .tab-button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  background: #f9fafb;
+  background: #ecedeb;
 }
 
 .tab-button.no-products:not(.active) {
@@ -916,7 +916,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   height: 140px;
-  background: #f9fafb;
+  background: #ecedeb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1361,7 +1361,7 @@ onUnmounted(() => {
 
 .view-more-btn {
   padding: 10px 24px;
-  background: linear-gradient(135deg, #1b6db5 0%, #2a8ce6 100%);
+  background: linear-gradient(135deg, var(--main-600), var(--main-700));
   color: white;
   border: none;
   border-radius: 6px;
@@ -1377,9 +1377,9 @@ onUnmounted(() => {
 }
 
 .view-more-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #155a9e 0%, #1e7bc7 100%);
+  background: linear-gradient(135deg, var(--main-700), var(--main-800));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(27, 109, 181, 0.3);
+  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
 }
 
 .view-more-btn:disabled {

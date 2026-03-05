@@ -29,7 +29,7 @@ const openMobileSearch = () => {
   align-items: center;
   gap: 10px;
 
-  background: #f1f1f1;
+  background: #ecedeb;
   border-radius: 12px;
 
   height: 44px;

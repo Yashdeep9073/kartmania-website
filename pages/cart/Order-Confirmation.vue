@@ -62,7 +62,7 @@ const total = route.query.total || '0.00'
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f9fafb;
+  background: #ecedeb;
   padding: 20px;
 }
 
@@ -97,7 +97,7 @@ const total = route.query.total || '0.00'
 }
 
 .details {
-  background: #f9fafb;
+  background: #ecedeb;
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 28px;

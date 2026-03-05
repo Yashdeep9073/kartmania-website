@@ -390,7 +390,7 @@ watch(() => formData.phone, () => {
 .common-input:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-  background: #f9fafb;
+  background: #ecedeb;
 }
 
 .common-input.border-danger {

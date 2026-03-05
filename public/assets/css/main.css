@@ -78,7 +78,7 @@
     --border-color: 236 13% 77%;
     --bg-color-one: #F3FAF2;
     --bg-color-two: #FFFBF4;
-    --bg-color-three: #F1F1F1;
+    --bg-color-three: #ecedeb;
     --neutral: #121535;
     --translate-x-middle: translateX(-50%);
     --translate-y-middle: translateY(-50%);
@@ -1631,12 +1631,11 @@ body {
     font-family: var(--body-font);
     color: hsl(var(--body-color));
     word-break: break-word;
-    background-color: hsl(var(--white));
+    background-color: #ffffff;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
-      background-color: #f5f5f5;
 
 }
 html, body {

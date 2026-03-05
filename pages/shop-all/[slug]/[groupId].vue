@@ -2121,7 +2121,7 @@ onMounted(() => {
 }
 
 .size-guide-table th {
-  background: #f9fafb;
+  background: #ecedeb;
   padding: 12px 16px;
   text-align: left;
   font-weight: 600;
@@ -2136,7 +2136,7 @@ onMounted(() => {
 }
 
 .size-guide-table tr:hover {
-  background: #f9fafb;
+  background: #ecedeb;
 }
 
 .size-guide-table tr:last-child td {

@@ -1,5 +1,5 @@
 <template>
-  <div class="short-product pt-110">
+  <div class="short-product pt-20">
     <div class="container container-lg">
       <div class="row gy-4">
         <!-- Featured Products -->

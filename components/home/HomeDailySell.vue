@@ -1,5 +1,5 @@
 <template>
-  <section class="best sells pt-30 pb-80">
+  <section class="best sells pt-15 pb-40">
     <div class="container container-lg">
       <div class="section-heading">
         <div class="flex-between flex-wrap gap-8">

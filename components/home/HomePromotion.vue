@@ -1,14 +1,14 @@
 <!-- components/PromotionalBanner.vue -->
 <template>
-  <section v-if="!loading && promotionalBanners.length > 0" class="promotional-banner pb-40 pt-10 pt-md-60 pt-lg-80">
+  <section v-if="!loading && promotionalBanners.length > 0" class="promotional-banner pb-10 pt-5 pt-md-10 pt-lg-15">
     <div class="container container-lg px-3 px-md-4">
-      <div v-if="loading && showStaticFallback === false" class="text-center py-60 py-md-80">
+      <div v-if="loading && showStaticFallback === false" class="text-center py-30 py-md-40">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
       </div>
 
-      <div v-else-if="error && showStaticFallback === false" class="text-center py-60 py-md-80">
+      <div v-else-if="error && showStaticFallback === false" class="text-center py-30 py-md-40">
         <div class="alert alert-danger px-3 px-md-4 py-3">
           {{ error }}
         </div>
@@ -262,7 +262,7 @@ onMounted(() => {
 .promotional-banner-item {
   background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 2px solid transparent;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -315,20 +315,36 @@ onMounted(() => {
   transform: scale(1.05);
 }
 
+.promotional-banner-item:hover {
+  border-color: #830622;
+  box-shadow: 0 4px 20px rgba(202, 45, 82, 0.2);
+}
+
 .btn-main {
-  background: linear-gradient(135deg, #0266c3, #04b370);
+  background: linear-gradient(135deg, #CA2D52, #830622);
   border: none;
   font-weight: 600;
   color: white;
-  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 50px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 15px rgba(202, 45, 82, 0.3);
 }
 
 .btn-main:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 6px 20px rgba(202, 45, 82, 0.4);
   color: white;
+}
+
+.badge {
+  background: linear-gradient(135deg, #CA2D52, #830622) !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  text-transform: capitalize;
 }
 
 .text-danger-600 {

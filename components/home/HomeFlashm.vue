@@ -1,6 +1,6 @@
 <!-- components/FlashSalesBanner.vue -->
 <template>
-  <section class="flash-sales pt-60 pt-md-80 overflow-hidden">
+  <section class="flash-sales pt-30 pt-md-40 overflow-hidden">
     <div class="container container-lg">
       <!-- Loading State -->
       <div v-if="loading" class="row gy-4 arrow-style-two">

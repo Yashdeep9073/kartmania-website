@@ -1,5 +1,5 @@
 <template>
-  <section class="recommended-section">
+  <section class="recommended-section pt-20 pb-20">
     <div class="container">
       <div class="section-heading">
         <h2>{{ filteredProducts.length > 0 ? 'Recommended for you' : '' }}</h2>

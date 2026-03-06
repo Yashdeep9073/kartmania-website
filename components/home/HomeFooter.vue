@@ -1,22 +1,22 @@
 <template>
-  <footer class="footer py-120">
+  <footer class="footer py-40">
     <div class="container container-lg">
       <div class="footer-item-wrapper d-flex align-items-start flex-wrap">
         <div class="footer-item" data-aos="fade-up" data-aos-duration="200">
        <div class="footer-item__logo">
   <NuxtLink to="/">
-    <img :src="logoSrc" alt="Vibrantick Infotech Solutions">
+    <img :src="logoSrc" alt="239 The Business Developers">
   </NuxtLink>
 </div>
 
 <p class="mb-28 text-heading">
-  Vibrantick Infotech Solutions
+  239 The Business Developers
 </p>
 
 <div class="d-flex flex-column gap-8">
   <p class="text-heading fw-medium">
-    Phase 8B, Industrial Area, Sector 74,<br>
-    Mohali, Punjab, India
+    Lower Ground Kh, 1273, Old Delhi Gurugram Rd, <br>opp. Fun N Food Village, Kapas Hera Extension,<br>Kapas Hera<br>
+    New Delhi, Delhi, 110097
   </p>
 
   <a 
@@ -27,10 +27,10 @@
   </a>
 
   <a 
-    href="tel:+919915400090" 
+    href="tel:+919549936342" 
     class="text-heading fw-medium hover-text-main-600"
   >
-    +91 99154 00090
+    +91 95499 36342
   </a>
 </div>
 </div> 
@@ -53,15 +53,6 @@
             <li class="mb-16">
               <NuxtLink to="/security" class="text-heading hover-text-main-600">Security</NuxtLink>
             </li>
-            <li class="mb-16">
-              <NuxtLink to="/account/profile" class="text-heading hover-text-main-600">Our Suppliers</NuxtLink>
-            </li>
-            <li class="mb-16">
-              <NuxtLink to="/account/profile" class="text-heading hover-text-main-600">Extended Plan</NuxtLink>
-            </li>
-            <li class="">
-              <NuxtLink to="/account/profile" class="text-heading hover-text-main-600">Community</NuxtLink>
-            </li>
           </ul>
         </div>
         <div class="footer-item" data-aos="fade-up" data-aos-duration="600">
@@ -80,16 +71,10 @@
               <NuxtLink to="/contact/contact" class="text-heading hover-text-main-600">Submit and Dispute</NuxtLink>
             </li>
             <li class="mb-16">
-              <NuxtLink to="/contact/contact" class="text-heading hover-text-main-600">Policies & Rules</NuxtLink>
-            </li>
-            <li class="mb-16">
               <NuxtLink to="/grievance-redressal" class="text-heading hover-text-main-600">Grievance Redressal</NuxtLink>
             </li>
             <li class="mb-16">
               <NuxtLink to="/cancellation-returns" class="text-heading hover-text-main-600">Cancellation & Returns</NuxtLink>
-            </li>
-            <li class="">
-              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Online Shopping</NuxtLink>
             </li>
           </ul>
         </div>
@@ -135,35 +120,7 @@
             <li class="mb-16">
               <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Cars & Bike</NuxtLink>
             </li>
-            <li class="">
-              <NuxtLink to="/shop-all" class="text-heading hover-text-main-600">Seasons Sales</NuxtLink>
-            </li>
           </ul>
-        </div>
-        
-        <div class="footer-item" data-aos="fade-up" data-aos-duration="1200">
-          <h6 class="">Shop on The Go</h6>
-          <p class="mb-16">MarketPro App is available.  Get it now</p>
-          <div class="my-32">
-            <div class="flex-align gap-8">
-              <div class="bg-white rounded-10 p-1 box-shadow-5xl">
-                <img src="/assets/images/thumbs/qr-code.png" alt="QR Code">
-              </div>
-              <div class="d-flex flex-column gap-16">
-                <a href="https://www.apple.com/app-store" class="py-14 px-32 d-flex justify-content-center align-items-center gap-8 fw-medium text-heading text-sm hover-bg-main-600 hover-text-white box-shadow-6xl rounded-6">
-                  <i class="ph-fill ph-apple-logo"></i>
-                  Google play
-                </a>
-                <a href="https://www.apple.com/app-store" class="py-14 px-32 d-flex justify-content-center align-items-center gap-8 fw-medium text-heading text-sm hover-bg-main-600 hover-text-white box-shadow-6xl rounded-6">
-                  <img src="/assets/images/icon/google-play.svg" alt="Play Store">
-                  Google play
-                </a>
-              </div>
-            </div>
-            <div class="mt-24">
-              <img src="/assets/images/thumbs/method.png" alt="Method ">
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -93,19 +93,19 @@ useHead({ title: "Home" })
     <HomeFeature />
 
     <!-- BELOW THE FOLD (LAZY) -->
-    <LazySection :component="HomePromotion" root-margin="100px" />
-    <LazySection :component="HomeFlash" root-margin="100px" />
-    <LazySection :component="HomeBrand" root-margin="100px" />
-    <LazySection :component="HomeFlashm" root-margin="100px" /> 
-    <LazySection :component="HomeOffersGrid" root-margin="150px" />
-    <LazySection :component="HomeCategory" root-margin="150px" /> 
-    <LazySection :component="HomeRecomend" root-margin="200px" /> 
-    <LazySection :component="HomeOffer" root-margin="200px" /> 
-    <LazySection :component="HomeHotdeal" root-margin="200px" /> 
-    <LazySection :component="HomeDiscount" root-margin="250px" />
-    <LazySection :component="HomeShortProduct" root-margin="250px" />
-    <LazySection :component="HomeDailySell" root-margin="300px" /> 
-    <LazySection :component="ProductNews" root-margin="300px" /> 
+    <LazySection :component="HomePromotion" root-margin="50px" />
+    <LazySection :component="HomeFlash" root-margin="50px" />
+    <LazySection :component="HomeBrand" root-margin="50px" />
+    <LazySection :component="HomeFlashm" root-margin="50px" /> 
+    <LazySection :component="HomeOffersGrid" root-margin="50px" />
+    <LazySection :component="HomeCategory" root-margin="50px" /> 
+    <LazySection :component="HomeRecomend" root-margin="50px" /> 
+    <LazySection :component="HomeOffer" root-margin="50px" /> 
+    <LazySection :component="HomeHotdeal" root-margin="50px" /> 
+    <LazySection :component="HomeDiscount" root-margin="50px" />
+    <LazySection :component="HomeShortProduct" root-margin="50px" />
+    <LazySection :component="HomeDailySell" root-margin="50px" /> 
+    <LazySection :component="ProductNews" root-margin="50px" /> 
   </div>
 </template>
 

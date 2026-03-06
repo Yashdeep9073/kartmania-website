@@ -15,7 +15,7 @@ function copyCode() {
 </script>
 
 <template>
-  <div class="pt-80">
+  <div class="pt-40">
     <div class="container container-lg">
 
       <div

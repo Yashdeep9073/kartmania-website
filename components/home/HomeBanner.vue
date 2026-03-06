@@ -5,13 +5,18 @@
         <div class="slide active">
           <!-- Background Image -->
           <Transition name="slide" mode="out-in">
-            <img 
+            <NuxtLink 
               v-if="currentBanner"
               :key="currentBanner.image"
-              :src="currentBanner.image" 
-              :alt="currentBanner.title"
-              class="banner-image"
-            />
+              to="/shop-all"
+              class="banner-link"
+            >
+              <img 
+                :src="currentBanner.image" 
+                :alt="currentBanner.title"
+                class="banner-image"
+              />
+            </NuxtLink>
           </Transition>
           
           <!-- Overlay -->
@@ -22,30 +27,10 @@
           <div v-if="currentBanner" class="content" :key="currentBanner.title">
             <span class="subtitle">{{ currentBanner.description }}</span>
             <h1 class="title">{{ currentBanner.title }}</h1>
-            <NuxtLink to="/shop-all">
-              <button class="shop-btn">Shop Now</button>
-            </NuxtLink>
           </div>
           </Transition>
         </div>
 
-        <!-- Navigation Arrows -->
-        <button 
-          v-show="banners.length > 1"
-          class="nav-btn nav-prev" 
-          @click="prevBanner" 
-          aria-label="Previous banner"
-        >
-          <span class="nav-icon">←</span>
-        </button>
-        <button 
-          v-show="banners.length > 1"
-          class="nav-btn nav-next" 
-          @click="nextBanner" 
-          aria-label="Next banner"
-        >
-          <span class="nav-icon">→</span>
-        </button>
       </div>
     </div>
   </section>
@@ -246,6 +231,13 @@ onUnmounted(() => {
   filter: brightness(0.8);
 }
 
+.banner-link {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 /* Smooth slide between slides */
 .slide-enter-active,
 .slide-leave-active {
@@ -312,69 +304,6 @@ onUnmounted(() => {
   line-height: 1.3;
 }
 
-.shop-btn {
-  background: linear-gradient(135deg, #CA2D52, #830622);
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 25px;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-.shop-btn:hover {
-  transform: translateY(-3px);
-}
-
-/* Navigation buttons */
-.nav-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.9);
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 15;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.nav-btn:hover {
-  background: rgba(255, 255, 255, 1);
-  border-color: #fff;
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-}
-
-.nav-btn:active {
-  transform: translateY(-50%) scale(0.95);
-}
-
-.nav-prev {
-  left: 30px;
-}
-
-.nav-next {
-  right: 30px;
-}
-
-.nav-icon {
-  font-size: 28px;
-  font-weight: bold;
-  line-height: 1;
-  user-select: none;
-  pointer-events: none;
-}
-
 /* Error Indicator (small, non-blocking) */
 .error-indicator {
   position: absolute;
@@ -419,11 +348,6 @@ onUnmounted(() => {
   }
   
   .subtitle {
-    font-size: 14px;
-  }
-  
-  .shop-btn {
-    padding: 10px 20px;
     font-size: 14px;
   }
 }

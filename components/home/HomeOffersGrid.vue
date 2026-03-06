@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!loading && activeOffers.length > 0" class="offers-by-type py-80">
+  <div v-if="!loading && activeOffers.length > 0" class="offers-by-type py-30">
     <div class="container container-lg">
       <!-- Flash Sale Section -->
       <OfferTypeSection v-if="offersByType['FLASH_SALE'] && offersByType['FLASH_SALE'].length > 0" type="FLASH_SALE"
@@ -34,7 +34,7 @@
   </div>
 
   <!-- Loading State -->
-  <div v-else-if="loading" class="py-80">
+  <div v-else-if="loading" class="py-30">
     <div class="container container-lg">
       <div class="row g-12">
         <div v-for="n in 3" :key="n" class="col-md-4">

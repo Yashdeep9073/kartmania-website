@@ -114,7 +114,7 @@
             }" @click="clearSizeFilter" :disabled="isLoading">
               All Sizes
             </button>
-            <button v-for="size in sizes" :key="size.id" class="size-btn" :class="{
+            <button v-for="size in filteredSizes" :key="size.id" class="size-btn" :class="{
               'size-btn-active': filters.size === size.size
             }" @click="toggleSizeFilter(size.size)" :disabled="isLoading">
               {{ size.size }}
@@ -303,7 +303,7 @@
             </div>
 
             <!-- Filter by Color -->
-            <div v-if="colors.length > 0" class="shop-sidebar__box mb-32">
+            <div v-if="colors && colors.length > 0" class="shop-sidebar__box mb-32">
               <div class="flex-between mb-24">
                 <h6>Filter by Color</h6>
                 <button v-if="filters.color" @click="clearColorFilter" class="btn-clear" :disabled="isLoading">
@@ -313,9 +313,9 @@
               <ul class="scroll-list">
                 <li class="mb-16">
                   <div class="form-check">
-                    <input type="checkbox" name="colorFilter" id="color-all" :checked="!filters.color"
+                    <input type="radio" name="colorFilter" id="color-all" :checked="!filters.color"
                       @change="clearColorFilter" :disabled="isLoading">
-                    <label for="color-all">
+                    <label for="color-all" @click="clearColorFilter">
                       <div>
                         <span class="color-indicator"></span>
                         <span>All Colors</span>
@@ -325,9 +325,9 @@
                 </li>
                 <li v-for="color in colors" :key="color" class="mb-16">
                   <div class="form-check">
-                    <input type="checkbox" name="colorFilter" :id="`color-${color}`" :checked="filters.color === color"
+                    <input type="radio" name="colorFilter" :id="`color-${color}`" :checked="filters.color === color"
                       @change="toggleColorFilter(color)" :disabled="isLoading">
-                    <label :for="`color-${color}`">
+                    <label :for="`color-${color}`" @click="toggleColorFilter(color)">
                       <div>
                         <span class="color-indicator" :style="{ backgroundColor: getColorHex(color) }"></span>
                         <span>{{ color }}</span>
@@ -339,7 +339,7 @@
             </div>
 
             <!-- Filter by Size -->
-            <div v-if="sizes.length > 0" class="shop-sidebar__box mb-32">
+            <div v-if="filteredSizes && filteredSizes.length > 0" class="shop-sidebar__box mb-32">
               <div class="flex-between mb-24">
                 <h6>Filter by Size</h6>
                 <button v-if="filters.size" @click="clearSizeFilter" class="btn-clear" :disabled="isLoading">
@@ -352,7 +352,7 @@
                 }" @click="clearSizeFilter" :disabled="isLoading">
                   All Sizes
                 </button>
-                <button v-for="size in sizes" :key="size.id" class="size-btn" :class="{
+                <button v-for="size in filteredSizes" :key="size.id" class="size-btn" :class="{
                   'size-btn-active': filters.size === size.size
                 }" @click="toggleSizeFilter(size.size)" :disabled="isLoading">
                   {{ size.size }}
@@ -571,7 +571,7 @@
                           {{ product.mainProduct?.description || '' }}
                         </p> -->
 
-                        <div v-if="getAllAvailableColors(product).length > 0 || getAllAvailableSizes(product).length > 0" class="variant-info">
+                        <div v-if="getAllAvailableColors(product).length > 0 || getAllAvailableSizesFiltered(product).length > 0" class="variant-info">
                           <!-- Show available colors -->
                           <div v-if="getAllAvailableColors(product).length > 0" class="available-colors">
                             <span class="variant-label">Colors:</span>
@@ -587,14 +587,14 @@
                           </div>
                           
                           <!-- Show available sizes -->
-                          <div v-if="getAllAvailableSizes(product).length > 0" class="available-sizes">
+                          <div v-if="getAllAvailableSizesFiltered(product).length > 0" class="available-sizes">
                             <span class="variant-label">Sizes:</span>
                             <div class="size-options">
-                              <span v-for="size in getAllAvailableSizes(product).slice(0, 4)" :key="size" class="variant-chip size-chip">
+                              <span v-for="size in getAllAvailableSizesFiltered(product).slice(0, 4)" :key="size" class="variant-chip size-chip">
                                 {{ size }}
                               </span>
-                              <span v-if="getAllAvailableSizes(product).length > 4" class="more-count">
-                                +{{ getAllAvailableSizes(product).length - 4 }}
+                              <span v-if="getAllAvailableSizesFiltered(product).length > 4" class="more-count">
+                                +{{ getAllAvailableSizesFiltered(product).length - 4 }}
                               </span>
                             </div>
                           </div>
@@ -665,14 +665,14 @@
                           </div>
                         </div>
                         <span v-if="getProductBrand(product)">Brand: {{ getProductBrand(product) }}</span>
-                        <div v-if="getAllAvailableSizes(product).length > 0" class="size-meta">
+                        <div v-if="getAllAvailableSizesFiltered(product).length > 0" class="size-meta">
                           <span class="variant-label">Sizes:</span>
                           <div class="size-list">
-                            <span v-for="size in getAllAvailableSizes(product).slice(0, 4)" :key="size" class="size-item">
+                            <span v-for="size in getAllAvailableSizesFiltered(product).slice(0, 4)" :key="size" class="size-item">
                               {{ size }}
                             </span>
-                            <span v-if="getAllAvailableSizes(product).length > 4" class="more-count">
-                              +{{ getAllAvailableSizes(product).length - 4 }}
+                            <span v-if="getAllAvailableSizesFiltered(product).length > 4" class="more-count">
+                              +{{ getAllAvailableSizesFiltered(product).length - 4 }}
                             </span>
                           </div>
                         </div>
@@ -790,6 +790,13 @@ const products = computed(() => productStore.products)
 const categories = computed(() => productStore.categories)
 const colors = computed(() => productStore.colors)
 const sizes = computed(() => productStore.sizes)
+const filteredSizes = computed(() => {
+  if (!productStore.sizes || productStore.sizes.length === 0) return []
+  return productStore.sizes.filter(size => {
+    const sizeValue = typeof size === 'string' ? size : size.size || size.name || ''
+    return sizeValue.toLowerCase() !== 'xs'
+  })
+})
 const brands = computed(() => productStore.brands)
 const pagination = computed(() => productStore.pagination)
 const filters = computed(() => productStore.filters)
@@ -883,6 +890,7 @@ const getProductColor = (product) => productStore.getProductColor(product)
 const getProductSize = (product) => productStore.getProductSize(product)
 const getAllAvailableColors = (product) => productStore.getAllAvailableColors(product)
 const getAllAvailableSizes = (product) => productStore.getAllAvailableSizes(product)
+const getAllAvailableSizesFiltered = (product) => productStore.getAllAvailableSizes(product).filter(size => size?.toLowerCase() !== 'xs')
 const getProductRating = (product) => productStore.getProductRating(product) || 3.5
 const getReviewCount = (product) => productStore.getReviewCount(product) || Math.floor(Math.random() * 100) + 1
 const getPrimaryImage = (product) => productStore.getProductImage(product)

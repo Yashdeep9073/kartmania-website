@@ -9,7 +9,20 @@ const router = createRouter({
       component: () => import('@/pages/index.vue')
     },
 
-    // ✅ IMPORTANT: Add this route
+    // ✅ Product detail routes - handle both patterns
+    {
+      path: '/shop-all/:productWithId',
+      name: 'ShopProductDetailCompact',
+      component: () => import('@/pages/shop-all/[slug]/[groupId].vue'),
+      props: (route) => {
+        // Parse productWithId to extract slug and groupId
+        const parts = route.params.productWithId.toString().split('--')
+        return {
+          slug: parts[0] || route.params.productWithId,
+          groupId: parts[1] || parts[0]
+        }
+      }
+    },
     {
       path: '/shop-all/:slug/:groupId',
       name: 'ShopProductDetail',

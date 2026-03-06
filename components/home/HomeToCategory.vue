@@ -1,13 +1,13 @@
 <template>
   <section class="wheel-categories-section">
     <div class="section-header">
-      <!-- <h4 class="section-title">Top Categories</h4>
+      <h4 class="section-title">Top Categories</h4>
       <NuxtLink to="/shop-all" class="view-all">
         View All
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </NuxtLink> -->
+      </NuxtLink>
     </div>
 
     <!-- Wheel Layout Categories -->
@@ -117,8 +117,38 @@ const getCategoryLink = (category) => {
 }
 
 .section-header {
-  margin: 0;
+  margin: 0 0 20px 0;
   padding: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.view-all {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #CA2D52;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.view-all:hover {
+  color: #830622;
+  transform: translateX(3px);
+}
+
+.view-all svg {
+  transition: transform 0.3s ease;
 }
 
 .wheel-categories-swiper {
@@ -142,13 +172,22 @@ const getCategoryLink = (category) => {
   padding: 0;
 }
 
+.wheel-category-link:hover {
+  transform: translateY(-3px);
+}
+
+.wheel-category-link:hover .wheel-icon-circle {
+  border-color: #830622;
+  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
+}
+
 .wheel-icon-circle {
   width: 60px;
   height: 60px;
   border-radius: 50%;
   overflow: hidden;
-  background: #ecedeb;
-  border: 2px solid #f0f0f0;
+  background: #fff;
+  border: 2px solid #CA2D52;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -165,7 +204,7 @@ const getCategoryLink = (category) => {
 .wheel-category-name {
   font-size: 12px;
   font-weight: 500;
-  color: #444;
+  color: #333;
   margin: 0;
   line-height: 1.3;
   text-align: center;
@@ -189,12 +228,24 @@ const getCategoryLink = (category) => {
   .wheel-categories-section {
     display: block;
     padding-top: 10px;
-
+  }
+  
+  .section-header {
+    margin: 0 0 15px 0;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+  
+  .view-all {
+    font-size: 13px;
   }
   
   .wheel-icon-circle {
     width: 45px;
     height: 45px;
+    border: 2px solid #CA2D52;
   }
   
   .wheel-icon {

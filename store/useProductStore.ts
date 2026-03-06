@@ -296,6 +296,77 @@ export const useProductStore = defineStore('productStore', () => {
     return mockProducts
   }
 
+  const applyFiltersToProducts = (products: StoreProduct[], filters: Partial<typeof state.value.filters>) => {
+    let filteredProducts = [...products]
+
+    // Apply color filter
+    if (filters.color) {
+      filteredProducts = filteredProducts.filter(product => {
+        const colors = getAllAvailableColors(product)
+        return colors.some(color => color.toLowerCase() === filters.color!.toLowerCase())
+      })
+    }
+
+    // Apply size filter
+    if (filters.size) {
+      filteredProducts = filteredProducts.filter(product => {
+        const sizes = getAllAvailableSizes(product)
+        return sizes.some(size => size.toLowerCase() === filters.size!.toLowerCase())
+      })
+    }
+
+    // Apply category filter
+    if (filters.category && filters.category !== 'all') {
+      filteredProducts = filteredProducts.filter(product => {
+        const category = getProductCategory(product)
+        return category && category.toLowerCase() === filters.category!.toLowerCase()
+      })
+    }
+
+    // Apply brand filter
+    if (filters.brand) {
+      filteredProducts = filteredProducts.filter(product => {
+        const brand = getProductBrand(product)
+        return brand && brand.toLowerCase() === filters.brand!.toLowerCase()
+      })
+    }
+
+    // Apply price filter
+    if (filters.minPrice > 0) {
+      filteredProducts = filteredProducts.filter(product => {
+        const price = getDiscountedPrice(product)
+        return price >= filters.minPrice!
+      })
+    }
+
+    if (filters.maxPrice < 1000000) {
+      filteredProducts = filteredProducts.filter(product => {
+        const price = getDiscountedPrice(product)
+        return price <= filters.maxPrice!
+      })
+    }
+
+    return filteredProducts
+  }
+
+  const paginateProducts = (products: StoreProduct[], page: number = 1, limit: number = 24) => {
+    const startIndex = (page - 1) * limit
+    const endIndex = startIndex + limit
+    const paginatedProducts = products.slice(startIndex, endIndex)
+
+    return {
+      products: paginatedProducts,
+      pagination: {
+        currentPage: page,
+        lastPage: Math.ceil(products.length / limit),
+        total: products.length,
+        perPage: limit,
+        from: startIndex + 1,
+        to: Math.min(endIndex, products.length)
+      }
+    }
+  }
+
   // ==================== API ENDPOINTS ====================
 
   const API_ENDPOINTS = {
@@ -830,8 +901,12 @@ export const useProductStore = defineStore('productStore', () => {
 
   const fetchFilterOptions = async () => {
     try {
-      // Fetch categories with nested data
-      const categoriesResult = await fetchCategoriesWithNestedData()
+      // Fetch categories with nested data (don't let this failure break other filters)
+      try {
+        await fetchCategoriesWithNestedData()
+      } catch (error) {
+        console.warn('Failed to fetch categories, but continuing with other filters:', error)
+      }
 
       // Use fallback colors (API disabled to prevent 500 errors)
       state.value.colors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Yellow', 'Pink', 'Gray', 'Purple', 'Orange']
@@ -851,10 +926,18 @@ export const useProductStore = defineStore('productStore', () => {
 
       return true
     } catch (error) {
+      console.error('Error in fetchFilterOptions:', error)
 
-      // Use empty arrays as fallback
-      state.value.colors = []
-      state.value.sizes = []
+      // Use fallback arrays as final fallback
+      state.value.colors = ['Red', 'Blue', 'Green', 'Black', 'White', 'Yellow', 'Pink', 'Gray', 'Purple', 'Orange']
+      state.value.sizes = [
+        { id: '1', size: 'XS' },
+        { id: '2', size: 'S' },
+        { id: '3', size: 'M' },
+        { id: '4', size: 'L' },
+        { id: '5', size: 'XL' },
+        { id: '6', size: 'XXL' }
+      ]
       state.value.categories = []
       state.value.categoryTree = []
       state.value.brands = []
@@ -995,20 +1078,18 @@ export const useProductStore = defineStore('productStore', () => {
 
       // Check if GraphQL endpoint is available
       if (!API_ENDPOINTS.graphql) {
-        // Set empty state - no mock data
-        state.value.allProducts = []
-        state.value.filteredAndSortedProducts = []
-        state.value.pagination = {
-          currentPage: 1,
-          lastPage: 1,
-          total: 0,
-          perPage: 1000,
-          from: 0,
-          to: 0
-        }
+        // Use mock data for testing when API is not available
+        const mockProducts = generateMockProducts()
+        const filteredProducts = applyFiltersToProducts(mockProducts, mergedFilters)
+        const paginatedProducts = paginateProducts(filteredProducts, mergedFilters.page || 1, mergedFilters.limit || 24)
+        
+        state.value.allProducts = mockProducts
+        state.value.filteredAndSortedProducts = filteredProducts
+        state.value.pagination = paginatedProducts.pagination
+        
         return {
-          products: [],
-          pagination: state.value.pagination
+          products: paginatedProducts.products,
+          pagination: paginatedProducts.pagination
         }
       }
 

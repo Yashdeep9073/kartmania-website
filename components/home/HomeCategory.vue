@@ -1,5 +1,5 @@
 <template>
-  <section class="explore-categories pt-20">
+  <section class="explore-categories pt-10">
     <h4 class="section-title">Explore Top Categories</h4>
 
     <!-- MAIN CATEGORIES -->

@@ -11,7 +11,25 @@
 
       <!-- Error State -->
       <div v-else-if="error" class="alert alert-danger" role="alert">
-        {{ error }}
+        <div class="text-center">
+          <h5 class="mb-3">Product Style Not Found</h5>
+          <p class="mb-3">
+            <span v-if="error && typeof error === 'object' && 'status' in error && (error as any).status === 404">
+              The product style "{{ styleGroupId }}" is not available or has been discontinued.
+            </span>
+            <span v-else>
+              Unable to load product details. Please try again later.
+            </span>
+          </p>
+          <div class="d-flex gap-3 justify-content-center">
+            <NuxtLink to="/shop-all" class="btn btn-primary">
+              Browse All Products
+            </NuxtLink>
+            <button @click="refresh" class="btn btn-outline-primary">
+              Try Again
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Main Content -->
@@ -252,10 +270,10 @@
                     <div>
                       <span class="text-sm text-gray-600">Selected:</span>
                       <div class="flex-align gap-12 mt-4">
-                        <span class="badge bg-blue-100 text-blue-800 border border-blue-200">
+                        <span class="badge bg-main-600 text-white border border-main-600">
                           {{ selectedVariant.color?.name || selectedVariant.color }}
                         </span>
-                        <span class="badge bg-green-100 text-green-800 border border-green-200">
+                        <span class="badge bg-gray-800 text-white border border-gray-800">
                           {{ selectedVariant.size?.name || selectedVariant.size }}
                         </span>
                       </div>
@@ -522,7 +540,7 @@
                   </span>
                   <span class="text-Black fw-semibold">By Marketpro</span>
                 </div>
-                <NuxtLink to="/shop"
+                <NuxtLink to="/shop-all"
                   class="btn btn-white rounded-full text-uppercase fw-semibold transition-all duration-300">
                   View Store
                 </NuxtLink>
@@ -674,8 +692,9 @@
                               </button>
                               <span class="text-sm font-bold w-32 text-center border-x border-gray-200 py-4 bg-gray-50">{{ item.quantity }}</span>
                               <button @click="updateCartItemQuantity(item.id, 1)" 
+                                :disabled="item.stock && item.quantity >= item.stock"
                                 :class="['w-28 h-28 flex-center transition-colors',
-                                  'text-main-600 hover:bg-main-100']">
+                                  item.stock && item.quantity >= item.stock ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-main-600 hover:bg-main-100']">
                                 <i class="ph ph-plus text-sm"></i>
                               </button>
                             </div>
@@ -854,7 +873,7 @@
             </ul>
             <div
               class="bg-gradient-to-r from-green-50 to-emerald-50 text-green-600 rounded-12 flex-align gap-8 hover:from-green-100 hover:to-emerald-100 hover:text-green-700 transition-all duration-300 border border-green-200">
-              <img :src="safeLoadImage('/assets/images/icon/satisfaction-icon.png')" alt="Satisfaction Guaranteed"
+              <img :src="safeLoadImage('/assets/images/logo/pfevicon.png')" alt="Satisfaction Guaranteed"
                 class="w-24 h-24" loading="lazy" decoding="async" @error="handleImageError" />
               100% Satisfaction Guaranteed
             </div>
@@ -1271,13 +1290,54 @@ import 'swiper/css/pagination'
 -----------------------------------*/
 
 const route = useRoute()
+const router = useRouter()
 const styleGroupId = computed(() => route.params.groupId as string)
 
 /* ----------------------------------
    API
 -----------------------------------*/
 
-const { data, loading, error } = useProductGroupApi(styleGroupId)
+const { data, loading, error, refresh } = useProductGroupApi(styleGroupId)
+
+// Auto-redirect on 404 errors
+watch(error, (newError) => {
+  if (newError && typeof newError === 'object' && 'status' in newError && (newError as any).status === 404) {
+    // Show user notification about redirect
+    const toast = useToast?.() || { add: () => {} }
+    toast.add({
+      title: 'Product Style Not Found',
+      description: `Redirecting to available product style...`,
+      color: 'warning'
+    })
+    
+    // Try to get available groups and redirect to first one
+    const fetchAvailableGroups = async () => {
+      try {
+        const api = useApiEndpoints()
+        const allGroupsRes = await $fetch<{ data: any }>(api.products.group.list())
+        const availableGroups = allGroupsRes?.data || []
+        
+        if (availableGroups.length > 0) {
+          const firstGroup = availableGroups[0]
+          
+          console.log(`🔄 Redirecting from group ${styleGroupId.value} to ${firstGroup.groupId}: ${firstGroup.name}`)
+          
+          // Redirect to first available group
+          await router.replace({
+            params: { 
+              slug: route.params.slug, 
+              groupId: firstGroup.groupId 
+            }
+          })
+        }
+      } catch (e) {
+        console.error('Failed to fetch groups for redirect:', e)
+      }
+    }
+    
+    fetchAvailableGroups()
+  }
+})
 
 /* ----------------------------------
    CORE STATE
@@ -1760,10 +1820,16 @@ const removeFromCart = (itemId: number) => {
   saveCart(cart)
 }
 
-const updateCartItemQuantity = (itemId: number, newQuantity: number) => {
-  const cart = cartItems.value.map(item =>
-    item.id === itemId ? { ...item, quantity: newQuantity } : item
-  )
+const updateCartItemQuantity = (itemId: number, change: number) => {
+  const cart = cartItems.value.map(item => {
+    if (item.id === itemId) {
+      const newQuantity = item.quantity + change
+      // Ensure quantity doesn't go below 1 or exceed stock
+      const finalQuantity = Math.max(1, item.stock ? Math.min(newQuantity, item.stock) : newQuantity)
+      return { ...item, quantity: finalQuantity }
+    }
+    return item
+  })
   saveCart(cart)
 }
 

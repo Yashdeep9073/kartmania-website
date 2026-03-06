@@ -2636,19 +2636,19 @@ background-color: #e6e6e6;
 
 .banner-button {
   display: inline-block;
-  background: linear-gradient(135deg, var(--main-600), var(--main-700));
+  background: linear-gradient(135deg, #CA2D52, #830622);
   color: white;
   padding: 0.5rem 1.5rem;
   border-radius: 4px;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.875rem;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(202, 45, 82, 0.2);
 }
 
 .banner-button:hover {
-  background: linear-gradient(135deg, var(--main-700), var(--main-800));
+  background: linear-gradient(135deg, #830622, #CA2D52);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
 }

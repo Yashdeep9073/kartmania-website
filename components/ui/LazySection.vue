@@ -21,7 +21,7 @@ const props = defineProps({
   },
   placeholderHeight: {
     type: String,
-    default: "200px"
+    default: "50px"
   },
   showPlaceholder: {
     type: Boolean,
@@ -57,7 +57,7 @@ onMounted(() => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  min-height: 200px;
+  min-height: 50px;
 }
 
 .lazy-spinner {

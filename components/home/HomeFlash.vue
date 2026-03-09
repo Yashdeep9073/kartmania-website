@@ -42,10 +42,6 @@
             <div class="swiper-wrapper">
               <div v-for="(product, index) in displayProducts" :key="product.id" class="swiper-slide">
                 <div class="product-card">
-                  <button class="add-cart-btn" @click="addToCart(product)">
-                    Add <i class="ph ph-shopping-cart"></i>
-                  </button>
-
                   <NuxtLink :to="generateProductUrl(product)" class="product-image-container">
                     <img :src="getProductImage(product)" :alt="product.name" class="product-image"
                       @error="handleImageError($event)" loading="lazy" width="280" height="210" />
@@ -86,6 +82,10 @@
                         <div class="progress-fill" :style="{ width: getRandomSoldPercentage() + '%' }"></div>
                       </div>
                     </div>
+
+                    <button class="add-cart-btn" @click="addToCart(product)">
+                      Add <i class="ph ph-shopping-cart"></i>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -200,25 +200,25 @@ export default {
         const Swiper = SwiperModule.default
         swiperInstance.value = new Swiper(swiperContainer.value, {
           modules: [Navigation, Autoplay],
-          loop: displayProducts.value.length > 4,
-          slidesPerView: 5,
-          spaceBetween: 16,
+          loop: displayProducts.value.length > 6,
+          slidesPerView: 6,
+          spaceBetween: 12,
           centeredSlides: false,
           grabCursor: true,
           speed: 600,
           navigation: { nextEl: '.next-btn', prevEl: '.prev-btn', disabledClass: 'nav-btn-disabled' },
           autoplay: { delay: 3000, disableOnInteraction: true, pauseOnMouseEnter: true },
           breakpoints: {
-            320: { slidesPerView: 1, spaceBetween: 12 },
-            400: { slidesPerView: 1.5, spaceBetween: 12 },
-            480: { slidesPerView: 2, spaceBetween: 12 },
-            576: { slidesPerView: 2.5, spaceBetween: 14 },
-            640: { slidesPerView: 3, spaceBetween: 14 },
-            768: { slidesPerView: 3, spaceBetween: 16 },
-            900: { slidesPerView: 4, spaceBetween: 16 },
-            1024: { slidesPerView: 4, spaceBetween: 16 },
-            1200: { slidesPerView: 5, spaceBetween: 16 },
-            1400: { slidesPerView: 5, spaceBetween: 16 },
+            320: { slidesPerView: 1, spaceBetween: 8 },
+            400: { slidesPerView: 1.5, spaceBetween: 8 },
+            480: { slidesPerView: 2, spaceBetween: 10 },
+            576: { slidesPerView: 2.5, spaceBetween: 10 },
+            640: { slidesPerView: 3, spaceBetween: 12 },
+            768: { slidesPerView: 4, spaceBetween: 12 },
+            900: { slidesPerView: 5, spaceBetween: 14 },
+            1024: { slidesPerView: 5, spaceBetween: 14 },
+            1200: { slidesPerView: 6, spaceBetween: 12 },
+            1400: { slidesPerView: 6, spaceBetween: 14 },
           },
         })
       } catch (error) {
@@ -312,19 +312,21 @@ export default {
 
 <style scoped>
 .flash-sales {
-  padding: 60px 0;
+  margin-top: 40px;
+  padding: 40px 0 80px;
   background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  overflow: visible;
 }
 
 .container-lg {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 12px;
 }
 
 /* Section Heading */
 .section-heading {
-  margin-bottom: 32px;
+  margin-bottom: 48px;
 }
 
 .flex-between {
@@ -414,8 +416,9 @@ h5 {
 /* Swiper Container Wrapper */
 .swiper-container-wrapper {
   position: relative;
-  padding: 0 40px;
-  overflow: hidden;
+  padding: 0 16px;
+  overflow: visible;
+  margin: 0 -4px;
 }
 
 /* Swiper */
@@ -426,6 +429,8 @@ h5 {
 
 .swiper-wrapper {
   display: flex;
+  align-items: stretch;
+  justify-content: center;
   transition-timing-function: ease-out;
   box-sizing: border-box;
 }
@@ -454,7 +459,7 @@ h5 {
 }
 
 .product-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
   border-color: #CA2D52;
@@ -462,44 +467,41 @@ h5 {
 
 /* Add to Cart Button */
 .add-cart-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(202, 45, 82, 0.1);
-  color: #CA2D52;
+  background: #CA2D52;
+  color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
-  z-index: 2;
-}
-
-.product-card:hover .add-cart-btn {
+  justify-content: center;
+  gap: 4px;
   opacity: 1;
   transform: translateY(0);
+  transition: all 0.3s ease;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
+  width: 100%;
+  margin-top: 12px;
 }
 
 .add-cart-btn:hover {
-  background: #CA2D52;
-  color: white;
+  background: #B02548;
+  box-shadow: 0 6px 16px rgba(202, 45, 82, 0.4);
+  transform: translateY(-2px);
 }
 
 /* Product Image */
 .product-image-container {
-  display: block;
+  flex-shrink: 0;
   overflow: hidden;
   border-bottom: 1px solid #f1f5f9;
   background: #f8fafc;
   flex-shrink: 0;
-  min-height: 200px;
+  min-height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -507,9 +509,9 @@ h5 {
 
 .product-image {
   width: 100%;
-  height: 200px;
+  height: 160px;
   object-fit: contain;
-  padding: 24px;
+  padding: 16px;
   transition: transform 0.3s ease;
 }
 
@@ -519,7 +521,7 @@ h5 {
 
 /* Product Content */
 .product-content {
-  padding: 20px;
+  padding: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -722,16 +724,18 @@ h5 {
   }
 
   .swiper-container-wrapper {
-    padding: 0 30px;
+    padding: 0 12px;
+    margin: 0 -2px;
+    overflow: visible;
   }
 
   .product-image-container {
-    min-height: 160px;
+    min-height: 120px;
   }
 
   .product-image {
-    height: 160px;
-    padding: 16px;
+    height: 120px;
+    padding: 10px;
   }
 
   .product-content {
@@ -759,16 +763,18 @@ h5 {
   }
 
   .swiper-container-wrapper {
-    padding: 0 20px;
+    padding: 0 8px;
+    margin: 0 -2px;
+    overflow: visible;
   }
 
   .product-image-container {
-    min-height: 140px;
+    min-height: 100px;
   }
 
   .product-image {
-    height: 140px;
-    padding: 12px;
+    height: 100px;
+    padding: 8px;
   }
 
   .add-cart-btn {

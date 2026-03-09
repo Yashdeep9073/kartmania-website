@@ -63,63 +63,75 @@ const handleImageError = (e: Event) => {
 </script>
 
 <template>
-  <div class="banner-wrapper" :class="{ loading }">
-    <!-- Offer strip -->
-    <div class="offer-strip">
-      <span class="offer-text">
-        <template v-if="festivalOffer">
-          {{ discountText }} | {{ offerDisplayName }}
-        </template>
-        <template v-else>
-          FLAT 40% OFF | Flash Sale
-        </template>
-      </span>
-    </div>
-
-    <!-- Banner content -->
-    <div class="banner-content">
-      <div class="banner-text">
-        <p v-if="festivalOffer?.description">
-          {{ festivalOffer.description }}
-        </p>
-        <p v-else>
-          Top styles curated for you
-        </p>
+  <NuxtLink 
+    :to="`/shop-all?offer=${festivalOffer?.slug ?? 'all'}`"
+    class="banner-link"
+  >
+    <div class="banner-wrapper" :class="{ loading }">
+      <!-- Offer strip -->
+      <div class="offer-strip">
+        <span class="offer-text">
+          <template v-if="festivalOffer">
+            {{ discountText }} | {{ offerDisplayName }}
+          </template>
+          <template v-else>
+            FLAT 40% OFF | Flash Sale
+          </template>
+        </span>
       </div>
 
-      <div class="images-section">
+      <!-- Banner content -->
+      <div class="banner-content">
+        <div class="banner-text">
+          <p v-if="festivalOffer?.description">
+            {{ festivalOffer.description }}
+          </p>
+          <p v-else>
+            Top styles curated for you
+          </p>
+        </div>
+
+        <div class="images-section">
+          <img
+            v-if="!festivalOffer?.images?.length"
+            src="/assets/images/bg/shirt-removebg-preview.png"
+            alt="Shirt"
+            class="main-img"
+          />
+        </div>
+      </div>
+
+      <!-- Background banner -->
+      <div class="banner-bg-wrapper">
         <img
-          v-if="!festivalOffer?.images?.length"
-          src="/assets/images/bg/shirt-removebg-preview.png"
-          alt="Shirt"
-          class="main-img"
+          :src="primaryImageUrl"
+          class="banner-bg"
+          :alt="festivalOffer?.name || 'Festival Offer Banner'"
+          @error="handleImageError"
         />
-
-        <NuxtLink
-          :to="`/shop-all?offer=${festivalOffer?.slug ?? 'all'}`"
-          class="shop-link"
-        >
-          <button class="shop-btn">
-            Shop Now →
-          </button>
-        </NuxtLink>
+        <div class="bg-overlay"></div>
       </div>
     </div>
-
-    <!-- Background banner -->
-    <div class="banner-bg-wrapper">
-      <img
-        :src="primaryImageUrl"
-        class="banner-bg"
-        :alt="festivalOffer?.name || 'Festival Offer Banner'"
-        @error="handleImageError"
-      />
-      <div class="bg-overlay"></div>
-    </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <style scoped>
+.banner-link {
+  display: block;
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.banner-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.banner-link:hover .banner-bg {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}
+
 .banner-wrapper {
   position: relative;
   margin-bottom: 15px; 
@@ -227,33 +239,6 @@ const handleImageError = (e: Event) => {
   margin-right: 20px;
 }
 
-.shop-link {
-  position: absolute;
-  bottom: 15px;
-  right: 0;
-  z-index: 6;
-}
-
-.shop-btn {
-  background: #fff;
-  color: #CA2D52;
-  border: none;
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 700;
-  border-radius: 999px; 
-  cursor: pointer; 
-  transition: all 0.25s ease; 
-  display: flex; 
-  align-items: center;
-  justify-content: center;
-}
-
-.shop-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-}
-
 /* ==================== resposnive ==================== */
 
 @media (max-width: 768px) {
@@ -279,15 +264,6 @@ const handleImageError = (e: Event) => {
   .main-img {
     width: 100px;
     margin-right: 15px;
-  }
-
-  .shop-btn {
-    padding: 6px 14px;
-    font-size: 11px;
-  }
-
-  .shop-link {
-    bottom: 10px;
   }
 
   .offer-strip {
@@ -327,15 +303,6 @@ const handleImageError = (e: Event) => {
     margin-right: 10px;
   }
 
-  .shop-btn {
-    padding: 5px 12px;
-    font-size: 10px;
-  }
-
-  .shop-link {
-    bottom: 8px;
-  }
-
   .offer-strip {
     left: 0;
     right: 0;
@@ -366,15 +333,6 @@ const handleImageError = (e: Event) => {
   .main-img {
     width: 70px;
     margin-right: 8px;
-  }
-
-  .shop-btn {
-    padding: 4px 10px;
-    font-size: 9px;
-  }
-
-  .shop-link {
-    bottom: 3px;
   }
 }
 

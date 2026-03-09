@@ -5,18 +5,13 @@
         <div class="slide active">
           <!-- Background Image -->
           <Transition name="slide" mode="out-in">
-            <NuxtLink 
+            <img 
               v-if="currentBanner"
               :key="currentBanner.image"
-              to="/shop-all"
-              class="banner-link"
-            >
-              <img 
-                :src="currentBanner.image" 
-                :alt="currentBanner.title"
-                class="banner-image"
-              />
-            </NuxtLink>
+              :src="currentBanner.image" 
+              :alt="currentBanner.title"
+              class="banner-image"
+            />
           </Transition>
           
           <!-- Overlay -->
@@ -24,10 +19,17 @@
           
           <!-- Content -->
           <Transition name="slide-content" mode="out-in">
-          <div v-if="currentBanner" class="content" :key="currentBanner.title">
-            <span class="subtitle">{{ currentBanner.description }}</span>
-            <h1 class="title">{{ currentBanner.title }}</h1>
-          </div>
+          <NuxtLink 
+            v-if="currentBanner"
+            :key="currentBanner.title"
+            to="/shop-all"
+            class="banner-content-link"
+          >
+            <div class="content">
+              <span class="subtitle">{{ currentBanner.description }}</span>
+              <h1 class="title">{{ currentBanner.title }}</h1>
+            </div>
+          </NuxtLink>
           </Transition>
         </div>
 
@@ -231,11 +233,23 @@ onUnmounted(() => {
   filter: brightness(0.8);
 }
 
-.banner-link {
+.banner-content-link {
   position: absolute;
   width: 100%;
   height: 100%;
   display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s ease;
+}
+
+.banner-content-link:hover {
+  transform: scale(1.02);
+}
+
+.banner-content-link:hover .content {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
 }
 
 /* Smooth slide between slides */

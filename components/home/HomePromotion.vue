@@ -22,14 +22,7 @@
           :key="banner.id"
           :class="getColumnClasses(index)"
         >
-          <div class="promotional-banner-item position-relative rounded-16 rounded-md-20 rounded-lg-24 overflow-hidden z-1 py-32 py-md-40 py-lg-52 ps-20 ps-md-30 ps-lg-40 pe-16 pe-md-20 pe-lg-24 h-100">
-            <!-- Category Badge -->
-            <div v-if="banner.category" class="position-absolute top-0 end-0 m-3 z-2">
-              <span class="badge bg-primary text-white text-capitalize">
-                {{ banner.category?.replace('-', ' ')}}
-              </span>
-            </div>
-            
+          <NuxtLink :to="banner.slug ? `/shop-all?offer=${banner.slug}` : (banner.category ? `/shop-all?category=${banner.category}` : '/shop-all')" class="promotional-banner-item position-relative rounded-16 rounded-md-20 rounded-lg-24 overflow-hidden z-1 py-56 py-md-64 py-lg-76 ps-40 ps-md-48 ps-lg-64 pe-32 pe-md-40 pe-lg-48 h-100">
             <img
               :src="banner.image"
               :alt="banner.title"
@@ -45,15 +38,8 @@
                 <span class="text-heading fst-italic text-xs text-md-sm text-lg-base">Starting at</span>
                 <h6 class="text-danger-600 mb-0 text-sm text-md-base text-lg-xl">{{ banner.price }}</h6>
               </div>
-  
-              <NuxtLink :to="banner.slug ? `/shop-all?offer=${banner.slug}` : (banner.category ? `/shop-all?category=${banner.category}` : '/shop-all')" class="btn btn-main d-inline-flex align-items-center rounded-pill gap-2 gap-md-4 gap-lg-8 mt-3 mt-md-4 mt-lg-6 px-3 px-md-4 py-2 py-md-2 py-lg-3 text-xs text-md-sm text-lg-base">
-                Shop Now
-                <span class="icon d-flex text-sm text-md-base text-lg-xl">
-                  <i class="ph ph-arrow-right p-5"></i>
-                </span>
-              </NuxtLink>
             </div>
-          </div>
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -133,7 +119,7 @@ if (typeof window !== 'undefined') {
 
 // Get column classes based on index and screen size
 const getColumnClasses = (index: number): string => {
-  return 'col-12 col-md-6 col-lg-3'
+  return 'col-12 col-md-4 col-lg-3'
 }
 
 // Fetch offer data from API
@@ -267,6 +253,9 @@ onMounted(() => {
   position: relative;
   overflow: hidden;
   padding: 10px;
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
 .promotional-banner-item::before {
@@ -318,33 +307,6 @@ onMounted(() => {
 .promotional-banner-item:hover {
   border-color: #830622;
   box-shadow: 0 4px 20px rgba(202, 45, 82, 0.2);
-}
-
-.btn-main {
-  background: linear-gradient(135deg, #CA2D52, #830622);
-  border: none;
-  font-weight: 600;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 50px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(202, 45, 82, 0.3);
-}
-
-.btn-main:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(202, 45, 82, 0.4);
-  color: white;
-}
-
-.badge {
-  background: linear-gradient(135deg, #CA2D52, #830622) !important;
-  color: white !important;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  text-transform: capitalize;
 }
 
 .text-danger-600 {
@@ -401,12 +363,6 @@ onMounted(() => {
     line-height: 1.2;
   }
   
-  .btn-main {
-    padding: 8px 16px !important;
-    font-size: 0.75rem !important;
-    min-height: 36px;
-  }
-  
   .text-heading {
     font-size: 0.75rem !important;
   }
@@ -433,12 +389,6 @@ onMounted(() => {
     line-height: 1.1;
   }
   
-  .btn-main {
-    padding: 6px 12px !important;
-    font-size: 0.6875rem !important;
-    min-height: 32px;
-  }
-  
   .text-heading {
     font-size: 0.6875rem !important;
   }
@@ -455,10 +405,6 @@ onMounted(() => {
   
   .promotional-banner-item:active {
     transform: scale(0.98);
-  }
-  
-  .btn-main {
-    min-height: 44px;
   }
 } 
 </style> 

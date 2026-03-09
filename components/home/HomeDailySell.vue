@@ -83,7 +83,7 @@
         </div>
 
         <!-- Right Banner Card -->
-        <div class="col-xxl-4">
+        <NuxtLink to="/shop-all" class="col-xxl-4 text-decoration-none">
           <div v-if="offersLoading" class="text-center py-4">
             <div class="spinner-border text-main-600" role="status">
               <span class="visually-hidden">Loading offer...</span>
@@ -104,10 +104,6 @@
                 <span class="text-sm fw-medium text-heading">{{ dailyDealsOffers[0].description || 'Limited time offer' }}</span>
                 <span class="text-xs text-heading">Expire {{ new Date(dailyDealsOffers[0].endDate).toLocaleDateString() }}</span>
               </div>
-              <NuxtLink to="/shop-all" class="mt-16 btn bg-main-600 hover-text-white hover-bg-main-700 text-white fw-medium d-inline-flex align-items-center rounded-pill gap-8">
-                Shop Now
-                <span class="icon text-xl d-flex"><i class="ph ph-arrow-right"></i></span>
-              </NuxtLink>
             </div>  
           </div>
           
@@ -125,13 +121,9 @@
                 <span class="text-sm fw-medium text-heading">Delivery by 6:15am</span>
                 <span class="text-xs text-heading">Expire Aug 5</span>
               </div>
-              <NuxtLink to="/shop-all" class="mt-16 btn bg-main-600 hover-text-white hover-bg-main-700 text-white fw-medium d-inline-flex align-items-center rounded-pill gap-8">
-                Shop Now
-                <span class="icon text-xl d-flex"><i class="ph ph-arrow-right"></i></span>
-              </NuxtLink>
             </div>  
           </div>
-        </div>
+        </NuxtLink>
       </div>
     </div>
   </section>

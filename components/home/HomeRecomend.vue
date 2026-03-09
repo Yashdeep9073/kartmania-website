@@ -221,7 +221,6 @@ import { useRecommendStore } from '../../store/useRecommendStore'
 import { useWishlistStore } from '../../store/useWishlistStore'
 import { useToast } from "vue-toastification"
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import { Pagination } from 'swiper/modules'
 import { useCart } from '~/composables/api/useCart'
 
 /* Import Swiper styles */

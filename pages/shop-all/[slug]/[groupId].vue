@@ -34,59 +34,33 @@
 
       <!-- Main Content -->
       <div v-else-if="mainProduct" class="row gy-4">
-        <div class="col-lg-9 order-lg-1">
+        <div class="col-12">
           <div class="row gy-4">
             <!-- Product Images Section -->
             <div class="col-xl-6">
-              <div class="product-details__left sticky-image-gallery">
-                <!-- Desktop: Vertical thumbnails on left -->
-                <div class="product-gallery-wrapper d-none d-xl-flex">
-                  <!-- LEFT: VERTICAL THUMBNAILS (Desktop only) -->
-                  <div class="thumbnail-container me-3">
-                    <Swiper direction="vertical" @swiper="setThumbsSwiper" :spaceBetween="12" :slidesPerView="4" :watchSlidesProgress="true"
-                      class="thumbnail-swiper h-100">
-                      <SwiperSlide v-for="(thumb, index) in thumbnailImages" :key="index"
-                        @click="goToSlide(Number(index))">
-                        <div :class="[
-                          'thumbnail-item',
-                          activeThumb === index ? 'active-thumbnail' : ''
-                        ]">
-                          <div class="thumbnail-image-wrapper">
-                            <img :src="safeLoadImage(thumb)" :alt="`Thumbnail ${Number(index) + 1}`"
-                              class="thumbnail-image" loading="lazy" decoding="async" @error="handleImageError" />
-                          </div>
-                        </div>
-                      </SwiperSlide>
-                    </Swiper>
-                  </div>
-
-                  <!-- RIGHT: MAIN IMAGE -->
-                  <div class="product-details__thumb-slider overflow-hidden flex-grow-1">
-                    <Swiper :modules="[Thumbs]" :thumbs="{ swiper: thumbsSwiper }" :spaceBetween="0" :slidesPerView="1"
-                      :loadOnTransitionStart="true" class="main-swiper h-100"
-                      @swiper="setMainSwiper" @slideChange="onSlideChange">
-                      <SwiperSlide v-for="(image, index) in mainImages" :key="index" class="main-image-slide h-100">
-                        <div class="main-image-container h-100 d-flex align-items-center justify-content-center">
-                          <img :src="safeLoadImage(image)" :alt="`Product image ${Number(index) + 1}`"
-                            class="main-product-image" :loading="index === 0 ? 'eager' : 'lazy'" decoding="async"
-                            :preload="index === 0" @error="handleImageError" />
-                        </div>
-
-                      </SwiperSlide>
-                    </Swiper>
+              <div class="product-details__left">
+                <!-- Desktop: 2x2 Grid Layout -->
+                <div class="product-gallery-grid d-none d-xl-grid">
+                  <div class="grid-container">
+                    <div v-for="(image, index) in mainImages.slice(0, 4)" :key="index" class="grid-image-container"
+                      @click="openImageModal(Number(index))">
+                      <img :src="safeLoadImage(image)" :alt="`Product image ${Number(index) + 1}`"
+                        class="grid-product-image" loading="lazy" decoding="async" @error="handleImageError" />
+                    </div>
                   </div>
                 </div>
-                <!-- Mobile/Tablet: Horizontal thumbnails with dots -->
+
+                <!-- Mobile/Tablet: Single image with horizontal scroll -->
                 <div class="d-xl-none">
                   <!-- Main Image with Dots -->
                   <div class="mobile-main-slider">
-                    <Swiper :modules="[Pagination]" :spaceBetween="0" :slidesPerView="1"
-                      :pagination="{
-                        clickable: true,
-                        el: '.mobile-pagination',
-                        bulletClass: 'mobile-dot',
-                        bulletActiveClass: 'mobile-dot-active'
-                      } as any" @swiper="setMobileMainSwiper" @slideChange="onMobileSlideChange" class="mobile-main-swiper">
+                    <Swiper :modules="[Pagination]" :spaceBetween="0" :slidesPerView="1" :pagination="{
+                      clickable: true,
+                      el: '.mobile-pagination',
+                      bulletClass: 'mobile-dot',
+                      bulletActiveClass: 'mobile-dot-active'
+                    } as any" @swiper="setMobileMainSwiper" @slideChange="onMobileSlideChange"
+                      class="mobile-main-swiper">
                       <SwiperSlide v-for="(image, index) in mainImages" :key="index">
                         <div class="mobile-main-image-container">
                           <img :src="safeLoadImage(image)" :alt="`Product image ${Number(index) + 1}`"
@@ -101,9 +75,8 @@
 
                   <!-- Horizontal Thumbnails Slider for Mobile -->
                   <div class="mobile-thumbnails-slider mt-4">
-                    <Swiper :spaceBetween="10" :slidesPerView="4":watchSlidesProgress="true"
-                      class="mobile-thumbnail-swiper"
-                      @swiper="setMobileThumbsSwiper">
+                    <Swiper :spaceBetween="10" :slidesPerView="4" :watchSlidesProgress="true"
+                      class="mobile-thumbnail-swiper" @swiper="setMobileThumbsSwiper">
                       <SwiperSlide v-for="(thumb, index) in thumbnailImages" :key="index"
                         @click="goToMobileSlide(Number(index))">
                         <div :class="[
@@ -123,33 +96,38 @@
               </div>
             </div>
 
-            <!-- Product Details (Remains exactly the same) -->
+            <!-- Product Details -->
             <div class="col-xl-6">
               <div class="product-details__content">
-                <h5 class="mb-12">{{ mainProduct.name }}</h5>
-                <div class="flex-align flex-wrap gap-12">
-                  <div class="flex-align gap-12 flex-wrap">
-                    <div class="flex-align gap-8">
-                      <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
-                      <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
-                      <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
-                      <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
-                      <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
-                    </div>
-                    <span class="text-sm fw-medium text-neutral-600">4.7 Star Rating</span>
-                    <span class="text-sm fw-medium text-gray-500">({{ mainProduct.reviews?.length || 0 }})</span>
-                  </div>
-                  <span class="text-sm fw-medium text-gray-500">|</span>
-                  <span class="text-gray-900">
-                    <span class="text-gray-400">SKU:</span> {{ selectedVariant?.sku || mainProduct.sku }}
-                  </span>
-                </div>
-                <span class="mt-32 pt-32 text-gray-700 border-top border-gray-100 d-block"></span>
-                <p class="text-gray-700">{{ mainProduct.description }}</p>
+                <h5>{{ mainProduct.name }}</h5>
 
-                <!-- Color Selection images instead of color circles -->
-                <div v-if="availableColorsWithImages.length > 0" class="mt-32">
-                  <span class="text-gray-900 d-block mb-8 fw-semibold">Color:</span>
+                <!-- Enhanced Rating Section -->
+                <div class="rating-section">
+                  <div class="rating-stars">
+                    <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
+                    <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
+                    <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
+                    <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
+                    <span class="text-xs fw-medium text-warning-600 d-flex"><i class="ph-fill ph-star"></i></span>
+                  </div>
+                  <span class="rating-text">4.7 Star Rating</span>
+                  <span class="text-sm fw-medium text-gray-500">({{ mainProduct.reviews?.length || 0 }})</span>
+                </div>
+
+                <!-- Enhanced SKU Info -->
+                <div class="sku-info">
+                  <span class="text-gray-400">SKU:</span> {{ selectedVariant?.sku || mainProduct.sku }}
+                </div>
+                <!-- Enhanced Product Description -->
+                <div class="product-description">
+                  {{ mainProduct.description }}
+                </div>
+
+                <!-- Enhanced Color Selection -->
+                <div v-if="availableColorsWithImages.length > 0" class="color-selection">
+                  <div class="color-selection-title">
+                    <span>Color:</span>
+                  </div>
                   <div class="flex-align flex-wrap gap-16">
                     <div v-for="color in availableColorsWithImages" :key="color.name" @click="selectColor(color.name)"
                       @mouseenter="preloadColorImages(color.name)" :class="['flex flex-col items-center cursor-pointer',
@@ -240,7 +218,7 @@
                           class="flex justify-between">
                           <span class="text-gray-600">Screen:</span>
                           <span class="font-medium">{{ selectedVariant.attributes[0].extraAttributes.screenSize
-                            }}</span>
+                          }}</span>
                         </div>
                         <div v-if="selectedVariant?.attributes?.[0]?.extraAttributes?.color"
                           class="flex justify-between">
@@ -311,7 +289,7 @@
 
                 <!-- Special Offer -->
                 <div v-if="mainProduct.discountValue > 0"
-                  class="flex-align flex-wrap gap-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-12 py-16 px-24 border border-blue-100">
+                  class="flex-align flex-wrap gap-16 bg-gradient-to-r from-red-50 to-pink-50 rounded-12 py-16 px-24 border border-red-100">
                   <div class="flex-align gap-16">
                     <span class="text-main-600 text-sm fw-semibold"> Special Offer:</span>
                   </div>
@@ -457,11 +435,11 @@
                 </div>
 
                 <div class="flex-align gap-12">
-                  <button @click="toggleWishlist"
+                  <button @click="toggleWishlist(mainProduct)"
                     :class="['w-52 h-52 flex-center rounded-circle text-xl transition-all duration-300',
-                      isInWishlist ? 'bg-gradient-to-br from-red-500 to-pink-500 text-white shadow-lg' :
+                      isInWishlist(mainProduct?.id) ? 'bg-gradient-to-br from-red-500 to-pink-500 text-yellow-300 shadow-lg' :
                         'bg-gradient-to-br from-gray-50 to-white text-gray-600 hover:bg-gradient-to-br hover:from-red-50 hover:to-pink-50 hover:text-red-500 border border-gray-100 shadow-sm']">
-                    <i class="ph" :class="isInWishlist ? 'ph-heart-fill' : 'ph-heart'"></i>
+                    <i class="ph" :class="isInWishlist(mainProduct?.id) ? 'ph-heart-fill' : 'ph-heart'"></i>
                   </button>
                   <button @click="compareProduct"
                     class="w-52 h-52 bg-gradient-to-br from-gray-50 to-white text-gray-600 text-xl hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 hover:text-blue-500 flex-center rounded-circle border border-gray-100 shadow-sm transition-all duration-300">
@@ -527,324 +505,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-3 order-lg-2">
-          <div class="product-details__sidebar border border-gray-100 rounded-16 overflow-hidden shadow-sm">
-            <!-- Store Info -->
-            <div class="p-24 bg-yellow-400">
-              <div class="flex-between rounded-full p-8">
-                <div class="flex-align gap-8">
-                  <span class="w-44 h-44 bg-white rounded-full flex-center text-2xl text-main-600">
-                    <i class="ph ph-storefront"></i>
-                  </span>
-                  <span class="text-Black fw-semibold">By Marketpro</span>
-                </div>
-                <NuxtLink to="/shop-all"
-                  class="btn btn-white rounded-full text-uppercase fw-semibold transition-all duration-300">
-                  View Store
-                </NuxtLink>
-              </div>
-            </div>
-
-            <!-- Features Section -->
-            <div class="sidebar-features">
-              <!-- Fast Delivery -->
-              <div
-                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300">
-                <span
-                  class="w-44 h-44 bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                  <i class="ph-fill ph-truck"></i>
-                </span>
-                <div class="">
-                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Fast Delivery</h6>
-                  <p class="text-gray-700 text-sm">Lightning-fast shipping, guaranteed.</p>
-                </div>
-              </div>
-
-              <!-- Free Returns -->
-              <div
-                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300">
-                <span
-                  class="w-44 h-44 bg-gradient-to-br from-green-100 to-green-50 text-green-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                  <i class="ph-fill ph-arrow-u-up-left"></i>
-                </span>
-                <div class="">
-                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Free 90-day returns</h6>
-                  <p class="text-gray-700 text-sm">Shop risk-free with easy returns.</p>
-                </div>
-              </div>
-
-              <!-- Pickup Available -->
-              <div
-                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300">
-                <span
-                  class="w-44 h-44 bg-gradient-to-br from-purple-100 to-purple-50 text-purple-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                  <i class="ph-fill ph-check-circle"></i>
-                </span>
-                <div class="">
-                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Pickup available at Shop location</h6>
-                  <p class="text-gray-700 text-sm">Usually ready in 24 hours</p>
-                </div>
-              </div>
-
-              <!-- Payment -->
-              <div
-                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-all duration-300">
-                <span
-                  class="w-44 h-44 bg-gradient-to-br from-yellow-100 to-yellow-50 text-yellow-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                  <i class="ph-fill ph-credit-card"></i>
-                </span>
-                <div class="">
-                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Payment</h6>
-                  <p class="text-gray-700 text-sm">Payment upon receipt of goods, Payment by card in the department,
-                    Google Pay, Online card.</p>
-                </div>
-              </div>
-
-              <!-- Warranty -->
-              <div
-                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 border-bottom border-gray-100 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300">
-                <span
-                  class="w-44 h-44 bg-gradient-to-br from-red-100 to-red-50 text-red-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                  <i class="ph-fill ph-check-circle"></i>
-                </span>
-                <div class="">
-                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Warranty</h6>
-                  <p class="text-gray-700 text-sm">The Consumer Protection Act does not provide for the return of this
-                    product of proper quality.</p>
-                </div>
-              </div>
-
-              <!-- Packaging -->
-              <div
-                class="p-24 bg-gradient-to-r from-gray-50 to-white d-flex align-items-start gap-24 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 transition-all duration-300">
-                <span
-                  class="w-44 h-44 bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 rounded-full flex-center text-2xl flex-shrink-0 shadow-sm">
-                  <i class="ph-fill ph-package"></i>
-                </span>
-                <div class="">
-                  <h6 class="text-sm mb-8 fw-semibold text-gray-900">Packaging</h6>
-                  <p class="text-gray-700 text-sm">Research & development value proposition graphical user interface
-                    investor.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Enhanced Cart Summary -->
-            <div class="p-24 border-t border-gray-100 bg-gradient-to-b from-white to-gray-50">
-              <div class="flex-between items-center mb-20">
-                <div class="flex items-center gap-8">
-                  <div class="w-8 h-8 bg-main-600 rounded-full flex items-center justify-center">
-                    <span class="text-white text-xs font-bold">{{ cartItemCount }}</span>
-                  </div>
-                  <h6 class="text-sm fw-bold text-gray-900">Your Cart</h6>
-                </div>
-                <button @click="refreshCartSummary" 
-                  class="text-xs text-main-600 hover:text-main-800 transition-all duration-200 flex items-center gap-4 px-8 py-4 rounded-full hover:bg-main-50">
-                  <i class="ph ph-arrows-clockwise text-sm"></i> 
-                  <span>Refresh</span>
-                </button>
-              </div>
-
-              <div v-if="cartItems.length > 0" class="space-y-4">
-                <!-- Cart Items List with Enhanced UI -->
-                <div class="max-h-80 overflow-y-auto overflow-x-hidden pr-2 space-y-3 custom-scrollbar">
-                  <div v-for="item in cartItems" :key="item.id"
-                    class="cart-item border border-gray-100 rounded-xl p-16 bg-white shadow-sm hover:shadow-md transition-all duration-300">
-                    <div class="flex items-start gap-12">
-                      <div class="flex-shrink-0">
-                        <div class="w-48 h-48 rounded-lg overflow-hidden border border-gray-200">
-                          <img :src="safeLoadImage(item.image)" :alt="item.name" 
-                            class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            loading="lazy" decoding="async" @error="handleImageError" />
-                        </div>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <div class="flex-between items-start">
-                          <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-800 line-clamp-2 mb-4">{{ item.name }}</p>
-                            <div class="flex items-center gap-8">
-                              <span v-if="item.color" 
-                                class="inline-flex items-center gap-4 px-6 py-2 bg-blue-50 rounded-full font-medium force-color-red">
-                                <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: getColorHex(item.color) }"></span>
-                                {{ item.color }}
-                              </span>
-                              <span v-if="item.size" 
-                                class="px-6 py-2 bg-green-50 rounded-full font-medium force-color-red">
-                                {{ item.size }}
-                              </span>
-                            </div>
-                          </div>
-                          <button @click="removeFromCart(item.id)"
-                            class="text-gray-400 hover:text-red-500 transition-all duration-200 p-4 rounded-full hover:bg-red-50">
-                            <i class="ph ph-trash text-sm"></i>
-                          </button>
-                        </div>
-
-                        <div class="flex-between items-center mt-12">
-                          <div class="flex items-center gap-8">
-                            <div class="flex items-center border border-gray-200 rounded-full overflow-hidden">
-                              <button @click="updateCartItemQuantity(item.id, -1)" :disabled="item.quantity <= 1"
-                                :class="['w-28 h-28 flex-center transition-colors',
-                                  item.quantity <= 1 ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-600 hover:bg-gray-100']">
-                                <i class="ph ph-minus text-sm"></i>
-                              </button>
-                              <span class="text-sm font-bold w-32 text-center border-x border-gray-200 py-4 bg-gray-50">{{ item.quantity }}</span>
-                              <button @click="updateCartItemQuantity(item.id, 1)" 
-                                :disabled="item.stock && item.quantity >= item.stock"
-                                :class="['w-28 h-28 flex-center transition-colors',
-                                  item.stock && item.quantity >= item.stock ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-main-600 hover:bg-main-100']">
-                                <i class="ph ph-plus text-sm"></i>
-                              </button>
-                            </div>
-                          </div>
-                          <div class="text-right">
-                            <p class="text-sm font-bold text-main-600">₹{{ (item.price * item.quantity).toFixed(2) }}</p>
-                            <p v-if="item.quantity > 1" class="text-xs text-gray-500">₹{{ item.price.toFixed(2) }} each</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Enhanced Cart Totals -->
-                <div class="pt-20 border-t border-gray-200 space-y-3 bg-white rounded-xl p-16">
-                  <!-- Savings Badge -->
-                  <div v-if="cartSavings > 0" 
-                    class="flex items-center justify-between p-12 bg-green-50 border border-green-200 rounded-lg mb-16">
-                    <div class="flex items-center gap-8">
-                      <i class="ph ph-piggy-bank text-green-600 text-lg"></i>
-                      <span class="text-sm font-semibold text-green-700">You're saving!</span>
-                    </div>
-                    <span class="text-sm font-bold text-green-600">₹{{ cartSavings.toFixed(2) }}</span>
-                  </div>
-
-                  <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                      <span class="text-sm text-gray-600">Items ({{ cartItemCount }})</span>
-                      <span class="text-sm font-medium">{{ cartItems.length }} products</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                      <span class="text-sm text-gray-600">Subtotal</span>
-                      <span class="text-sm font-semibold">₹{{ cartSubtotal.toFixed(2) }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                      <span class="text-sm text-gray-600">Shipping</span>
-                      <div class="text-right">
-                        <span class="text-sm font-semibold text-green-600">FREE</span>
-                        <p class="text-xs text-gray-500">On orders above ₹499</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="flex justify-between items-center pt-12 border-t border-gray-200">
-                    <div>
-                      <span class="text-sm font-bold text-gray-900">Total</span>
-                      <p class="text-xs text-gray-500">Inclusive of all taxes</p>
-                    </div>
-                    <div class="text-right">
-                      <span class="text-xl font-bold text-main-600">₹{{ cartTotalPrice.toFixed(2) }}</span>
-                      <p v-if="cartTotalPrice >= 499" class="text-xs text-green-600 font-medium">Free Shipping Applied</p>
-                    </div>
-                  </div>
-
-                  <!-- Action Buttons -->
-                  <div class="space-y-8 mt-16">
-                    <NuxtLink to="/cart/cart" 
-                      class="btn btn-outline-main w-100 flex items-center justify-center gap-8 py-12 transition-all duration-300 hover:shadow-lg">
-                      <i class="ph ph-shopping-cart-simple"></i> 
-                      <span>View Cart ({{ cartItemCount }})</span>
-                    </NuxtLink>
-                    <NuxtLink to="/cart/checkout" 
-                      class="btn btn-main w-100 flex items-center justify-center gap-8 py-12 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
-                      <i class="ph ph-lock-simple"></i> 
-                      <span>Secure Checkout</span>
-                    </NuxtLink>
-                  </div>
-
-                  <!-- Trust Badges -->
-                  <div class="flex items-center justify-center gap-16 mt-16 pt-16 border-t border-gray-100">
-                    <div class="flex items-center gap-6 text-xs text-gray-500">
-                      <i class="ph ph-shield-check text-green-600"></i>
-                      <span>Secure</span>
-                    </div>
-                    <div class="flex items-center gap-6 text-xs text-gray-500">
-                      <i class="ph ph-truck text-blue-600"></i>
-                      <span>Fast Delivery</span>
-                    </div>
-                    <div class="flex items-center gap-6 text-xs text-gray-500">
-                      <i class="ph ph-arrow-u-up-left text-purple-600"></i>
-                      <span>Easy Returns</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Enhanced Empty Cart -->
-              <div v-else class="text-center py-16">
-                <div class="mb-16 relative">
-                  <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                    <i class="ph ph-shopping-cart text-4xl text-gray-300"></i>
-                  </div>
-                  <div class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                    <span class="text-white text-xs font-bold">0</span>
-                  </div>
-                </div>
-                <h6 class="text-lg font-semibold text-gray-700 mb-8">Your cart is empty</h6>
-                <p class="text-sm text-gray-500 mb-16">Add items to get started!</p>
-                <div class="space-y-8">
-                  <button @click="addToCart" 
-                    :disabled="!selectedVariant || (selectedVariant?.stock || mainProduct.stock) <= 0"
-                    :class="['btn btn-main w-100 transition-all duration-300',
-                      !selectedVariant || (selectedVariant?.stock || mainProduct.stock) <= 0 ? 'btn-secondary' : 'hover:shadow-lg hover:-translate-y-0.5']">
-                    <i class="ph ph-plus-circle me-2"></i> 
-                    Add This Product to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Variants Summary -->
-            <div v-if="variants.length > 0" class="p-24 border-t border-gray-100">
-              <h6 class="text-sm mb-16 fw-semibold text-gray-900">Available Variants</h6>
-              <div class="space-y-3 max-h-200 overflow-y-auto pr-2">
-                <div v-for="variant in variants" :key="variant.id" @click="selectVariant(variant)" :class="[
-                  'variant-item p-12 rounded-lg border cursor-pointer transition-all duration-300',
-                  selectedVariant?.id === variant.id
-                    ? 'border-main-600 bg-main-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                ]">
-                  <div class="flex-between items-center">
-                    <div>
-                      <div class="flex-align gap-2 mb-2">
-                        <span class="text-xs text-gray-600">SKU:</span>
-                        <span class="text-xs font-medium">{{ variant.sku }}</span>
-                      </div>
-                      <div class="flex-align gap-2">
-                        <span class="text-xs text-gray-600">Color:</span>
-                        <span class="text-xs font-medium">{{ variant.color?.name || variant.color }}</span>
-                        <span class="text-xs text-gray-400 mx-2">•</span>
-                        <span class="text-xs text-gray-600">Size:</span>
-                        <span class="text-xs font-medium">{{ variant.size?.name || variant.size }}</span>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <div :class="[
-                        'text-xs font-medium',
-                        variant.stock > 10 ? 'text-green-600' :
-                          variant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
-                      ]">
-                        {{ variant.stock }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Product Tabs Section -->
@@ -871,8 +531,7 @@
                 </button>
               </li>
             </ul>
-            <div
-              class="bg-gradient-to-r from-green-50 to-emerald-50 text-green-600 rounded-12 flex-align gap-8 hover:from-green-100 hover:to-emerald-100 hover:text-green-700 transition-all duration-300 border border-green-200">
+            <div class="satisfaction-badge">
               <img :src="safeLoadImage('/assets/images/logo/pfevicon.png')" alt="Satisfaction Guaranteed"
                 class="w-24 h-24" loading="lazy" decoding="async" @error="handleImageError" />
               100% Satisfaction Guaranteed
@@ -883,19 +542,21 @@
             <!-- Description Tab -->
             <div v-if="activeTab === 'description'" class="tab-content">
               <div class="mb-40">
-                <h6 class="mb-24 fw-bold">Product Description</h6>
-                <p class="text-gray-700">{{ mainProduct.description }}</p>
+                <h6 class="section-title">Product Description</h6>
+                <div class="description-text">
+                  {{ mainProduct.description }}
+                </div>
 
                 <div v-if="mainProduct.category" class="mt-32">
-                  <h6 class="mb-16 fw-semibold">Product Categories</h6>
-                  <div class="d-flex flex-wrap gap-12">
-                    <span class="badge bg-black text-white border border-black">
+                  <h6 class="section-title">Product Categories</h6>
+                  <div class="category-badges">
+                    <span class="category-badge">
                       {{ mainProduct.category.name }}
                     </span>
-                    <span v-if="mainProduct.subCategory" class="badge bg-black text-white border border-black">
+                    <span v-if="mainProduct.subCategory" class="category-badge">
                       {{ mainProduct.subCategory.name }}
                     </span>
-                    <span v-if="mainProduct.subSubCategory" class="badge bg-black text-white border border-black">
+                    <span v-if="mainProduct.subSubCategory" class="category-badge">
                       {{ mainProduct.subSubCategory.name }}
                     </span>
                   </div>
@@ -903,64 +564,51 @@
 
                 <!-- Product Information -->
                 <div class="mt-40">
-                  <h6 class="mb-24 fw-bold">Product Information</h6>
-                  <ul class="mt-32">
-                    <li class="text-gray-400 mb-14 flex-align gap-14">
-                      <span
-                        class="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 text-xs flex-center rounded-full shadow-sm">
-                        <i class="ph ph-check"></i>
-                      </span>
-                      <span class="text-heading fw-medium">
-                        SKU: <span class="text-gray-500">{{ selectedVariant?.sku || mainProduct.sku }}</span>
-                      </span>
-                    </li>
-                    <li class="text-gray-400 mb-14 flex-align gap-14">
-                      <span
-                        class="w-20 h-20 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 text-xs flex-center rounded-full shadow-sm">
-                        <i class="ph ph-check"></i>
-                      </span>
-                      <span class="text-heading fw-medium">
-                        Barcode: <span class="text-gray-500">{{ mainProduct.barcode || 'N/A' }}</span>
-                      </span>
-                    </li>
-                    <li class="text-gray-400 mb-14 flex-align gap-14">
-                      <span
-                        class="w-20 h-20 bg-gradient-to-br from-green-50 to-green-100 text-green-600 text-xs flex-center rounded-full shadow-sm">
-                        <i class="ph ph-check"></i>
-                      </span>
-                      <span class="text-heading fw-medium">
-                        Unit: <span class="text-gray-500">{{ mainProduct.unit?.name }} ({{ mainProduct.unit?.shortName
-                          }})</span>
-                      </span>
-                    </li>
-                    <li v-if="mainProduct.manufacturedDate" class="text-gray-400 mb-14 flex-align gap-14">
-                      <span
-                        class="w-20 h-20 bg-gradient-to-br from-yellow-50 to-yellow-100 text-yellow-600 text-xs flex-center rounded-full shadow-sm">
-                        <i class="ph ph-check"></i>
-                      </span>
-                      <span class="text-heading fw-medium">
-                        Manufactured: <span class="text-gray-500">{{ formatDate(mainProduct.manufacturedDate) }}</span>
-                      </span>
-                    </li>
-                    <li v-if="mainProduct.expiryDate" class="text-gray-400 mb-14 flex-align gap-14">
-                      <span
-                        class="w-20 h-20 bg-gradient-to-br from-red-50 to-red-100 text-red-600 text-xs flex-center rounded-full shadow-sm">
-                        <i class="ph ph-check"></i>
-                      </span>
-                      <span class="text-heading fw-medium">
-                        Expiry: <span class="text-gray-500">{{ formatDate(mainProduct.expiryDate) }}</span>
-                      </span>
-                    </li>
-                    <li v-if="mainProduct.origin" class="text-gray-400 mb-14 flex-align gap-14">
-                      <span
-                        class="w-20 h-20 bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 text-xs flex-center rounded-full shadow-sm">
-                        <i class="ph ph-check"></i>
-                      </span>
-                      <span class="text-heading fw-medium">
-                        Origin: <span class="text-gray-500">{{ mainProduct.origin }}</span>
-                      </span>
-                    </li>
-                  </ul>
+                  <h6 class="section-title">Product Information</h6>
+                  <div class="info-list">
+                    <div class="info-item">
+                      <div class="info-icon sku">
+                        <i class="ph ph-package"></i>
+                      </div>
+                      <div class="info-content">
+                        <div class="info-label">SKU</div>
+                        <div class="info-value">{{ selectedVariant?.sku || mainProduct.sku }}</div>
+                      </div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-icon barcode">
+                        <i class="ph ph-barcode"></i>
+                      </div>
+                      <div class="info-content">
+                        <div class="info-label">Barcode</div>
+                        <div class="info-value">{{ mainProduct.barcode || 'N/A' }}</div>
+                      </div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-icon unit">
+                        <i class="ph ph-cube"></i>
+                      </div>
+                      <div class="info-content">
+                        <div class="info-label">Unit</div>
+                        <div class="info-value">{{ mainProduct.unit?.name }} ({{ mainProduct.unit?.shortName }})</div>
+                      </div>
+                    </div>
+                    <div v-if="mainProduct.manufacturedDate && formatDate(mainProduct.manufacturedDate) !== 'N/A'"
+                      class="info-item">
+                      <div class="info-icon manufactured">
+                        <i class="ph ph-calendar"></i>
+                      </div>
+                    </div>
+                    <div v-if="mainProduct.origin" class="info-item">
+                      <div class="info-icon origin">
+                        <i class="ph ph-map-pin"></i>
+                      </div>
+                      <div class="info-content">
+                        <div class="info-label">Origin</div>
+                        <div class="info-value">{{ mainProduct.origin }}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Manufacturer Details -->
@@ -983,84 +631,113 @@
             <!-- Attributes Tab -->
             <div v-else-if="activeTab === 'attributes'" class="tab-content">
               <div class="mb-40">
-                <h6 class="mb-24 fw-bold">Product Attributes</h6>
+                <div class="attributes-panel">
+                  <div class="attributes-panel__header">
+                    <h6 class="attributes-panel__title">Product Attributes</h6>
+                    <p class="attributes-panel__subtitle">Variant specifications and pricing details</p>
+                  </div>
 
-                <div v-if="selectedVariant"
-                  class="mb-32 p-24 border border-gray-100 rounded-16 bg-gradient-to-r from-gray-50 to-white">
-                  <h6 class="text-md fw-semibold mb-16">Selected Variant</h6>
-
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-24">
-                    <!-- Basic Attributes -->
-                    <div class="space-y-3">
-                      <div class="flex items-center gap-3">
-                        <div class="w-20 h-20 rounded-lg overflow-hidden border border-gray-300">
-                          <img :src="safeLoadImage(getColorFirstImage(selectedVariant.color?.name || selectedVariant.color))"
-                            :alt="selectedVariant.color?.name || selectedVariant.color" class="w-full h-full object-cover" loading="lazy"
-                            decoding="async" @error="handleImageError" />
+                  <!-- Selected Variant Info -->
+                  <div v-if="selectedVariant" class="attributes-card mb-32">
+                    <div class="attributes-card__top">
+                      <div class="attributes-card__variant">
+                        <div class="attributes-card__image-wrap">
+                          <img
+                            :src="safeLoadImage(getColorFirstImage(selectedVariant.color?.name || selectedVariant.color))"
+                            :alt="selectedVariant.color?.name || selectedVariant.color"
+                            class="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                            @error="handleImageError"
+                          />
                         </div>
                         <div>
-                          <span class="text-gray-500 text-sm">Color:</span>
-                          <span class="text-gray-800 font-medium ml-2">{{ selectedVariant.color?.name || selectedVariant.color }}</span>
+                          <p class="attributes-card__label">Selected Variant</p>
+                          <div class="attributes-chip-list">
+                            <span class="attributes-chip">{{ selectedVariant.color?.name || selectedVariant.color }}</span>
+                            <span class="attributes-chip attributes-chip--neutral">{{ selectedVariant.size?.name || selectedVariant.size }}</span>
+                          </div>
                         </div>
                       </div>
-
-                      <div class="flex items-center gap-3">
-                        <span
-                          class="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-full flex-center text-xs shadow-sm">
-                          <i class="ph ph-ruler"></i>
-                        </span>
-                        <div>
-                          <span class="text-gray-500 text-sm">Size:</span>
-                          <span class="text-gray-800 font-medium ml-2">{{ selectedVariant.size?.name || selectedVariant.size }}</span>
-                        </div>
-                      </div>
-
-                      <div class="flex items-center gap-3">
-                        <span
-                          class="w-20 h-20 bg-gradient-to-br from-green-50 to-green-100 text-green-600 rounded-full flex-center text-xs shadow-sm">
-                          <i class="ph ph-fabric"></i>
-                        </span>
-                        <div>
-                          <span class="text-gray-500 text-sm">SKU:</span>
-                          <span class="text-gray-800 font-medium ml-2">{{ selectedVariant.sku }}</span>
-                        </div>
-                      </div>
-
-                      <div class="flex items-center gap-3">
-                        <span
-                          class="w-20 h-20 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 rounded-full flex-center text-xs shadow-sm">
-                          <i class="ph ph-package"></i>
-                        </span>
-                        <div>
-                          <span class="text-gray-500 text-sm">Stock:</span>
-                          <span :class="[
-                            'font-medium ml-2',
-                            selectedVariant.stock > 10 ? 'text-green-600' :
-                              selectedVariant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
-                          ]">
-                            {{ selectedVariant.stock }}
-                          </span>
-                        </div>
-                      </div>
+                      <span
+                        :class="[
+                          'attributes-stock',
+                          selectedVariant.stock > 10
+                            ? 'attributes-stock--in'
+                            : selectedVariant.stock > 0
+                              ? 'attributes-stock--low'
+                              : 'attributes-stock--out'
+                        ]"
+                      >
+                        {{ selectedVariant.stock > 10 ? 'In stock' : selectedVariant.stock > 0 ? selectedVariant.stock + ' left' : 'Out of stock' }}
+                      </span>
                     </div>
 
-                    <!-- Price Information -->
-                    <div class="space-y-3">
-                      <h6 class="text-sm font-semibold text-gray-700 mb-8">Pricing</h6>
-
-                      <div class="bg-white p-3 rounded-lg border border-gray-100">
-                        <span class="text-gray-500 text-xs">Price</span>
-                        <p class="text-gray-800 font-medium">₹{{ selectedVariant.price }}</p>
+                    <div class="attributes-spec-grid">
+                      <div class="attributes-spec">
+                        <span>SKU</span>
+                        <strong>{{ selectedVariant.sku || 'N/A' }}</strong>
                       </div>
-
-                      <div v-if="mainProduct.discountValue > 0" class="bg-white p-3 rounded-lg border border-gray-100">
-                        <span class="text-gray-500 text-xs">Discount</span>
-                        <p class="text-green-600 font-medium">{{ mainProduct.discountValue }}% OFF</p>
+                      <div class="attributes-spec">
+                        <span>MRP</span>
+                        <strong>₹{{ selectedVariant.price }}</strong>
                       </div>
+                      <div v-if="mainProduct.discountValue > 0" class="attributes-spec">
+                        <span>Discount</span>
+                        <strong class="text-green-600">{{ mainProduct.discountValue }}% OFF</strong>
+                      </div>
+                      <div class="attributes-spec">
+                        <span>Offer Price</span>
+                        <strong class="text-main-600">₹{{ discountedPrice }}</strong>
+                      </div>
+                    </div>
+                  </div>
 
-                      <div class="bg-white p-3 rounded-lg border border-gray-100">
-                        <span class="text-gray-500 text-xs">Discounted Price</span>
-                        <p class="text-main-600 font-medium">₹{{ discountedPrice }}</p>
+                  <!-- Fallback: Main Product Attributes when no variant is selected -->
+                  <div v-else class="attributes-card mb-32">
+                    <div class="attributes-card__top">
+                      <div class="attributes-card__variant">
+                        <div class="attributes-card__image-wrap attributes-card__image-wrap--placeholder">
+                          <i class="ph ph-package"></i>
+                        </div>
+                        <div>
+                          <p class="attributes-card__label">Product Information</p>
+                          <div class="attributes-chip-list">
+                            <span class="attributes-chip attributes-chip--neutral">SKU: {{ mainProduct?.sku || 'N/A' }}</span>
+                            <span v-if="mainProduct?.barcode" class="attributes-chip attributes-chip--neutral">Barcode: {{ mainProduct.barcode }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        :class="[
+                          'attributes-stock',
+                          (mainProduct?.stock || 0) > 10
+                            ? 'attributes-stock--in'
+                            : (mainProduct?.stock || 0) > 0
+                              ? 'attributes-stock--low'
+                              : 'attributes-stock--out'
+                        ]"
+                      >
+                        {{ (mainProduct?.stock || 0) > 10 ? 'In stock' : (mainProduct?.stock || 0) > 0 ? (mainProduct?.stock || 0) + ' left' : 'Out of stock' }}
+                      </span>
+                    </div>
+
+                    <div class="attributes-spec-grid">
+                      <div class="attributes-spec">
+                        <span>MRP</span>
+                        <strong>₹{{ mainProduct?.price || 0 }}</strong>
+                      </div>
+                      <div v-if="mainProduct?.discountValue > 0" class="attributes-spec">
+                        <span>Discount</span>
+                        <strong class="text-green-600">{{ mainProduct.discountValue }}% OFF</strong>
+                      </div>
+                      <div class="attributes-spec">
+                        <span>Status</span>
+                        <strong class="text-main-600">{{ (mainProduct?.stock || 0) > 0 ? 'Available' : 'Out of stock' }}</strong>
+                      </div>
+                      <div class="attributes-spec">
+                        <span>Total Stock</span>
+                        <strong>{{ mainProduct?.stock || 0 }}</strong>
                       </div>
                     </div>
                   </div>
@@ -1068,30 +745,70 @@
 
                 <!-- All Variants -->
                 <div v-if="variants.length > 0">
-                  <h6 class="text-md fw-semibold mb-16">All Variants</h6>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-24">
-                    <div v-for="variant in variants" :key="variant.id"
-                      class="border border-gray-200 rounded-lg p-16 hover:border-gray-300 transition-colors">
-                      <div class="flex-between items-start mb-12">
-                        <div>
-                          <span class="text-xs text-gray-500">SKU</span>
-                          <p class="text-sm font-medium">{{ variant.sku }}</p>
-                        </div>
-                        <div class="text-right">
-                          <span class="text-xs text-gray-500">Stock</span>
-                          <p :class="[
-                            'text-sm font-medium',
-                            variant.stock > 10 ? 'text-green-600' :
-                              variant.stock > 0 ? 'text-yellow-600' : 'text-red-600'
+                  <h6 class="attributes-list-title">All Variants</h6>
+                  <div class="variants-container">
+                    <div class="variants-grid attributes-variants-grid scrollable-variants">
+                      <div v-for="(variant, index) in variants.slice(0, displayedVariantsCount)" :key="variant.id"
+                        class="variant-card attributes-variant-card">
+                        <div class="attributes-variant-card__head">
+                          <span class="attributes-variant-badge">Variant {{ Number(index) + 1 }}</span>
+                          <span :class="[
+                            'attributes-variant-stock',
+                            variant.stock > 10 ? 'attributes-variant-stock--in' :
+                              variant.stock > 0 ? 'attributes-variant-stock--low' : 'attributes-variant-stock--out'
                           ]">
-                            {{ variant.stock }}
-                          </p>
+                            {{ variant.stock > 10 ? 'In stock' : variant.stock > 0 ? variant.stock + ' left' : 'Out of stock' }}
+                          </span>
+                        </div>
+
+                        <div class="attributes-variant-card__body">
+                          <div class="attributes-variant-image">
+                            <img
+                              :src="safeLoadImage(getColorFirstImage(variant.color?.name || variant.color))"
+                              :alt="`${variant.color?.name || variant.color} - ${variant.size?.name || variant.size}`"
+                              class="w-full h-full object-cover"
+                              loading="lazy"
+                              decoding="async"
+                              @error="handleImageError"
+                            />
+                          </div>
+
+                          <div class="attributes-variant-meta">
+                            <span class="attributes-variant-meta__label">SKU</span>
+                            <p class="attributes-variant-meta__value">{{ variant.sku || 'N/A' }}</p>
+                            <div class="attributes-chip-list">
+                              <span class="attributes-chip">{{ variant.color?.name || variant.color }}</span>
+                              <span class="attributes-chip attributes-chip--neutral">{{ variant.size?.name || variant.size }}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="attributes-variant-card__footer">
+                          <div class="attributes-variant-price">
+                            <span class="attributes-variant-price__label">Offer Price</span>
+                            <div class="attributes-variant-price__value-wrap">
+                              <span class="attributes-variant-price__value">₹{{ discountedPriceForVariant(variant) }}</span>
+                              <span v-if="mainProduct.discountValue > 0" class="attributes-variant-price__mrp">₹{{ variant.price }}</span>
+                            </div>
+                          </div>
+                          <div class="attributes-variant-action">
+                            <button @click="selectVariant(variant)" class="attributes-select-btn">
+                              Select
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <div class="flex-align gap-8">
-                        <span class="badge bg-blue-100 text-blue-800">{{ variant.color?.name || variant.color }}</span>
-                        <span class="badge bg-green-100 text-green-800">{{ variant.size?.name || variant.size }}</span>
-                      </div>
+                    </div>
+
+                    <!-- Load More Button -->
+                    <div v-if="displayedVariantsCount < variants.length" class="text-center mt-24">
+                      <button @click="scrollToNextVariants"
+                        class="px-24 py-12 bg-white border border-gray-300 hover:border-red-300 rounded-lg text-gray-700 hover:text-red-600 font-medium transition-all duration-300">
+                        <div class="flex items-center gap-8">
+                          <i class="ph ph-arrow-down"></i>
+                          Load {{ Math.min(9, variants.length - displayedVariantsCount) }} more variants
+                        </div>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1104,7 +821,6 @@
                 </div>
               </div>
             </div>
-
             <!-- Reviews Tab -->
             <div v-else-if="activeTab === 'reviews'" class="tab-content">
               <div class="row g-4">
@@ -1268,6 +984,148 @@
           </div>
         </div>
       </div>
+      <!-- Recommended Products Section -->
+      <div class="mb-40">
+        <div class="recommend-section">
+          <div class="recommend-section__head">
+            <div>
+              <h6 class="recommend-section__title">Recommended Products</h6>
+              <p class="recommend-section__subtitle">You might also like these products</p>
+            </div>
+            <div class="recommend-section__chip">
+              <i class="ph ph-heart"></i>
+              <span>Curated for you</span>
+            </div>
+          </div>
+
+          <div v-if="recommendStore.isLoading" class="recommend-state">
+            <div class="inline-block animate-spin">
+              <i class="ph ph-spinner text-4xl text-red-600"></i>
+            </div>
+            <p class="text-gray-500 mt-16">Loading recommended products...</p>
+          </div>
+
+          <div v-else-if="recommendStore.products.length > 0" class="w-full">
+            <Swiper
+              :slides-per-view="1.35"
+              :space-between="12"
+              :breakpoints="{
+                '480': {
+                  slidesPerView: 1.7,
+                  spaceBetween: 14,
+                },
+                '640': {
+                  slidesPerView: 2.35,
+                  spaceBetween: 16,
+                },
+                '768': {
+                  slidesPerView: 2.9,
+                  spaceBetween: 18,
+                },
+                '1024': {
+                  slidesPerView: 3.8,
+                  spaceBetween: 20,
+                },
+                '1280': {
+                  slidesPerView: 4.8,
+                  spaceBetween: 20,
+                },
+              }"
+              class="recommended-swiper"
+            >
+              <SwiperSlide v-for="product in recommendStore.products.slice(0, 12)" :key="product.groupId || product.id">
+                <article class="recommended-card">
+                  <button
+                    @click.stop="toggleWishlist(product)"
+                    class="recommended-card__wishlist"
+                    :aria-label="isInWishlist(getRecommendationProductId(product)) ? 'Remove from wishlist' : 'Add to wishlist'"
+                  >
+                    <i :class="[
+                      'ph',
+                      isInWishlist(getRecommendationProductId(product)) ? 'ph-heart-fill is-active' : 'ph-heart'
+                    ]"></i>
+                  </button>
+
+                  <NuxtLink :to="getRecommendedProductRoute(product)" class="recommended-card__link">
+                    <div class="recommended-card__media">
+                      <img
+                        :src="recommendStore.getProductImage(product)"
+                        :alt="recommendStore.getProductName(product)"
+                        class="recommended-card__image"
+                        loading="lazy"
+                        decoding="async"
+                        @error="handleImageError"
+                      />
+                      <span v-if="recommendStore.hasDiscount(product)" class="recommended-card__pill recommended-card__pill--sale">
+                        {{ recommendStore.getDiscountPercentage(product) }}% off
+                      </span>
+                      <span
+                        class="recommended-card__pill"
+                        :class="recommendStore.getProductStock(product) > 0 ? 'recommended-card__pill--stock' : 'recommended-card__pill--out'"
+                      >
+                        {{ getRecommendationStockLabel(product) }}
+                      </span>
+                    </div>
+
+                    <div class="recommended-card__body">
+                      <h6 class="recommended-card__title line-clamp-2">
+                        {{ recommendStore.getProductName(product) }}
+                      </h6>
+
+                      <div class="recommended-card__rating">
+                        <div class="recommended-card__stars">
+                          <i
+                            v-for="star in 5"
+                            :key="star"
+                            :class="[
+                              'ph',
+                              star <= Math.floor(recommendStore.getProductRating(product))
+                                ? 'ph-star-fill'
+                                : star === Math.ceil(recommendStore.getProductRating(product)) &&
+                                    recommendStore.getProductRating(product) % 1 !== 0
+                                  ? 'ph-star-half'
+                                  : 'ph-star',
+                            ]"
+                          ></i>
+                        </div>
+                        <span class="recommended-card__rating-value">{{ recommendStore.getProductRating(product).toFixed(1) }}</span>
+                        <span class="recommended-card__reviews">({{ recommendStore.getReviewCount(product) }})</span>
+                      </div>
+
+                      <div class="recommended-card__price">
+                        <span class="recommended-card__price-current">₹{{ recommendStore.getDiscountedPrice(product) }}</span>
+                        <span v-if="recommendStore.hasDiscount(product)" class="recommended-card__price-original">
+                          ₹{{ recommendStore.getOriginalPrice(product) }}
+                        </span>
+                        <span v-if="recommendStore.hasDiscount(product)" class="recommended-card__price-save">
+                          {{ recommendStore.getDiscountPercentage(product) }}% off
+                        </span>
+                      </div>
+                    </div>
+                  </NuxtLink>
+
+                  <button
+                    @click.stop="addRecommendedToCart(product)"
+                    :disabled="recommendStore.getProductStock(product) <= 0"
+                    class="recommended-card__cart"
+                    :class="{ 'recommended-card__cart--disabled': recommendStore.getProductStock(product) <= 0 }"
+                  >
+                    <i class="ph ph-shopping-cart text-base"></i>
+                    {{ recommendStore.getProductStock(product) <= 0 ? 'Out of Stock' : 'Add to Cart' }}
+                  </button>
+                </article>
+              </SwiperSlide>
+            </Swiper>
+          </div>
+
+          <div v-else class="recommend-state">
+            <div class="mb-16">
+              <i class="ph ph-shopping-bag text-4xl text-gray-300"></i>
+            </div>
+            <p class="text-gray-500">No recommended products available at the moment.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -1280,6 +1138,8 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Thumbs, Pagination } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
 import { useProductGroupApi } from '~/composables/api/useProductGroupApi'
+import { useRecommendStore } from '~/store/useRecommendStore'
+import { useWishlistStore } from '~/store/useWishlistStore'
 
 import 'swiper/css'
 import 'swiper/css/thumbs'
@@ -1303,30 +1163,30 @@ const { data, loading, error, refresh } = useProductGroupApi(styleGroupId)
 watch(error, (newError) => {
   if (newError && typeof newError === 'object' && 'status' in newError && (newError as any).status === 404) {
     // Show user notification about redirect
-    const toast = useToast?.() || { add: () => {} }
+    const toast = useToast?.() || { add: () => { } }
     toast.add({
       title: 'Product Style Not Found',
       description: `Redirecting to available product style...`,
       color: 'warning'
     })
-    
+
     // Try to get available groups and redirect to first one
     const fetchAvailableGroups = async () => {
       try {
         const api = useApiEndpoints()
         const allGroupsRes = await $fetch<{ data: any }>(api.products.group.list())
         const availableGroups = allGroupsRes?.data || []
-        
+
         if (availableGroups.length > 0) {
           const firstGroup = availableGroups[0]
-          
+
           console.log(`🔄 Redirecting from group ${styleGroupId.value} to ${firstGroup.groupId}: ${firstGroup.name}`)
-          
+
           // Redirect to first available group
           await router.replace({
-            params: { 
-              slug: route.params.slug, 
-              groupId: firstGroup.groupId 
+            params: {
+              slug: route.params.slug,
+              groupId: firstGroup.groupId
             }
           })
         }
@@ -1334,10 +1194,17 @@ watch(error, (newError) => {
         console.error('Failed to fetch groups for redirect:', e)
       }
     }
-    
+
     fetchAvailableGroups()
   }
 })
+
+/* ----------------------------------
+   STORES
+-----------------------------------*/
+
+const recommendStore = useRecommendStore()
+const wishlistStore = useWishlistStore()
 
 /* ----------------------------------
    CORE STATE
@@ -1427,12 +1294,12 @@ const selectedSize = computed(
 const mainImages = computed(() => {
   // First try: Selected variant images
   if (selectedVariant.value?.images?.length) {
-    return selectedVariant.value.images.map((i: any) => safeLoadImage(i.imageUrl))
+    return selectedVariant.value.images.map((i: any) => safeLoadImage(i.imageUrl || i))
   }
 
   // Second try: Main product images
   if (mainProduct.value?.images?.length) {
-    return mainProduct.value.images.map((i: any) => safeLoadImage(i.imageUrl))
+    return mainProduct.value.images.map((i: any) => safeLoadImage(i.imageUrl || i))
   }
 
   // Fallback: Return empty array to prevent errors
@@ -1557,11 +1424,11 @@ const discountedPrice = computed(() => {
 -----------------------------------*/
 
 // Fallback image path
-const FALLBACK_IMAGE = '/assets/images/placeholder.jpg'
+const FALLBACK_IMAGE = '/assets/images/nowcategory/p1.jpg'
 
 // Safe image loading with error handling
-const safeLoadImage = (src: string, fallback: string = FALLBACK_IMAGE): string => {
-  if (!src || src.trim() === '') return fallback
+const safeLoadImage = (src: any, fallback: string = FALLBACK_IMAGE): string => {
+  if (!src || typeof src !== 'string' || src.trim() === '') return fallback
   return src
 }
 
@@ -1594,17 +1461,20 @@ const preloadVariantImages = (variant: any) => {
     }
 
     // Start loading the image
-    img.src = safeLoadImage(imageObj.imageUrl)
+    img.src = safeLoadImage(imageObj.imageUrl || imageObj)
   })
 }
 
-const preloadColorImages = (colorName: string) => {
+const preloadColorImages = (colorName: any) => {
+  if (!colorName || typeof colorName !== 'string') return
+
   const colorVariants = variants.value.filter(v => v.color?.name === colorName)
   // Preload only first image of each variant for color switching
   colorVariants.forEach(variant => {
-    if (variant.images?.[0]?.imageUrl) {
+    if (variant.images?.[0]) {
       const img = new Image()
-      img.src = safeLoadImage(variant.images[0].imageUrl)
+      const firstImage = variant.images[0]
+      img.src = safeLoadImage(firstImage.imageUrl || firstImage)
     }
   })
 }
@@ -1686,6 +1556,13 @@ const onSlideChange = (swiper: SwiperType) => {
   activeThumb.value = swiper.activeIndex
 }
 
+// Image modal functionality
+const openImageModal = (index: number) => {
+  // For now, just log - can be extended to open a modal
+  console.log('Opening image modal for index:', index)
+  // TODO: Implement modal functionality
+}
+
 
 
 /* ----------------------------------
@@ -1762,18 +1639,116 @@ const getFitText = (fit: string) => {
 }
 
 // Image functions
-const getColorFirstImage = (colorName: string) => {
-  const color = mainProduct.value?.colors?.find((c: any) => c.name === colorName)
-  return color?.imageUrl || '/assets/images/placeholder.jpg'
+const getColorFirstImage = (colorName: any) => {
+  if (!colorName || typeof colorName !== 'string') {
+    return '/assets/images/placeholder.jpg'
+  }
+
+  // Try to find color in mainProduct.colors first
+  const color = mainProduct.value?.colors?.find((c: any) =>
+    c.name?.toLowerCase() === colorName?.toLowerCase()
+  )
+
+  if (color?.imageUrl) {
+    return color.imageUrl
+  }
+
+  // Try to find in variant images
+  const variantWithColor = variants.value.find(v =>
+    v.color?.name?.toLowerCase() === colorName?.toLowerCase()
+  )
+
+  if (variantWithColor?.images?.length > 0) {
+    const firstImage = variantWithColor.images[0]
+    // Handle both string URLs and image objects with imageUrl property
+    return typeof firstImage === 'string' ? firstImage : firstImage?.imageUrl || '/assets/images/placeholder.jpg'
+  }
+
+  // Try to construct image path based on color name
+  if (colorName) {
+    const possiblePaths = [
+      `/assets/images/products/${colorName.toLowerCase().replace(/\s+/g, '-')}/main.jpg`,
+      `/assets/images/colors/${colorName.toLowerCase().replace(/\s+/g, '-')}.jpg`,
+      `/assets/images/nowcategory/${colorName.toLowerCase().replace(/\s+/g, '-')}.jpg`
+    ]
+
+    for (const path of possiblePaths) {
+      if (path) return path
+    }
+  }
+
+  // Final fallback
+  return '/assets/images/placeholder.jpg'
 }
 
 // Utility functions
-const formatDate = (date: string) => new Date(date).toLocaleDateString()
+const formatDate = (date: string) => {
+  if (!date) return 'N/A'
+
+  const parsedDate = new Date(date)
+
+  // Check if date is invalid or is the Unix epoch (1970-01-01)
+  if (isNaN(parsedDate.getTime()) ||
+    parsedDate.getFullYear() === 1970 &&
+    parsedDate.getMonth() === 0 &&
+    parsedDate.getDate() === 1) {
+    return 'N/A'
+  }
+
+  return parsedDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
 
 const calculateAverageRating = () => {
   if (!mainProduct.value?.reviews?.length) return 0
   const sum = mainProduct.value.reviews.reduce((acc: number, review: any) => acc + review.rating, 0)
   return Number((sum / mainProduct.value.reviews.length).toFixed(1))
+}
+
+// Variant functions
+const discountedPriceForVariant = (variant: any) => {
+  if (!mainProduct.value?.discountValue) return variant.price
+  return Math.round(variant.price * (1 - mainProduct.value.discountValue / 100))
+}
+
+const displayedVariantsCount = ref(9)
+
+const scrollToNextVariants = () => {
+  console.log('Load More clicked - Current count:', displayedVariantsCount.value, 'Total variants:', variants.value.length)
+
+  // Increase the displayed variants count
+  displayedVariantsCount.value = Math.min(displayedVariantsCount.value + 9, variants.value.length)
+  console.log('New count after increment:', displayedVariantsCount.value)
+
+  // Scroll to the newly loaded variants
+  nextTick(() => {
+    const container = document.querySelector('.variants-container')
+    if (container) {
+      // Scroll to the last newly added variant
+      const newVariantIndex = displayedVariantsCount.value - 1
+      const newVariantElement = container.querySelector(`.variant-card:nth-child(${newVariantIndex + 1})`)
+
+      if (newVariantElement) {
+        console.log('Scrolling to new variant at index:', newVariantIndex)
+        newVariantElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        })
+      } else {
+        console.log('Using fallback scroll to bottom')
+        // Fallback: scroll to bottom of container
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: 'smooth'
+        })
+      }
+    } else {
+      console.log('Container not found')
+    }
+  })
 }
 
 // Action functions
@@ -1792,11 +1767,61 @@ const validateQuantity = (value: number) => {
   return Math.min(Math.max(1, value), max)
 }
 
-const toggleWishlist = () => {
-  // Wishlist toggle logic
+const getRecommendationProductId = (product: any): string | number | null => {
+  if (!product) return null
+  return product?.mainProduct?.id ?? product?.id ?? product?.groupId ?? null
 }
 
-const isInWishlist = computed(() => false) // Simplified for now
+const getRecommendedProductRoute = (product: any): string => {
+  const slug = Array.isArray(route.params.slug) ? route.params.slug[0] : route.params.slug
+  const groupId = product?.groupId ?? product?.id ?? product?.mainProduct?.groupId
+
+  if (!slug || !groupId) return '/shop-all'
+  return `/shop-all/${slug}/${groupId}`
+}
+
+const getRecommendationStockLabel = (product: any): string => {
+  const stock = recommendStore.getProductStock(product)
+  if (stock <= 0) return 'Out of stock'
+  if (stock <= 10) return `${stock} left`
+  return 'In stock'
+}
+
+const toggleWishlist = (product: any) => {
+  if (!product) {
+    console.log('No product provided to toggleWishlist')
+    return
+  }
+
+  const productId = getRecommendationProductId(product)
+  if (!productId) {
+    console.log('Unable to resolve product id for wishlist')
+    return
+  }
+
+  console.log('Toggling wishlist for product:', productId)
+
+  const mainProductForWishlist = product?.mainProduct?.id ? product.mainProduct : product
+  const wishlistProduct = {
+    mainProduct: mainProductForWishlist,
+    selectedVariant: selectedVariant.value
+  }
+
+  if (isInWishlist(productId)) {
+    console.log('Removing from wishlist')
+    wishlistStore.removeItem({ mainProduct: { id: productId } })
+  } else {
+    console.log('Adding to wishlist')
+    wishlistStore.addItem(wishlistProduct)
+  }
+
+  console.log('Wishlist items count:', wishlistStore.items.length)
+}
+
+const isInWishlist = (productId: string | number | null | undefined) => {
+  if (productId === null || productId === undefined) return false
+  return wishlistStore.items.some(item => String(item?.mainProduct?.id) === String(productId))
+}
 
 const compareProduct = () => {
   // Compare logic
@@ -1838,34 +1863,73 @@ const submitReview = () => {
   console.log('Review submitted:', { rating: rating.value, title: reviewTitle.value, content: reviewContent.value })
 }
 
-const addToCart = () => {
-  if (!selectedVariant.value) return
+const addToCart = (product: any) => {
+  if (!product) return
 
   const cart = [...cartItems.value]
 
   const existing = cart.find(
     item =>
-      item.productId === mainProduct.value.id &&
-      item.variantId === selectedVariant.value.id
+      item.productId === product.id &&
+      (!product.variantId || item.variantId === product.variantId)
   )
 
   if (existing) {
-    existing.quantity += quantity.value
+    existing.quantity += 1
   } else {
     cart.push({
-      id: Date.now(),
-      productId: mainProduct.value.id,
-      variantId: selectedVariant.value.id,
-      name: mainProduct.value.name,
-      price: discountedPrice.value,
-      quantity: quantity.value,
-      image: mainImages.value[0]
+      id: Date.now().toString(),
+      productId: product.id,
+      variantId: product.variantId || null,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: product.images?.[0]?.imageUrl || '/assets/images/nowcategory/p1.jpg',
+      color: product.color?.name || product.color,
+      size: product.size?.name || product.size
     })
   }
 
+  cartItems.value = cart
   saveCart(cart)
 }
 
+const addRecommendedToCart = (product: any) => {
+  if (!product) return
+
+  const stock = recommendStore.getProductStock(product)
+  if (stock <= 0) return
+
+  const productId = getRecommendationProductId(product)
+  if (!productId) return
+
+  const cart = [...cartItems.value]
+  const existing = cart.find(
+    item =>
+      String(item.productId) === String(productId) &&
+      String(item.variantId || '') === String(product.variantId || '')
+  )
+
+  if (existing) {
+    existing.quantity += 1
+  } else {
+    cart.push({
+      id: Date.now().toString(),
+      productId,
+      variantId: product.variantId || null,
+      name: recommendStore.getProductName(product),
+      price: recommendStore.getDiscountedPrice(product),
+      quantity: 1,
+      image: recommendStore.getProductImage(product),
+      color: product?.color?.name || product?.color || null,
+      size: product?.size?.name || product?.size || null,
+      stock
+    })
+  }
+
+  cartItems.value = cart
+  saveCart(cart)
+}
 
 const stockPercentage = computed(() => {
   const stock = selectedVariant.value?.stock ?? 0
@@ -1873,12 +1937,12 @@ const stockPercentage = computed(() => {
   return Math.min((stock / maxStock) * 100, 100)
 })
 
-
 /* ----------------------------------
    LIFECYCLE
 -----------------------------------*/
 
-onMounted(() => {
+onMounted(async () => {
+  // Load cart data
   loadCartFromStorage()
 
   window.addEventListener('storage', (event) => {
@@ -1886,6 +1950,13 @@ onMounted(() => {
       loadCartFromStorage()
     }
   })
+
+  // Load recommended products
+  try {
+    await recommendStore.fetchProducts({ sortBy: 'popularity', limit: 12 })
+  } catch (error) {
+    console.error('Failed to fetch recommended products:', error)
+  }
 })
 </script>
 
@@ -2484,6 +2555,819 @@ onMounted(() => {
 </style>
 
 <style>
+/* Product Gallery Grid Styles */
+.product-gallery-grid {
+  width: 100%;
+  height: auto;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 4px;
+  width: 90%;
+  height: 900px;
+  margin: 0 auto;
+}
+
+.grid-image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.grid-image-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.grid-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: scale-down;
+  transition: transform 0.3s ease;
+  background-color: #f8fafc;
+}
+
+.grid-image-container:hover .grid-product-image {
+  transform: scale(1.05);
+}
+
+/* Enhanced Product Details Styles */
+.product-details__content {
+  padding: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.product-details__content h5 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.rating-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fef3c7;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.rating-text {
+  font-weight: 600;
+  color: #92400e;
+}
+
+.sku-info {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.product-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #475569;
+  margin: 20px 0;
+  padding: 16px;
+  background: #fafbfc;
+  border-radius: 8px;
+  border-left: 4px solid #CA2D52;
+}
+
+.color-selection {
+  margin: 24px 0;
+}
+
+.color-selection-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-option {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.color-option:hover {
+  transform: translateY(-2px);
+}
+
+.size-selection {
+  margin: 24px 0;
+}
+
+.size-selection-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.size-guide-button {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+
+.size-guide-button:hover {
+  color: #2563eb;
+}
+
+.price-section {
+  margin: 24px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 12px;
+  border: 1px solid #bae6fd;
+}
+
+.price-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.current-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0369a1;
+}
+
+.original-price {
+  font-size: 1.25rem;
+  color: #64748b;
+  text-decoration: line-through;
+}
+
+.discount-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: #dc2626;
+  color: white;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.stock-info {
+  margin: 20px 0;
+  padding: 16px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+}
+
+.stock-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.stock-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stock-text {
+  font-weight: 600;
+  color: #166534;
+}
+
+.stock-progress {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.stock-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+  transition: width 0.3s ease;
+}
+
+/* Enhanced Product Tabs Section */
+.product-dContent {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-top: 40px;
+}
+
+.product-dContent__header {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 2px solid #e2e8f0;
+  padding: 24px 32px;
+}
+
+.product-dContent .nav {
+  display: flex;
+  gap: 8px;
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.product-dContent .nav-link {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #64748b;
+  border: none;
+  background: transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.product-dContent .nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #CA2D52 0%, #830622 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.product-dContent .nav-link.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #CA2D52 0%, #830622 100%);
+  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
+  transform: translateY(-1px);
+}
+
+.product-dContent .nav-link:hover:not(.active) {
+  color: #CA2D52;
+  background: #fef2f4;
+  transform: translateY(-1px);
+}
+
+.satisfaction-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: white;
+  color: #CA2D52;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 16px rgba(202, 45, 82, 0.25);
+  transition: all 0.3s ease;
+}
+
+.satisfaction-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(202, 45, 82, 0.35);
+}
+
+.product-dContent__box {
+  padding: 32px;
+  background: #ffffff;
+}
+
+.tab-content {
+  animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #830622;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, #CA2D52 0%, transparent 100%);
+  border-radius: 1px;
+}
+
+.description-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #475569;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 12px;
+  border-left: 4px solid #CA2D52;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.category-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.category-badge {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #CA2D52 0%, #830622 100%);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  box-shadow: 0 2px 8px rgba(202, 45, 82, 0.2);
+  transition: all 0.3s ease;
+}
+
+.category-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.info-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.info-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.info-icon.sku {
+  background: linear-gradient(135deg, #CA2D52 0%, #830622 100%);
+}
+
+.info-icon.barcode {
+  background: linear-gradient(135deg, #CA2D52 0%, #830622 100%);
+}
+
+.info-icon.unit {
+  background: linear-gradient(135deg, #CA2D52 0%, #830622 100%);
+}
+
+.info-icon.origin {
+  background: linear-gradient(135deg, #CA2D52 0%, #830622 100%);
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.info-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+/* Attributes tab refinements */
+.attributes-panel {
+  border: 1px solid #e7edf3;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #fbfcff 100%);
+  padding: 20px;
+}
+
+.attributes-panel__header {
+  margin-bottom: 18px;
+}
+
+.attributes-panel__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.attributes-panel__subtitle {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.attributes-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.attributes-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.attributes-card__variant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.attributes-card__image-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.attributes-card__image-wrap--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ca2d52;
+  background: #fff1f4;
+  border-color: #fbc9d4;
+}
+
+.attributes-card__image-wrap--placeholder i {
+  font-size: 1.1rem;
+}
+
+.attributes-card__label {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.attributes-chip-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.attributes-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ffe9ee;
+  color: #9f1239;
+  border: 1px solid #fbc9d4;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.attributes-chip--neutral {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.attributes-stock {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.attributes-stock--in {
+  color: #166534;
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.attributes-stock--low {
+  color: #92400e;
+  background: #fef3c7;
+  border-color: #fcd34d;
+}
+
+.attributes-stock--out {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.attributes-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.attributes-spec {
+  border: 1px solid #e7edf3;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fafcff;
+}
+
+.attributes-spec span {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.attributes-spec strong {
+  font-size: 0.9rem;
+  color: #111827;
+  font-weight: 700;
+}
+
+.attributes-list-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.attributes-variants-grid {
+  gap: 14px;
+}
+
+.attributes-variant-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.attributes-variant-card:hover {
+  border-color: #f4b4c2;
+  box-shadow: 0 12px 24px rgba(190, 18, 60, 0.12);
+  transform: translateY(-2px);
+}
+
+.attributes-variant-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.attributes-variant-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #9f1239;
+  background: #ffe9ee;
+  border: 1px solid #fbc9d4;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.attributes-variant-stock {
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.attributes-variant-stock--in {
+  color: #166534;
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.attributes-variant-stock--low {
+  color: #92400e;
+  background: #fef3c7;
+  border-color: #fcd34d;
+}
+
+.attributes-variant-stock--out {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.attributes-variant-card__body {
+  display: grid;
+  grid-template-columns: 104px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.attributes-variant-image {
+  width: 100%;
+  height: 104px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.attributes-variant-meta__label {
+  display: block;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.attributes-variant-meta__value {
+  font-size: 0.86rem;
+  color: #111827;
+  font-weight: 700;
+  margin: 0 0 10px;
+  line-height: 1.35;
+}
+
+.attributes-variant-card__footer {
+  border-top: 1px solid #eef2f7;
+  padding-top: 12px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.attributes-variant-price__label {
+  display: block;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.attributes-variant-price__value-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.attributes-variant-price__value {
+  color: #be123c;
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.attributes-variant-price__mrp {
+  color: #6b7280;
+  font-size: 0.78rem;
+  text-decoration: line-through;
+}
+
+.attributes-select-btn {
+  border: 0;
+  border-radius: 9px;
+  padding: 7px 12px;
+  background: linear-gradient(135deg, #ca2d52 0%, #9f1239 100%);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  line-height: 1;
+}
+
+.attributes-select-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 14px rgba(159, 18, 57, 0.2);
+}
+
+@media (max-width: 640px) {
+  .attributes-panel {
+    padding: 14px;
+  }
+
+  .attributes-card {
+    padding: 12px;
+  }
+
+  .attributes-card__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .attributes-spec-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attributes-variant-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .attributes-variant-card__head {
+    flex-wrap: wrap;
+  }
+
+  .attributes-variant-card__body {
+    grid-template-columns: 1fr;
+  }
+
+  .attributes-variant-image {
+    height: 140px;
+  }
+
+  .attributes-variant-card__footer {
+    align-items: center;
+  }
+}
+
 /* Force cart label colors - non-scoped to override everything */
 .cart-label-text {
   color: #CA2D52 !important;
@@ -2510,5 +3394,431 @@ div[class*="bg-"] span.cart-label-text {
 span.force-color-red {
   color: #CA2D52 !important;
   font-size: 0.75rem !important;
+}
+
+/* Red Theme Overrides for main-600 color */
+.text-main-600 {
+  color: #CA2D52 !important;
+}
+
+.bg-main-600 {
+  background-color: #CA2D52 !important;
+}
+
+.border-main-600 {
+  border-color: #CA2D52 !important;
+}
+
+.hover\:text-main-600:hover {
+  color: #CA2D52 !important;
+}
+
+.hover\:text-main-800:hover {
+  color: #830622 !important;
+}
+
+.hover\:bg-main-600:hover {
+  background-color: #CA2D52 !important;
+}
+
+/* Ensure consistency for all main color variants */
+.text-main-800 {
+  color: #830622 !important;
+}
+
+.bg-main-800 {
+  background-color: #830622 !important;
+}
+
+.border-main-800 {
+  border-color: #830622 !important;
+}
+
+/* Variants Grid Styles */
+.variants-container {
+  max-height: 800px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.variants-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.scrollable-variants {
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.scrollable-variants::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.variant-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.variant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(202, 45, 82, 0.15);
+}
+
+.variant-image img {
+  transition: transform 0.3s ease;
+}
+
+.variant-card:hover .variant-image img {
+  transform: scale(1.05);
+}
+
+/* Scrollbar Styles */
+.variants-scrollbar {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.scrollbar-track {
+  width: 100%;
+  height: 40px;
+  background: linear-gradient(135deg, #fef2f4 0%, #fecaca 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fca5a5;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.scrollbar-track:hover {
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.2);
+}
+
+.scrollbar-thumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #830622;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.scrollbar-thumb i {
+  font-size: 1.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .variants-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .variants-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Recommended Products Redesign */
+.recommend-section {
+  border-radius: 20px;
+  border: 1px solid #f3d6dc;
+  background: linear-gradient(120deg, #ffffff 0%, #fff6f7 55%, #ffffff 100%);
+  box-shadow: 0 12px 34px rgba(2, 6, 23, 0.04);
+  padding: 32px;
+}
+
+.recommend-section__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.recommend-section__title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.recommend-section__subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.recommend-section__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #fbc9d4;
+  background: #fff1f4;
+  color: #be123c;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.recommend-state {
+  text-align: center;
+  padding: 56px 0;
+}
+
+.recommended-swiper {
+  padding-bottom: 24px !important;
+}
+
+.recommended-swiper .swiper-slide {
+  height: auto !important;
+  display: flex;
+}
+
+.recommended-swiper .swiper-slide > article {
+  height: 100%;
+  width: 100%;
+}
+
+.recommended-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
+  border-radius: 16px;
+  border: 1px solid #e8edf2;
+  background: #ffffff;
+  overflow: hidden;
+  min-height: 100%;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.recommended-card:hover {
+  transform: translateY(-4px);
+  border-color: #f4b4c2;
+  box-shadow: 0 18px 35px rgba(190, 18, 60, 0.14);
+}
+
+.recommended-card__wishlist {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+}
+
+.recommended-card__wishlist:hover {
+  border-color: #fda4af;
+  color: #dc2626;
+  background: #fff3f5;
+}
+
+.recommended-card__wishlist i.is-active {
+  color: #dc2626;
+}
+
+.recommended-card__link {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+
+.recommended-card__media {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  overflow: hidden;
+}
+
+.recommended-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.recommended-card:hover .recommended-card__image {
+  transform: scale(1.06);
+}
+
+.recommended-card__pill {
+  position: absolute;
+  left: 10px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.recommended-card__pill--sale {
+  top: 10px;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.recommended-card__pill--stock {
+  bottom: 10px;
+  background: rgba(22, 163, 74, 0.12);
+  color: #166534;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.recommended-card__pill--out {
+  bottom: 10px;
+  background: rgba(107, 114, 128, 0.16);
+  color: #374151;
+  border: 1px solid rgba(107, 114, 128, 0.22);
+}
+
+.recommended-card__body {
+  padding: 12px 12px 10px;
+}
+
+.recommended-card__title {
+  color: #111827;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0 0 10px;
+  min-height: 2.4em;
+}
+
+.recommended-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.recommended-card__stars {
+  display: flex;
+  align-items: center;
+  color: #f59e0b;
+  font-size: 0.82rem;
+}
+
+.recommended-card__rating-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.recommended-card__reviews {
+  font-size: 0.74rem;
+  color: #6b7280;
+}
+
+.recommended-card__price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.recommended-card__price-current {
+  color: #be123c;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.recommended-card__price-original {
+  color: #6b7280;
+  font-size: 0.78rem;
+  text-decoration: line-through;
+}
+
+.recommended-card__price-save {
+  color: #15803d;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.recommended-card__cart {
+  margin: 0 12px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ca2d52 0%, #b91c3c 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.84rem;
+  padding: 9px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.recommended-card__cart:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(185, 28, 60, 0.28);
+}
+
+.recommended-card__cart--disabled,
+.recommended-card__cart:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 1024px) {
+  .recommend-section {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .recommend-section {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .recommend-section__head {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+
+  .recommend-section__chip {
+    font-size: 0.8rem;
+    padding: 7px 12px;
+  }
+
+  .recommended-card__title {
+    font-size: 0.84rem;
+  }
+
+  .recommended-card__price-current {
+    font-size: 0.94rem;
+  }
 }
 </style>

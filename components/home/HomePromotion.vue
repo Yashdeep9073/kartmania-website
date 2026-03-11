@@ -1,6 +1,6 @@
 <!-- components/PromotionalBanner.vue -->
 <template>
-  <section v-if="!loading && promotionalBanners.length > 0" class="promotional-banner pb-10 pt-5 pt-md-10 pt-lg-15">
+  <section v-if="!loading && promotionalBanners.length > 0" class="promotional-banner pb-16 pt-8 pt-md-12 pt-lg-20">
     <div class="container container-lg px-3 px-md-4">
       <div v-if="loading && showStaticFallback === false" class="text-center py-30 py-md-40">
         <div class="spinner-border text-primary" role="status">

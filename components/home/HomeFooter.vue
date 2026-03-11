@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer py-40">
+  <footer class="footer py-48">
     <div class="container container-lg">
       <div class="row g-4">
         <!-- Company Info - Takes more space on desktop -->

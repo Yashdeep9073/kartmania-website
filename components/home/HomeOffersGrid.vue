@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!loading && activeOffers.length > 0" class="offers-by-type py-30">
+  <div v-if="!loading && activeOffers.length > 0" class="offers-by-type py-40">
     <div class="container container-lg">
       <!-- Flash Sale Section -->
       <OfferTypeSection v-if="offersByType['FLASH_SALE'] && offersByType['FLASH_SALE'].length > 0" type="FLASH_SALE"

@@ -1,5 +1,5 @@
 <template>
-  <section class="recommended-section pt-20 pb-20">
+  <section class="recommended-section pt-12 pb-12">
     <div class="container">
       <div class="section-heading">
         <h2>{{ filteredProducts.length > 0 ? 'Recommended for you' : '' }}</h2>
@@ -197,11 +197,24 @@
         </Swiper>
       </div>
       
+      <!-- Error State -->
+      <div v-if="errorMessage && !isLoading" class="error-state">
+        <div class="error-icon">
+          <i class="ph ph-warning-circle text-5xl text-red-400"></i>
+        </div>
+        <p class="error-message">{{ errorMessage }}</p>
+        <button @click="retryInitialization" class="retry-btn">
+          <i class="ph ph-arrow-clockwise mr-2"></i>
+          Try Again
+        </button>
+      </div>
+      
       <!-- Empty State -->
-      <div v-else class="empty-state">
+      <div v-else-if="!isLoading && filteredProducts.length === 0" class="empty-state">
         <div class="empty-icon">
           <i class="ph ph-package text-5xl text-gray-400"></i>
         </div> 
+        <p>No products available</p>
       </div>
       
       <!-- View More Button -->
@@ -260,12 +273,37 @@ const filteredProducts = computed(() => {
 
 const pagination = computed(() => recommendStore.pagination || { total: 0, perPage: productsPerPage })
 
-// Handle image error
+// Handle image error with fallback
 const handleImageError = (event, index) => {
-  // Hide broken image
   const img = event.target
+  
+  // Prevent infinite loop
+  if (img.dataset.fallbackSet) {
+    return
+  }
+  
+  // Try fallback image first
+  const fallbackSrc = '/assets/images/placeholder.jpg'
+  if (img.src !== fallbackSrc && !img.src.includes('placeholder')) {
+    img.src = fallbackSrc
+    img.dataset.fallbackSet = 'true'
+    return
+  }
+  
+  // If fallback also fails, hide image but show placeholder
   img.style.display = 'none'
-  img.onerror = null // Prevent infinite loop
+  
+  // Create placeholder div
+  const wrapper = img.parentElement
+  if (wrapper && !wrapper.querySelector('.image-placeholder')) {
+    const placeholder = document.createElement('div')
+    placeholder.className = 'image-placeholder'
+    placeholder.innerHTML = '<i class="ph ph-package text-3xl text-gray-400"></i>'
+    placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; background: #f9fafb;'
+    wrapper.appendChild(placeholder)
+  }
+  
+  img.onerror = null
 }
 
 // Get product link
@@ -302,17 +340,65 @@ onMounted(async () => {
   isLoading.value = true
   
   try {
-    // Load categories first
-    await recommendStore.fetchCategories()
+    // Load categories first with timeout
+    const categoriesPromise = recommendStore.fetchCategories()
+    const categoriesTimeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Categories fetch timeout')), 5000)
+    )
     
-    // Load "All" products
-    activeTab.value = 'all'
-    await recommendStore.fetchProducts({
-      page: 1,
-      limit: 10, // Limit to 10 products
-      category: null, 
-      sortBy: 'popularity'
-    })
+    await Promise.race([categoriesPromise, categoriesTimeout])
+      .catch(err => {
+        console.warn('Categories fetch failed, using fallback:', err.message)
+        // Continue with products even if categories fail
+      })
+    
+    // Load "All" products with timeout and retry
+    let productsLoaded = false
+    let retryCount = 0
+    const maxRetries = 2
+    
+    while (!productsLoaded && retryCount <= maxRetries) {
+      try {
+        const productsPromise = recommendStore.fetchProducts({
+          page: 1,
+          limit: 10,
+          category: null, 
+          sortBy: 'popularity'
+        })
+        
+        const productsTimeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Products fetch timeout')), 8000)
+        )
+        
+        await Promise.race([productsPromise, productsTimeout])
+        productsLoaded = true
+        
+        // Check if we got products
+        if (recommendStore.products.length === 0) {
+          console.warn('No products loaded, trying fallback...')
+          // Try with different parameters
+          await recommendStore.fetchProducts({
+            page: 1,
+            limit: 10,
+            category: null, 
+            sortBy: 'name' // Try different sort
+          })
+        }
+        
+      } catch (error) {
+        retryCount++
+        console.error(`Products fetch attempt ${retryCount} failed:`, error)
+        
+        if (retryCount <= maxRetries) {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount))
+        } else {
+          // Set error state but don't break the UI
+          errorMessage.value = 'Unable to load products. Please refresh the page.'
+          console.error('All product fetch attempts failed')
+        }
+      }
+    }
     
     // Check if we need scroll buttons
     nextTick(() => {
@@ -387,16 +473,97 @@ const loadProductsForCategory = async (categoryId) => {
   try {
     const categoryName = categoryId === 'all' ? null : getCategoryName(categoryId)
     
-    await recommendStore.fetchProducts({
-      page: 1,
-      limit: 10, // Limit to 10 products
-      category: categoryName,
-      sortBy: 'popularity'
-    })
+    // Add retry logic for category loading
+    let productsLoaded = false
+    let retryCount = 0
+    const maxRetries = 2
+    
+    while (!productsLoaded && retryCount <= maxRetries) {
+      try {
+        const productsPromise = recommendStore.fetchProducts({
+          page: 1,
+          limit: 10,
+          category: categoryName,
+          sortBy: 'popularity'
+        })
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Category products timeout')), 6000)
+        )
+        
+        await Promise.race([productsPromise, timeoutPromise])
+        productsLoaded = true
+        
+        // Verify we got products
+        if (recommendStore.products.length === 0 && categoryName) {
+          console.warn(`No products found for category: ${categoryName}`)
+          // Try case-insensitive search
+          const allCats = recommendStore.categories || []
+          const matchingCat = allCats.find(cat => 
+            cat.name?.toLowerCase() === categoryName?.toLowerCase()
+          )
+          
+          if (matchingCat) {
+            await recommendStore.fetchProducts({
+              page: 1,
+              limit: 10,
+              category: matchingCat.name,
+              sortBy: 'popularity'
+            })
+          }
+        }
+        
+      } catch (error) {
+        retryCount++
+        console.error(`Category ${categoryName} load attempt ${retryCount} failed:`, error)
+        
+        if (retryCount <= maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount))
+        } else {
+          errorMessage.value = `Unable to load ${categoryName || 'products'}. Please try again.`
+        }
+      }
+    }
     
   } catch (error) {
     console.error('Error loading products:', error)
     errorMessage.value = 'Failed to load products. Please try again.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Retry initialization
+const retryInitialization = async () => {
+  errorMessage.value = ''
+  isLoading.value = true
+  
+  try {
+    // Reset store state
+    recommendStore.products = []
+    
+    // Retry initialization
+    await Promise.race([
+      recommendStore.fetchCategories(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Categories timeout')), 5000))
+    ]).catch(() => {
+      console.warn('Categories retry failed, continuing with products')
+    })
+    
+    await Promise.race([
+      recommendStore.fetchProducts({
+        page: 1,
+        limit: 10,
+        category: null, 
+        sortBy: 'popularity'
+      }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Products timeout')), 8000))
+    ])
+    
+    errorMessage.value = ''
+  } catch (error) {
+    console.error('Retry failed:', error)
+    errorMessage.value = 'Still unable to load products. Please check your connection and refresh the page.'
   } finally {
     isLoading.value = false
   }
@@ -564,17 +731,17 @@ onUnmounted(() => {
   background: linear-gradient(135deg, var(--main-600), var(--main-700));
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 4px;
+  margin-top: 6px;
   width: 100%;
 }
 
@@ -780,7 +947,7 @@ onUnmounted(() => {
 <style scoped>
 /* ==================== RECOMMENDED PRODUCTS SECTION ==================== */
 .recommended-section {
-  padding: 40px 0;
+  padding: 24px 0;
   background-color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -796,13 +963,13 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
   gap: 20px;
 }
 
 .section-heading h2 {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #1f2937;
   margin: 0;
@@ -811,7 +978,7 @@ onUnmounted(() => {
 
 /* ==================== PRODUCTS SWIPER ==================== */
 .products-swiper-container {
-  padding: 20px 0;
+  padding: 12px 0;
 }
 
 .products-swiper {
@@ -851,7 +1018,7 @@ onUnmounted(() => {
 
 .product-card {
   background: white;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
@@ -943,7 +1110,7 @@ onUnmounted(() => {
 .product-image-wrapper {
   position: relative;
   width: 100%;
-  height: 140px;
+  height: 120px;
   background: #ecedeb;
   display: flex;
   align-items: center;
@@ -968,25 +1135,25 @@ onUnmounted(() => {
 
 /* ==================== PRODUCT CONTENT ==================== */
 .product-content {
-  padding: 12px;
+  padding: 10px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .product-title {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #1f2937;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 40px;
+  min-height: 32px;
 }
 
 .rating-section {
@@ -1022,7 +1189,7 @@ onUnmounted(() => {
 }
 
 .current-price {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #1f2937;
 }
@@ -1043,7 +1210,51 @@ onUnmounted(() => {
   border-radius: 4px;
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+/* ==================== ERROR STATE ==================== */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  min-height: 200px;
+}
+
+.error-icon {
+  margin-bottom: 16px;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.retry-btn {
+  background: linear-gradient(135deg, var(--main-600), var(--main-700));
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.retry-btn:hover {
+  background: linear-gradient(135deg, var(--main-700), var(--main-800));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
+}
+
+/* ==================== EMPTY STATE ==================== */
 
 /* Large Desktop */
 @media (max-width: 1600px) {
@@ -1087,27 +1298,27 @@ onUnmounted(() => {
     gap: 12px;
   }
   .recommended-section {
-    padding: 30px 0;
+    padding: 20px 0;
   }
   .product-image-wrapper {
-    height: 120px;
+    height: 100px;
   }
   
   .product-content {
-    padding: 10px;
+    padding: 8px;
   }
   
   .product-title {
-    font-size: 0.8rem;
-    min-height: 36px;
+    font-size: 0.75rem;
+    min-height: 28px;
   }
   
   .current-price {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
   }
   
   .section-heading h2 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
   
   .scroll-btn {
@@ -1119,7 +1330,7 @@ onUnmounted(() => {
 
 @media (max-width: 769px) {
   .recommended-section {
-    padding: 20px 0;
+    padding: 16px 0;
   }
   
   .container {
@@ -1128,11 +1339,11 @@ onUnmounted(() => {
   
   .products-grid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    gap: 8px;
   }
   
   .product-card {
-    border-radius: 8px;
+    border-radius: 6px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     border: 1px solid #f3f4f6;
   }
@@ -1142,77 +1353,77 @@ onUnmounted(() => {
   }
   
   .product-image-wrapper {
-    height: 100px;
+    height: 80px;
   }
   
   .product-content {
-    padding: 8px;
-    gap: 6px;
+    padding: 6px;
+    gap: 4px;
   }
   
   .product-title {
-    font-size: 0.75rem;
-    line-height: 1.3;
-    min-height: 32px;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    min-height: 28px;
     -webkit-line-clamp: 2;
     line-clamp: 2;
   }
   
   .price-wrapper {
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 3px;
   }
   
   .current-price {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 700;
   }
   
   .original-price {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
   
   .discount-percentage {
-    font-size: 0.7rem;
-    padding: 1px 4px;
+    font-size: 0.65rem;
+    padding: 1px 3px;
   }
   
   .section-heading {
-    margin-bottom: 20px;
-    gap: 16px;
+    margin-bottom: 16px;
+    gap: 12px;
   }
   
   .section-heading h2 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
   
   .category-tabs {
-    padding: 6px 4px 10px;
-    gap: 6px;
+    padding: 4px 4px 8px;
+    gap: 4px;
   }
   
   .tab-button {
-    padding: 5px 10px;
-    font-size: 0.75rem;
-    min-height: 28px;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    min-height: 24px;
   }
   
   .product-badges {
-    top: 6px;
-    left: 6px;
+    top: 4px;
+    left: 4px;
   }
   
   .badge {
-    padding: 2px 4px;
-    font-size: 0.6rem;
+    padding: 2px 3px;
+    font-size: 0.55rem;
   }
   
   .wishlist-btn {
-    top: 6px;
-    right: 6px;
-    width: 24px;
-    height: 24px;
-    font-size: 0.8rem;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
   }
   
   .scroll-btn {
@@ -1224,11 +1435,7 @@ onUnmounted(() => {
 @media (max-width: 576px) {
   .products-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;   
-  }
-  
-  .rating-section {
-    display: none;
+    gap: 6px;
   }
   
   .product-content {

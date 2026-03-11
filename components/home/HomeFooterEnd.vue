@@ -1,5 +1,5 @@
 <template>
-  <div class="bottom-footer py-8">
+  <div class="bottom-footer py-12">
     <div class="container container-lg">
       <div class="bottom-footer__inner flex-between flex-wrap gap-16 py-16 border-top border-neutral-50">
 <p class="bottom-footer__text text-heading wow fadeInLeft fw-medium">

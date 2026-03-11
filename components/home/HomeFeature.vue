@@ -1,5 +1,5 @@
 <template>
-  <div class="feature pb-8" id="featureSection">
+  <div class="feature pb-12 pt-8" id="featureSection">
     <div class="container container-lg">
       <div class="position-relative ">
         <div class="flex-align">

@@ -179,6 +179,7 @@ onUnmounted(() => {
   min-height: 450px;
   position: relative;
   overflow: hidden;
+  margin-bottom: 3rem; /* Add spacing after banner */
 }
 
 /* Loading State (minimal) */

@@ -1,6 +1,6 @@
 <template>
   <!-- hide entire block if no HOT_DEALS -->
-  <section v-if="showSection" class="hot-deals pt-40 overflow-hidden">
+  <section v-if="showSection" class="hot-deals pt-48 pb-8 overflow-hidden">
     <div class="container container-lg">
       <!-- HEADER -->
       <div class="section-heading flex-between mb-24">

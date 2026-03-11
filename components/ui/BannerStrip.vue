@@ -134,7 +134,7 @@ const handleImageError = (e: Event) => {
 
 .banner-wrapper {
   position: relative;
-  margin-bottom: 15px; 
+  margin-bottom: 25px; 
   width: 100%; 
   height: 150px;
   max-width: 1000px;

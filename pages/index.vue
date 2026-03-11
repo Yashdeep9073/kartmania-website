@@ -73,7 +73,7 @@ const ProductNews = defineAsyncComponent({
   loader: () => import("~/components/product/ProductNews.vue"),
   errorComponent: () => import("~/components/ui/LazySection.vue"),
   delay: 200,
-  timeout: 3000
+  timeout: 10000 // Increased timeout to 10 seconds
 })
 const HomeOffersGrid = defineAsyncComponent({
   loader: () => import("~/components/home/HomeOffersGrid.vue"),
@@ -114,6 +114,28 @@ useHead({ title: "Home" })
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+/* Add consistent spacing between sections */
+.main-container > * {
+  margin-bottom: 3rem; /* 48px spacing between sections */
+}
+
+.main-container > *:last-child {
+  margin-bottom: 0;
+}
+
+/* Reduce spacing for smaller screens */
+@media (max-width: 768px) {
+  .main-container > * {
+    margin-bottom: 2rem; /* 32px on mobile */
+  }
+}
+
+@media (max-width: 576px) {
+  .main-container > * {
+    margin-bottom: 1.5rem; /* 24px on small mobile */
+  }
 }
 </style>
 

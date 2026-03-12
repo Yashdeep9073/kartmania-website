@@ -119,17 +119,16 @@ const handleImageError = (e: Event) => {
 .banner-link {
   display: block;
   text-decoration: none;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.banner-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .banner-link:hover .banner-bg {
-  transform: scale(1.02);
-  transition: transform 0.3s ease;
+  transform: scale(1.01);
+  transition: transform 0.4s ease;
+}
+
+.banner-link:hover .offer-strip {
+  transform: translateY(-1px);
+  transition: transform 0.25s ease;
 }
 
 .banner-wrapper {

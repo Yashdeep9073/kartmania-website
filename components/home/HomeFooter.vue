@@ -22,8 +22,8 @@
               </p>
 
               <div class="contact-links mb-2">
-                <a href="mailto:info@vibrantick.org" class="text-heading small hover-text-main-600 d-block mb-2">
-                  <i class="ph ph-envelope me-2"></i>info@vibrantick.org
+                <a href="mailto:info@pranzo.in" class="text-heading small hover-text-main-600 d-block mb-2">
+                  <i class="ph ph-envelope me-2"></i>info@pranzo.in
                 </a>
                 <a href="tel:+919549936342" class="text-heading small hover-text-main-600 d-block">
                   <i class="ph ph-phone me-2"></i>+91 95499 36342

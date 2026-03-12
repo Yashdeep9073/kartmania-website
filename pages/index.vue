@@ -139,3 +139,30 @@ useHead({ title: "Home" })
 }
 </style>
 
+<style>
+@media (max-width: 768px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .main-container {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .main-container > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .main-container img,
+  .main-container video,
+  .main-container canvas,
+  .main-container svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+</style>

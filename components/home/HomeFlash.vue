@@ -48,6 +48,12 @@
                   </NuxtLink>
 
                   <div class="product-content">
+                    <h6 class="product-title">
+                      <NuxtLink :to="generateProductUrl(product)" class="product-link">
+                        {{ product.name }}
+                      </NuxtLink>
+                    </h6>
+
                     <div class="price-review-row">
                       <div class="price-section">
                         <span class="current-price">
@@ -65,12 +71,6 @@
                         <span class="review-count">(17k)</span>
                       </div>
                     </div>
-
-                    <h6 class="product-title">
-                      <NuxtLink :to="generateProductUrl(product)" class="product-link">
-                        {{ product.name }}
-                      </NuxtLink>
-                    </h6>
 
                     <!-- Progress Bar -->
                     <div class="progress-section">
@@ -158,7 +158,7 @@ export default {
       if (!offers.value || offers.value.length === 0) return []
 
       const productOffers = offers.value.filter(offer =>
-        offer.offerType === 'FLASH_SALE' &&
+        (offer.offerType === 'FLASH_SALE' || offer.offerType === 'PRODUCT') &&
         (offer.products?.length || offer.OfferProducts?.length)
       )
 
@@ -171,7 +171,7 @@ export default {
 
       return (offerProducts || [])
         .map((item: any) => item.product || item.Product || item)
-        .filter((p: any) => p)
+        .filter((p: any) => p && p.id && p.name) // Ensure product has required fields
         .map((product: any) => ({
           ...product,
           price: Number(product.price),
@@ -200,25 +200,26 @@ export default {
         const Swiper = SwiperModule.default
         swiperInstance.value = new Swiper(swiperContainer.value, {
           modules: [Navigation, Autoplay],
-          loop: displayProducts.value.length > 6,
+          loop: true,
           slidesPerView: 6,
           spaceBetween: 12,
           centeredSlides: false,
           grabCursor: true,
           speed: 600,
           navigation: { nextEl: '.next-btn', prevEl: '.prev-btn', disabledClass: 'nav-btn-disabled' },
-          autoplay: { delay: 3000, disableOnInteraction: true, pauseOnMouseEnter: true },
+          autoplay: { delay: 2000, disableOnInteraction: false, pauseOnMouseEnter: false },
           breakpoints: {
-            320: { slidesPerView: 1, spaceBetween: 8 },
-            400: { slidesPerView: 1.5, spaceBetween: 8 },
-            480: { slidesPerView: 2, spaceBetween: 10 },
-            576: { slidesPerView: 2.5, spaceBetween: 10 },
-            640: { slidesPerView: 3, spaceBetween: 12 },
-            768: { slidesPerView: 4, spaceBetween: 12 },
-            900: { slidesPerView: 5, spaceBetween: 14 },
-            1024: { slidesPerView: 5, spaceBetween: 14 },
-            1200: { slidesPerView: 6, spaceBetween: 12 },
-            1400: { slidesPerView: 6, spaceBetween: 14 },
+            320: { slidesPerView: 1, spaceBetween: 4 },
+            375: { slidesPerView: 1.1, spaceBetween: 4 },
+            400: { slidesPerView: 1.3, spaceBetween: 4 },
+            480: { slidesPerView: 1.8, spaceBetween: 6 },
+            576: { slidesPerView: 2.5, spaceBetween: 6 },
+            640: { slidesPerView: 3.2, spaceBetween: 8 },
+            768: { slidesPerView: 4.2, spaceBetween: 8 },
+            900: { slidesPerView: 5.1, spaceBetween: 10 },
+            1024: { slidesPerView: 5.8, spaceBetween: 10 },
+            1200: { slidesPerView: 6.4, spaceBetween: 8 },
+            1400: { slidesPerView: 6.8, spaceBetween: 10 },
           },
         })
       } catch (error) {
@@ -312,10 +313,10 @@ export default {
 
 <style scoped>
 .flash-sales {
-  margin-top: 40px;
-  padding: 40px 0 80px;
+  margin-top: 16px;
+  padding: 12px 0 24px;
   background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
-  overflow: visible;
+  overflow: hidden;
 }
 
 .container-lg {
@@ -454,6 +455,8 @@ h5 {
   height: 100%;
   width: 100%;
   min-width: 0;
+  max-width: 320px;
+  max-height: 340px;
   position: relative;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -470,9 +473,9 @@ h5 {
   background: #CA2D52;
   color: white;
   border: none;
-  padding: 10px 14px;
+  padding: 6px 10px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -485,7 +488,7 @@ h5 {
   z-index: 2;
   box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
   width: 100%;
-  margin-top: 12px;
+  margin-top: 6px;
 }
 
 .add-cart-btn:hover {
@@ -501,7 +504,7 @@ h5 {
   border-bottom: 1px solid #f1f5f9;
   background: #f8fafc;
   flex-shrink: 0;
-  min-height: 160px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -509,9 +512,8 @@ h5 {
 
 .product-image {
   width: 100%;
-  height: 160px;
-  object-fit: contain;
-  padding: 16px;
+  height: 100%;
+  object-fit: cover;
   transition: transform 0.3s ease;
 }
 
@@ -521,19 +523,20 @@ h5 {
 
 /* Product Content */
 .product-content {
-  padding: 12px;
+  padding: 6px 10px;
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+  max-height: 200px;
 }
 
 .price-review-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin: 0;
   flex-shrink: 0;
 }
 
@@ -542,6 +545,9 @@ h5 {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
 }
 
 .current-price {
@@ -587,13 +593,14 @@ h5 {
 
 /* Product Title */
 .product-title {
-  margin: 0 0 16px 0;
+  margin: 0;
   flex-shrink: 0;
-  line-height: 1.4;
+  line-height: 1.3;
+  max-height: 2.6em;
 }
 
 .product-link {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #1e293b;
   text-decoration: none;
@@ -602,8 +609,8 @@ h5 {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.5;
-  max-height: 3em;
+  line-height: 1.3;
+  max-height: 2.6em;
 }
 
 .product-link:hover {
@@ -612,15 +619,15 @@ h5 {
 
 /* Progress Section */
 .progress-section {
-  margin-top: auto;
+  margin-top: 2px;
   flex-shrink: 0;
 }
 
 .progress-info {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 12px;
+  margin-bottom: 4px;
+  font-size: 11px;
   color: #64748b;
 }
 
@@ -710,7 +717,7 @@ h5 {
 /* Responsive */
 @media (max-width: 768px) {
   .flash-sales {
-    padding: 40px 0;
+    padding: 8px 0 16px;
   }
 
   h5 {
@@ -724,22 +731,22 @@ h5 {
   }
 
   .swiper-container-wrapper {
-    padding: 0 12px;
-    margin: 0 -2px;
-    overflow: visible;
+    padding: 0 8px;
+    margin: 0;
+    overflow: hidden;
   }
 
   .product-image-container {
-    min-height: 120px;
+    min-height: 140px;
   }
 
   .product-image {
-    height: 120px;
+    height: 140px;
     padding: 10px;
   }
 
   .product-content {
-    padding: 16px;
+    padding: 12px;
   }
 
   .current-price {
@@ -751,6 +758,11 @@ h5 {
     max-height: 2.8em;
   }
 
+  .add-cart-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
   .nav-btn {
     width: 36px;
     height: 36px;
@@ -759,26 +771,39 @@ h5 {
 
 @media (max-width: 480px) {
   .flash-sales {
-    padding: 32px 0;
+    padding: 6px 0 12px;
   }
 
   .swiper-container-wrapper {
-    padding: 0 8px;
-    margin: 0 -2px;
-    overflow: visible;
+    padding: 0 6px;
+    margin: 0;
+    overflow: hidden;
   }
 
   .product-image-container {
-    min-height: 100px;
+    min-height: 120px;
   }
 
   .product-image {
-    height: 100px;
+    height: 120px;
     padding: 8px;
   }
 
+  .product-content {
+    padding: 10px;
+  }
+
+  .product-link {
+    font-size: 13px;
+    max-height: 2.6em;
+  }
+
+  .current-price {
+    font-size: 15px;
+  }
+
   .add-cart-btn {
-    padding: 6px 12px;
+    padding: 6px 10px;
     font-size: 12px;
   }
 
@@ -786,11 +811,6 @@ h5 {
     width: 32px;
     height: 32px;
     font-size: 14px;
-  }
-
-  .product-link {
-    font-size: 13px;
-    max-height: 2.6em;
   }
 }
 

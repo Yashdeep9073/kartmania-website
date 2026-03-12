@@ -5,198 +5,112 @@
         <h2>{{ filteredProducts.length > 0 ? 'Recommended for you' : '' }}</h2>
         <div class="category-tabs-container">
           <!-- Left Scroll Button -->
-          <button 
-            v-if="showScrollButtons"
-            class="scroll-btn scroll-left"
-            @click="scrollTabs(-1)"
-            :disabled="isAtStart"
-          >
+          <button v-if="showScrollButtons" class="scroll-btn scroll-left" @click="scrollTabs(-1)" :disabled="isAtStart">
             <i class="ph ph-caret-left"></i>
           </button>
-          
+
           <div class="category-tabs-wrapper" ref="tabsContainer">
-            <div class="category-tabs">
+            <div class="category-tabs" @scroll.passive="handleScroll">
               <!-- All Category Tab -->
-              <button 
-                class="tab-button"
-                :class="{ active: activeTab === 'all' }"
-                @click="loadProductsForCategory('all')"
-                :disabled="isLoading && activeTab !== 'all'"
-              >
+              <button class="tab-button" :class="{ active: activeTab === 'all' }"
+                @click="loadProductsForCategory('all')" :disabled="isLoading && activeTab !== 'all'">
                 <span class="tab-label">All Products</span>
               </button>
-               
+
               <!-- Categories from API -->
-              <button 
-                v-for="(category, index) in allCategories"
-                :key="category.id"
-                class="tab-button"
-                :class="{ 
-                  active: activeTab === category.id,
-                  'no-products': category.productCount === 0
-                }"
-                @click="loadProductsForCategory(category.id)"
+              <button v-for="(category, index) in allCategories" :key="category.id" class="tab-button" :class="{
+                active: activeTab === category.id,
+                'no-products': category.productCount === 0
+              }" @click="loadProductsForCategory(category.id)"
                 :disabled="(isLoading && activeTab !== category.id) || category.productCount === 0"
-                :title="category.productCount === 0 ? 'No products available' : `${category.productCount} products`"
-              >
+                :title="category.productCount === 0 ? 'No products available' : `${category.productCount} products`">
                 <span class="tab-label">
                   {{ category.name }}
-                </span>  
+                </span>
               </button>
             </div>
           </div>
-          
+
           <!-- Right Scroll Button -->
-          <button 
-            v-if="showScrollButtons"
-            class="scroll-btn scroll-right"
-            @click="scrollTabs(1)"
-            :disabled="isAtEnd"
-          >
+          <button v-if="showScrollButtons" class="scroll-btn scroll-right" @click="scrollTabs(1)" :disabled="isAtEnd">
             <i class="ph ph-caret-right"></i>
           </button>
         </div>
       </div>
-      
+
       <!-- Loading State -->
       <div v-if="isLoading" class="loading-container">
         <div class="loading-spinner"></div>
       </div>
-      
+
       <!-- Products Swiper Carousel -->
       <div v-else-if="filteredProducts.length > 0" class="products-swiper-container">
         <Swiper
-          :slides-per-view="1"
-          :space-between="20"
-          :breakpoints="{
-            400: { slidesPerView: 2, spaceBetween: 10 },
-            576: { slidesPerView: 3, spaceBetween: 12 },
-            768: { slidesPerView: 4, spaceBetween: 14 },
-            992: { slidesPerView: 5, spaceBetween: 16 },
-            1200: { slidesPerView: 6, spaceBetween: 16 },
-            1400: { slidesPerView: 7, spaceBetween: 16 },
-            1600: { slidesPerView: 8, spaceBetween: 16 }
-          }"
           class="products-swiper"
+          :modules="swiperModules"
+          :slides-per-view="2"
+          :space-between="10"
+          :breakpoints="swiperBreakpoints"
+          :watch-overflow="true"
         >
-          <SwiperSlide 
-            v-for="(product, index) in filteredProducts"
-            :key="product.groupId || `product-${index}`"
-          >
-            <div 
-              class="product-card"
-            > 
-              <!-- Product Badges -->
-              <div class="product-badges">
-                <span v-if="hasDiscount(product)" class="badge sale">SALE</span>
-              </div> 
-              
-              <!-- Wishlist Button -->
-              <button 
-                class="wishlist-btn"
-                @click="addToWishlist(product)"
-                :disabled="isLoading"
-                :title="isInWishlist(product) ? 'Remove from wishlist' : 'Add to wishlist'"
-                :class="{ 
-                  'in-wishlist': isInWishlist(product)
-                }"
-              >
-                <i :class="['ph', isInWishlist(product) ? 'ph-heart-fill' : 'ph-heart']"></i>
-              </button>
-              
-              <!-- Product Image -->
-              <div class="product-image-wrapper" :class="{ 'out-of-stock': getProductStock(product) === 0 }">
-                <img 
-                  :src="getProductImage(product, index)"
-                  :alt="getProductName(product)"
-                  class="product-image"
-                  @error="handleImageError($event, index)"
-                  loading="lazy"
-                />
-              </div>
-              
-              <!-- Product Content -->
-              <NuxtLink
-                :to="getProductLink(product)"
-                class="text-decoration-none text-reset d-block"
-              >
-                <div class="product-content">
-                  
-                  <!-- Product Title -->
-                  <h3 class="product-title">
-                    {{ getProductName(product) }}
-                  </h3>
-                  
-                  <!-- Rating -->
-                  <div class="rating-section">
-                    <div class="stars">
-                      <span v-for="star in 5" :key="star">
-                        <i 
-                          :class="[
-                            'ph',
-                            star <= Math.round(getProductRating(product))
-                              ? 'ph-star-fill text-yellow-400'
-                              : 'ph-star text-gray-300'
-                          ]"
-                        ></i>
-                      </span>
-                    </div>
-                    <span class="rating-value">
-                      {{ getProductRating(product).toFixed(1) }}
-                    </span>
-                    <span class="review-count">
-                      ({{ getReviewCount(product) }})
-                    </span>
-                  </div>
-                  
-                  <!-- Price -->
-                  <div class="price-section">
-                    <div class="price-wrapper">
-                      <span class="current-price">
-                        ₹{{ Math.floor(getDiscountedPrice(product)) }}
-                      </span>
-                      <span v-if="hasDiscount(product)" class="original-price">
-                         ₹{{ Math.floor(getOriginalPrice(product)) }}
-                      </span>
-                    </div>
-                    <span v-if="hasDiscount(product)" class="discount-percentage">
-                      {{ getDiscountPercentage(product) }}% off
-                    </span>
-                  </div>
-                  
-                  <!-- Stock Status -->
-                  <div class="stock-status">
-                    <span v-if="getProductStock(product) > 10" class="in-stock">
-                      Available
-                    </span>
-                    <span v-else-if="getProductStock(product) > 0" class="low-stock">
-                      {{ getProductStock(product) }} left
-                    </span>
-                    <span v-else class="out-of-stock">
-                      Out of stock
-                    </span>
-                  </div>
+        <SwiperSlide v-for="(product, index) in filteredProducts" :key="product.groupId || `product-${index}`" class="h-auto">
+          <div class="product-card">
+            <NuxtLink :to="getProductLink(product)" class="product-image-container">
+              <img :src="getProductImage(product, index)" :alt="getProductName(product)" class="product-image"
+                @error="handleImageError($event, index)" loading="lazy" width="280" height="210" />
+            </NuxtLink>
 
-                  <!-- Add to Cart Button -->
-                  <button 
-                    @click.stop="handleAddToCart(product)"
-                    :disabled="getProductStock(product) === 0 || isAddingToCart"
-                    class="add-to-cart-btn"
-                    :class="{ 'disabled': getProductStock(product) === 0 || isAddingToCart }"
-                  >
-                    <i v-if="!isAddingToCart" class="ph ph-shopping-cart"></i>
-                    <i v-else class="ph ph-spinner-gap animate-spin"></i>
-                    {{ isAddingToCart ? 'Adding...' : 'Add to Cart' }}
-                  </button>
+            <div class="product-content">
+              <h6 class="product-title">
+                <NuxtLink :to="getProductLink(product)" class="product-link">
+                  {{ getProductName(product) }}
+                </NuxtLink>
+              </h6>
 
+              <div class="price-review-row">
+                <div class="price-section">
+                  <span class="current-price">
+                    ₹{{ Math.floor(getDiscountedPrice(product)) }}
+                    <span class="per-unit">/Qty</span>
+                  </span>
+                  <span class="original-price" v-if="hasDiscount(product)">
+                    ₹{{ Math.floor(getOriginalPrice(product)) }}
+                  </span>
                 </div>
-              </NuxtLink>
 
+                <div class="review-section">
+                  <span class="rating">{{ getProductRating(product).toFixed(1) }}</span>
+                  <i class="ph-fill ph-star rating-star"></i>
+                  <span class="review-count">({{ getReviewCount(product) }})</span>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="progress-section">
+                <div class="progress-info">
+                  <span>Sold: {{ Math.floor(Math.random() * 30) + 70 }}%</span>
+                  <span>Available: {{ Math.floor(Math.random() * 20) + 5 }}</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" :style="{ width: (Math.floor(Math.random() * 30) + 70) + '%' }"></div>
+                </div>
+              </div>
+
+              <button class="add-cart-btn" @click="handleAddToCart(product)" :disabled="getProductStock(product) === 0 || isAddingToCart">
+                <template v-if="getProductStock(product) === 0">
+                  Out of Stock
+                </template>
+                <template v-else>
+                  <i v-if="!isAddingToCart" class="ph ph-shopping-cart"></i>
+                  {{ isAddingToCart ? 'Adding...' : 'Add' }}
+                </template>
+              </button>
             </div>
-          </SwiperSlide>
+          </div>
+        </SwiperSlide>
         </Swiper>
       </div>
-      
+
       <!-- Error State -->
       <div v-if="errorMessage && !isLoading" class="error-state">
         <div class="error-icon">
@@ -208,15 +122,15 @@
           Try Again
         </button>
       </div>
-      
+
       <!-- Empty State -->
       <div v-else-if="!isLoading && filteredProducts.length === 0" class="empty-state">
         <div class="empty-icon">
           <i class="ph ph-package text-5xl text-gray-400"></i>
-        </div> 
+        </div>
         <p>No products available</p>
       </div>
-      
+
       <!-- View More Button -->
       <div v-if="filteredProducts.length > 0 && pagination.total > pagination.perPage" class="view-more-container">
         <button @click="viewMoreProducts" class="view-more-btn" :disabled="isLoading">
@@ -238,7 +152,6 @@ import { useCart } from '~/composables/api/useCart'
 
 /* Import Swiper styles */
 import 'swiper/css'
-import 'swiper/css/pagination'
 
 const toast = useToast()
 const recommendStore = useRecommendStore()
@@ -259,6 +172,19 @@ const isAtStart = ref(true)
 const isAtEnd = ref(false)
 const showScrollButtons = ref(false)
 
+const swiperBreakpoints = {
+  320: { slidesPerView: 1.5, spaceBetween: 8 },
+  375: { slidesPerView: 1.8, spaceBetween: 8 },
+  480: { slidesPerView: 2, spaceBetween: 10 },
+  640: { slidesPerView: 2.5, spaceBetween: 12 },
+  768: { slidesPerView: 3, spaceBetween: 12 },
+  840: { slidesPerView: 3.2, spaceBetween: 12 },
+  992: { slidesPerView: 3.5, spaceBetween: 14 },
+  1200: { slidesPerView: 4.5, spaceBetween: 16 },
+  1400: { slidesPerView: 5, spaceBetween: 16 },
+  1600: { slidesPerView: 6, spaceBetween: 16 }
+}
+
 // Computed
 const allCategories = computed(() => {
   return recommendStore.categories || []
@@ -266,7 +192,7 @@ const allCategories = computed(() => {
 
 const filteredProducts = computed(() => {
   const products = recommendStore.products || []
-  
+
   // API returns main products directly, no need to filter variants
   return products
 })
@@ -276,12 +202,12 @@ const pagination = computed(() => recommendStore.pagination || { total: 0, perPa
 // Handle image error with fallback
 const handleImageError = (event, index) => {
   const img = event.target
-  
+
   // Prevent infinite loop
   if (img.dataset.fallbackSet) {
     return
   }
-  
+
   // Try fallback image first
   const fallbackSrc = '/assets/images/placeholder.jpg'
   if (img.src !== fallbackSrc && !img.src.includes('placeholder')) {
@@ -289,10 +215,10 @@ const handleImageError = (event, index) => {
     img.dataset.fallbackSet = 'true'
     return
   }
-  
+
   // If fallback also fails, hide image but show placeholder
   img.style.display = 'none'
-  
+
   // Create placeholder div
   const wrapper = img.parentElement
   if (wrapper && !wrapper.querySelector('.image-placeholder')) {
@@ -302,7 +228,7 @@ const handleImageError = (event, index) => {
     placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; background: #f9fafb;'
     wrapper.appendChild(placeholder)
   }
-  
+
   img.onerror = null
 }
 
@@ -310,13 +236,13 @@ const handleImageError = (event, index) => {
 const getProductLink = (product) => {
   const productName = getProductName(product)
   const groupId = product.groupId || product.mainProduct?.id || product.id
-  
+
   // Ensure we have valid values
   if (!groupId || groupId === 'undefined') {
     console.warn('Invalid product ID for link generation:', product)
     return '/shop/shop-all'
   }
-  
+
   // Create a URL-safe product name with fallback
   let safeProductName = 'product' // default fallback
   if (productName && productName.trim()) {
@@ -326,53 +252,53 @@ const getProductLink = (product) => {
       .replace(/^-+|-+$/g, '')
       .substring(0, 50) // limit length
   }
-  
+
   // Ensure we don't end up with an empty slug
   if (!safeProductName || safeProductName === '') {
     safeProductName = 'product'
   }
-  
+
   return `/shop-all/${safeProductName}--${groupId}`
 }
 
 // Initialize
 onMounted(async () => {
   isLoading.value = true
-  
+
   try {
     // Load categories first with timeout
     const categoriesPromise = recommendStore.fetchCategories()
-    const categoriesTimeout = new Promise((_, reject) => 
+    const categoriesTimeout = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Categories fetch timeout')), 5000)
     )
-    
+
     await Promise.race([categoriesPromise, categoriesTimeout])
       .catch(err => {
         console.warn('Categories fetch failed, using fallback:', err.message)
         // Continue with products even if categories fail
       })
-    
+
     // Load "All" products with timeout and retry
     let productsLoaded = false
     let retryCount = 0
     const maxRetries = 2
-    
+
     while (!productsLoaded && retryCount <= maxRetries) {
       try {
         const productsPromise = recommendStore.fetchProducts({
           page: 1,
           limit: 10,
-          category: null, 
+          category: null,
           sortBy: 'popularity'
         })
-        
-        const productsTimeout = new Promise((_, reject) => 
+
+        const productsTimeout = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Products fetch timeout')), 8000)
         )
-        
+
         await Promise.race([productsPromise, productsTimeout])
         productsLoaded = true
-        
+
         // Check if we got products
         if (recommendStore.products.length === 0) {
           console.warn('No products loaded, trying fallback...')
@@ -380,15 +306,15 @@ onMounted(async () => {
           await recommendStore.fetchProducts({
             page: 1,
             limit: 10,
-            category: null, 
+            category: null,
             sortBy: 'name' // Try different sort
           })
         }
-        
+
       } catch (error) {
         retryCount++
         console.error(`Products fetch attempt ${retryCount} failed:`, error)
-        
+
         if (retryCount <= maxRetries) {
           // Wait before retry
           await new Promise(resolve => setTimeout(resolve, 1000 * retryCount))
@@ -399,12 +325,12 @@ onMounted(async () => {
         }
       }
     }
-    
+
     // Check if we need scroll buttons
     nextTick(() => {
       checkScrollButtons()
     })
-    
+
   } catch (error) {
     console.error('Initialization error:', error)
     errorMessage.value = 'Failed to load data. Please try again.'
@@ -415,42 +341,36 @@ onMounted(async () => {
 
 // Check scroll buttons visibility
 const checkScrollButtons = () => {
-  if (!tabsContainer.value) return
-  
-  const container = tabsContainer.value
-  const tabs = container.querySelector('.category-tabs')
-  
-  if (tabs && container) {
-    const isOverflowing = tabs.scrollWidth > container.offsetWidth
-    showScrollButtons.value = isOverflowing
-    
-    if (isOverflowing) {
-      updateScrollState()
-    }
-  }
+  const tabs = getTabsScrollElement()
+  if (!tabs) return
+
+  const isOverflowing = tabs.scrollWidth > tabs.clientWidth + 1
+  showScrollButtons.value = isOverflowing
+
+  updateScrollState()
 }
 
 // Update scroll state
 const updateScrollState = () => {
-  if (!tabsContainer.value) return
-  
-  const container = tabsContainer.value
-  isAtStart.value = container.scrollLeft <= 10
-  isAtEnd.value = container.scrollLeft + container.offsetWidth >= container.scrollWidth - 10
+  const tabs = getTabsScrollElement()
+  if (!tabs) return
+
+  isAtStart.value = tabs.scrollLeft <= 10
+  isAtEnd.value = tabs.scrollLeft + tabs.clientWidth >= tabs.scrollWidth - 10
 }
 
 // Scroll tabs
 const scrollTabs = (direction) => {
-  if (!tabsContainer.value) return
-  
+  const tabs = getTabsScrollElement()
+  if (!tabs) return
+
   const scrollAmount = 200 // pixels to scroll
-  const container = tabsContainer.value
-  
-  container.scrollBy({
+
+  tabs.scrollBy({
     left: direction * scrollAmount,
     behavior: 'smooth'
   })
-  
+
   // Update state after scroll
   setTimeout(updateScrollState, 300)
 }
@@ -460,24 +380,29 @@ const handleScroll = () => {
   updateScrollState()
 }
 
+const getTabsScrollElement = () => {
+  if (!tabsContainer.value) return null
+  return tabsContainer.value.querySelector('.category-tabs')
+}
+
 // Load products for category
 const loadProductsForCategory = async (categoryId) => {
   if (activeTab.value === categoryId || isLoading.value) return
-  
+
   activeTab.value = categoryId
   currentPage.value = 1
-  
+
   isLoading.value = true
   errorMessage.value = ''
-  
+
   try {
     const categoryName = categoryId === 'all' ? null : getCategoryName(categoryId)
-    
+
     // Add retry logic for category loading
     let productsLoaded = false
     let retryCount = 0
     const maxRetries = 2
-    
+
     while (!productsLoaded && retryCount <= maxRetries) {
       try {
         const productsPromise = recommendStore.fetchProducts({
@@ -486,23 +411,23 @@ const loadProductsForCategory = async (categoryId) => {
           category: categoryName,
           sortBy: 'popularity'
         })
-        
-        const timeoutPromise = new Promise((_, reject) => 
+
+        const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Category products timeout')), 6000)
         )
-        
+
         await Promise.race([productsPromise, timeoutPromise])
         productsLoaded = true
-        
+
         // Verify we got products
         if (recommendStore.products.length === 0 && categoryName) {
           console.warn(`No products found for category: ${categoryName}`)
           // Try case-insensitive search
           const allCats = recommendStore.categories || []
-          const matchingCat = allCats.find(cat => 
+          const matchingCat = allCats.find(cat =>
             cat.name?.toLowerCase() === categoryName?.toLowerCase()
           )
-          
+
           if (matchingCat) {
             await recommendStore.fetchProducts({
               page: 1,
@@ -512,11 +437,11 @@ const loadProductsForCategory = async (categoryId) => {
             })
           }
         }
-        
+
       } catch (error) {
         retryCount++
         console.error(`Category ${categoryName} load attempt ${retryCount} failed:`, error)
-        
+
         if (retryCount <= maxRetries) {
           await new Promise(resolve => setTimeout(resolve, 1000 * retryCount))
         } else {
@@ -524,7 +449,7 @@ const loadProductsForCategory = async (categoryId) => {
         }
       }
     }
-    
+
   } catch (error) {
     console.error('Error loading products:', error)
     errorMessage.value = 'Failed to load products. Please try again.'
@@ -537,11 +462,11 @@ const loadProductsForCategory = async (categoryId) => {
 const retryInitialization = async () => {
   errorMessage.value = ''
   isLoading.value = true
-  
+
   try {
     // Reset store state
     recommendStore.products = []
-    
+
     // Retry initialization
     await Promise.race([
       recommendStore.fetchCategories(),
@@ -549,17 +474,17 @@ const retryInitialization = async () => {
     ]).catch(() => {
       console.warn('Categories retry failed, continuing with products')
     })
-    
+
     await Promise.race([
       recommendStore.fetchProducts({
         page: 1,
         limit: 10,
-        category: null, 
+        category: null,
         sortBy: 'popularity'
       }),
       new Promise((_, reject) => setTimeout(() => reject(new Error('Products timeout')), 8000))
     ])
-    
+
     errorMessage.value = ''
   } catch (error) {
     console.error('Retry failed:', error)
@@ -572,20 +497,20 @@ const retryInitialization = async () => {
 // View more products
 const viewMoreProducts = async () => {
   if (isLoading.value) return
-  
+
   isLoading.value = true
   currentPage.value += 1
-  
+
   try {
     const categoryName = activeTab.value === 'all' ? null : getCategoryName(activeTab.value)
-    
+
     await recommendStore.fetchProducts({
       page: currentPage.value,
       limit: productsPerPage,
       category: categoryName,
       sortBy: 'popularity'
     })
-    
+
   } catch (error) {
     console.error('Error loading more products:', error)
     currentPage.value -= 1
@@ -638,27 +563,27 @@ const isBestSeller = (product) => recommendStore.isBestSeller(product)
 // Helper function to get category name by ID
 const getCategoryName = (categoryId) => {
   if (categoryId === 'all') return null
-  
-  const category = allCategories.value.find(cat => 
+
+  const category = allCategories.value.find(cat =>
     cat.id === categoryId || cat.id.toString() === categoryId.toString()
   )
-  
+
   return category?.name || null
 }
 
 // Cart functionality
 const handleAddToCart = (product) => {
   console.log('handleAddToCart called with product:', product)
-  
+
   // Prevent multiple clicks
   if (isAddingToCart.value) {
     console.log('Already adding to cart, preventing duplicate call')
     return
   }
-  
+
   // Extract actual product data from nested structure
   const actualProduct = product.mainProduct || product
-  
+
   if (!actualProduct || !actualProduct.id) {
     console.error('Invalid product:', actualProduct)
     toast.error("Invalid product data", {
@@ -668,10 +593,10 @@ const handleAddToCart = (product) => {
     })
     return
   }
-  
+
   // Set flag to prevent multiple clicks
   isAddingToCart.value = true
-  
+
   try {
     console.log('Adding to cart:', actualProduct)
     addToCart(actualProduct)
@@ -706,70 +631,347 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Previous CSS remains the same */
-
-/* Stock status */
-.stock-status {
-  margin-top: 6px;
-  font-size: 0.75rem;
+/* HomeFlash Card Design Styles */
+.product-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-width: 0;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.stock-status .in-stock {
-  color: var(--main-600);
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: #CA2D52;
 }
 
-.stock-status .low-stock {
-  color: #d97706;
+/* Product Image */
+.product-image-container {
+  flex-shrink: 0;
+  overflow: hidden;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+  flex-shrink: 0;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.stock-status .out-of-stock {
-  color: #dc2626;
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-/* ==================== ADD TO CART BUTTON ==================== */
-.add-to-cart-btn {
-  background: linear-gradient(135deg, var(--main-600), var(--main-700));
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Product Content */
+.product-content {
+  padding: 6px 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.price-review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.price-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.current-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.per-unit {
+  font-size: 14px;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.original-price {
+  font-size: 14px;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.review-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.rating {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.rating-star {
+  color: #f59e0b;
+  font-size: 14px;
+}
+
+.review-count {
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* Product Title */
+.product-title {
+  margin: 0;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.product-link {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.5;
+  max-height: 3em;
+}
+
+.product-link:hover {
+  color: #CA2D52;
+}
+
+/* Progress Section */
+.progress-section {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Add to Cart Button */
+.add-cart-btn {
+  background: #CA2D52;
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.75rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  margin-top: 6px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
+  width: 100%;
+  margin-top: 8px;
+}
+
+.add-cart-btn:hover:not(:disabled) {
+  background: #B02548;
+  box-shadow: 0 6px 16px rgba(202, 45, 82, 0.4);
+  transform: translateY(-2px);
+}
+
+.add-cart-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Existing styles from HomeRecomend */
+.recommended-section {
+  padding: 24px 0;
+  background-color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Section Heading */
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.section-heading h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Products Swiper */
+.products-swiper-container {
+  padding: 10px 0;
+}
+
+.products-swiper {
+  padding: 0 10px 6px;
+}
+
+.products-swiper .swiper {
+  overflow: visible;
+}
+
+.products-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+}
+
+.products-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+.products-swiper .swiper-slide>.product-card {
   width: 100%;
 }
 
-.add-to-cart-btn:hover:not(.disabled) {
-  background: linear-gradient(135deg, var(--main-700), var(--main-800));
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
+  background: white;
+  border-radius: 16px;
+  border: 1px dashed #e2e8f0;
 }
 
-.add-to-cart-btn.disabled {
-  background: #e5e7eb;
-  color: #9ca3af;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+.error-icon {
+  margin-bottom: 16px;
 }
 
-.add-to-cart-btn i {
-  font-size: 1rem;
+.error-message {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: #475569;
 }
 
-.review-count {
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin-left: 4px;
+.retry-btn {
+  background: #CA2D52;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-/* ==================== ENHANCED TABS SCROLLING ==================== */
+.retry-btn:hover {
+  background: #B02548;
+  transform: translateY(-2px);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
+  background: white;
+  border-radius: 16px;
+  border: 1px dashed #e2e8f0;
+}
+
+.empty-icon {
+  margin-bottom: 16px;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #CA2D52;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Category Tabs */
 .category-tabs-container {
   display: flex;
   align-items: center;
@@ -806,7 +1008,6 @@ onUnmounted(() => {
   width: 0;
 }
 
-/* Scroll buttons */
 .scroll-btn {
   width: 32px;
   height: 32px;
@@ -847,7 +1048,6 @@ onUnmounted(() => {
   order: 1;
 }
 
-/* Tab buttons always visible */
 .tab-button {
   padding: 6px 14px;
   border: 1px solid #e5e7eb;
@@ -876,9 +1076,9 @@ onUnmounted(() => {
 }
 
 .tab-button.active {
-  background: linear-gradient(135deg, var(--main-600), var(--main-700));
-  color: white;
-  border-color: var(--main-600);
+  background: linear-gradient(135deg, #CA2D52, #B02548);
+  color: white !important;
+  border-color: #CA2D52;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(202, 45, 82, 0.25);
 }
@@ -902,490 +1102,67 @@ onUnmounted(() => {
   gap: 4px;
 }
 
-.tab-count {
-  font-size: 0.75rem;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 1px 6px;
-  border-radius: 10px;
-  margin-left: 2px;
-}
-
-/* Touch device optimizations */
-@media (hover: none) {
-  .category-tabs {
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 16px; /* Extra space for scroll indicator */
-  }
-  
-  .scroll-btn {
-    display: none; /* Hide scroll buttons on touch devices */
-  }
-}
-
-/* Add visual scroll hint on mobile */
-@media (max-width: 768px) {
-  .category-tabs-wrapper::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 20px;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.9));
-    pointer-events: none;
-    z-index: 5;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .category-tabs-wrapper.scrollable::after {
-    opacity: 1;
-  }
-}
-</style>
-
-<style scoped>
-/* ==================== RECOMMENDED PRODUCTS SECTION ==================== */
-.recommended-section {
-  padding: 24px 0;
-  background-color: #ffffff;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-/* ==================== SECTION HEADING ==================== */
-.section-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.section-heading h2 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0;
-  flex-shrink: 0;
-}
-
-/* ==================== PRODUCTS SWIPER ==================== */
-.products-swiper-container {
-  padding: 12px 0;
-}
-
-.products-swiper {
-  padding: 0 20px;
-}
-
-.products-swiper .swiper {
-  overflow: visible;
-}
-
-.products-swiper .swiper-slide {
-  height: auto;
-}
-
-/* Swiper Pagination */
-.products-swiper .swiper-pagination {
-  bottom: -30px;
-}
-
-.products-swiper .swiper-pagination-bullet {
-  background: #d1d5db;
-  opacity: 1;
-  transition: all 0.3s ease;
-}
-
-.products-swiper .swiper-pagination-bullet-active {
-  background: #1b6db5;
-  transform: scale(1.2);
-}
-
-/* ==================== PRODUCTS GRID ==================== */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 16px;
-}
-
-.product-card {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  border: 1px solid #e5e7eb;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.15);
-  border-color: var(--main-600);
-}
-
-/* ==================== PRODUCT BADGES ==================== */
-.product-badges {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  display: flex;
-  gap: 4px;
-  z-index: 10;
-}
-
-.badge {
-  padding: 3px 6px;
-  border-radius: 3px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: white;
-  display: inline-block;
-  line-height: 1;
-}
-
-.badge.sale {
-  background: var(--main-600);
-}
-
-.badge.best {
-  background: var(--main-700);
-}
-
-.badge.out-of-stock {
-  background: #6b7280;
-}
-
-/* ==================== WISHLIST BUTTON ==================== */
-.wishlist-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: white;
-  border: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-  padding: 0;
-}
-
-.wishlist-btn:hover {
-  background: #fef2f2;
-  border-color: #dc2626;
-}
-
-.wishlist-btn.in-wishlist {
-  background: #fef2f2;
-  border-color: #dc2626;
-}
-
-.wishlist-btn.in-wishlist i {
-  color: #dc2626;
-}
-
-.wishlist-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ==================== PRODUCT IMAGE ==================== */
-.product-image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 120px;
-  background: #ecedeb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.product-image-wrapper.out-of-stock {
-  opacity: 0.6;
-}
-
-.product-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transition: transform 0.3s ease;
-}
-
-.product-card:hover .product-image {
-  transform: scale(1.05);
-}
-
-/* ==================== PRODUCT CONTENT ==================== */
-.product-content {
-  padding: 10px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.product-title {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #1f2937;
-  margin: 0;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 32px;
-}
-
-.rating-section {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.stars {
-  display: flex;
-  gap: 1px;
-  font-size: 0.8rem;
-}
-
-.rating-value {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #374151;
-  margin-left: 4px;
-}
-
-.price-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.price-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.current-price {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.original-price {
-  font-size: 0.85rem;
-  color: #9ca3af;
-  text-decoration: line-through;
-  font-weight: 500;
-}
-
-.discount-percentage {
-  font-size: 0.8rem;
-  color: #dc2626;
-  font-weight: 600;
-  background: #fee2e2;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-/* ==================== ERROR STATE ==================== */
-.error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
+/* View More Button */
+.view-more-container {
   text-align: center;
-  min-height: 200px;
+  margin-top: 32px;
 }
 
-.error-icon {
-  margin-bottom: 16px;
-}
-
-.error-message {
-  color: #dc2626;
-  font-size: 1rem;
-  margin-bottom: 20px;
-  max-width: 400px;
-  line-height: 1.5;
-}
-
-.retry-btn {
-  background: linear-gradient(135deg, var(--main-600), var(--main-700));
+.view-more-btn {
+  background: #CA2D52;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
-.retry-btn:hover {
-  background: linear-gradient(135deg, var(--main-700), var(--main-800));
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
+.view-more-btn:hover:not(:disabled) {
+  background: #B02548;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(202, 45, 82, 0.4);
 }
 
-/* ==================== EMPTY STATE ==================== */
-
-/* Large Desktop */
-@media (max-width: 1600px) {
-  .products-grid {
-    grid-template-columns: repeat(8, 1fr);
-  }
+.view-more-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
-/* Desktop */
-@media (max-width: 1400px) {
-  .products-grid {
-    grid-template-columns: repeat(7, 1fr);
+/* Responsive */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 12px;
   }
   
   .section-heading {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .section-heading h2 {
+    font-size: 1.25rem;
   }
   
   .category-tabs-container {
     width: 100%;
-    justify-content: flex-start;
-  }
-  
-  .category-tabs {
-    justify-content: flex-start;
   }
 }
 
-/* Laptop */
-@media (max-width: 1200px) {
-  .products-grid {
-    grid-template-columns: repeat(6, 1fr);
-  }
-}
-
-/* Tablet */
-@media (max-width: 992px) {
-  .products-grid {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-  }
-  .recommended-section {
-    padding: 20px 0;
-  }
-  .product-image-wrapper {
-    height: 100px;
-  }
-  
-  .product-content {
-    padding: 8px;
-  }
-  
-  .product-title {
-    font-size: 0.75rem;
-    min-height: 28px;
-  }
-  
-  .current-price {
-    font-size: 0.85rem;
-  }
-  
-  .section-heading h2 {
-    font-size: 1.2rem;
-  }
-  
-  .scroll-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 769px) {
+@media (max-width: 768px) {
   .recommended-section {
     padding: 16px 0;
   }
   
   .container {
-    padding: 0 12px;
-  }
-  
-  .products-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-  }
-  
-  .product-card {
-    border-radius: 6px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-    border: 1px solid #f3f4f6;
-  }
-  
-  .rating-section {
-    display: none;
-  }
-  
-  .product-image-wrapper {
-    height: 80px;
-  }
-  
-  .product-content {
-    padding: 6px;
-    gap: 4px;
-  }
-  
-  .product-title {
-    font-size: 0.7rem;
-    line-height: 1.2;
-    min-height: 28px;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-  }
-  
-  .price-wrapper {
-    flex-wrap: wrap;
-    gap: 3px;
-  }
-  
-  .current-price {
-    font-size: 0.8rem;
-    font-weight: 700;
-  }
-  
-  .original-price {
-    font-size: 0.65rem;
-  }
-  
-  .discount-percentage {
-    font-size: 0.65rem;
-    padding: 1px 3px;
+    padding: 0 8px;
   }
   
   .section-heading {
@@ -1394,257 +1171,164 @@ onUnmounted(() => {
   }
   
   .section-heading h2 {
-    font-size: 1.1rem;
+    font-size: 1.125rem;
   }
   
-  .category-tabs {
-    padding: 4px 4px 8px;
-    gap: 4px;
-  }
-  
-  .tab-button {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-    min-height: 24px;
-  }
-  
-  .product-badges {
-    top: 4px;
-    left: 4px;
-  }
-  
-  .badge {
-    padding: 2px 3px;
-    font-size: 0.55rem;
-  }
-  
-  .wishlist-btn {
-    top: 4px;
-    right: 4px;
-    width: 20px;
-    height: 20px;
-    font-size: 0.7rem;
+  .category-tabs-container {
+    gap: 6px;
   }
   
   .scroll-btn {
-    display: none; /* Hide scroll buttons on mobile, use touch scrolling */
-  }
-}
-
-/* Small Mobile */
-@media (max-width: 576px) {
-  .products-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-  }
-  
-  .product-content {
-    padding: 6px;
-    gap: 4px;
-  }
-  
-  .product-image-wrapper {
-    height: 90px;
-  }
-  
-  .product-title {
-    font-size: 0.7rem;
-    min-height: 28px;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-  }
-  
-  .price-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-  
-  .current-price {
-    font-size: 0.85rem;
-  }
-  
-  .original-price {
-    font-size: 0.65rem;
-  }
-  
-  .discount-percentage {
-    font-size: 0.65rem;
-  }
-  
-  .section-heading h2 {
-    font-size: 1.1rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
   }
   
   .tab-button {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-    min-height: 26px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    min-height: 28px;
+  }
+  
+  .products-swiper-container {
+    padding: 8px 0;
+  }
+  
+  .products-swiper {
+    padding: 0 8px 4px;
+  }
+  
+  .error-state, .empty-state {
+    padding: 40px 16px;
+  }
+  
+  .error-message {
+    font-size: 16px;
+  }
+  
+  .loading-container {
+    padding: 60px 0;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .view-more-container {
+    margin-top: 24px;
+  }
+  
+  .view-more-btn {
+    padding: 10px 20px;
+    font-size: 13px;
   }
 }
 
-/* Extra Small Mobile */
-@media (max-width: 400px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 480px) {
+  .recommended-section {
+    padding: 12px 0;
+  }
+  
+  .container {
+    padding: 0 6px;
+  }
+  
+  .section-heading {
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  
+  .section-heading h2 {
+    font-size: 1rem;
+  }
+  
+  .category-tabs-container {
+    gap: 4px;
+  }
+  
+  .scroll-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+  
+  .tab-button {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    min-height: 24px;
+  }
+  
+  .category-tabs {
+    padding: 6px 2px 8px;
     gap: 6px;
   }
   
-  .product-image-wrapper {
-    height: 80px;
+  .products-swiper-container {
+    padding: 6px 0;
   }
   
-  .product-title {
-    font-size: 0.65rem;
-    min-height: 26px;
+  .products-swiper {
+    padding: 0 6px 2px;
   }
   
-  .current-price {
-    font-size: 0.8rem;
+  .error-state, .empty-state {
+    padding: 30px 12px;
+  }
+  
+  .error-message {
+    font-size: 14px;
+  }
+  
+  .retry-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  
+  .loading-container {
+    padding: 40px 0;
+  }
+  
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 2px;
+  }
+  
+  .view-more-container {
+    margin-top: 20px;
+  }
+  
+  .view-more-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+    gap: 6px;
   }
 }
 
-/* ==================== UTILITY CLASSES ==================== */
-.text-yellow-400 {
-  color: #fbbf24;
+@media (max-width: 360px) {
+  .container {
+    padding: 0 4px;
+  }
+  
+  .section-heading h2 {
+    font-size: 0.875rem;
+  }
+  
+  .tab-button {
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    min-height: 22px;
+  }
 }
 
-.text-gray-300 {
-  color: #d1d5db;
+/* Fix for Swiper layout */
+:deep(.swiper-slide) {
+  height: auto !important;
 }
 
-.text-gray-400 {
-  color: #9ca3af;
-}
-
-.text-gray-500 {
-  color: #6b7280;
-}
-
-.text-5xl {
-  font-size: 3rem;
-}
-
-.mr-2 {
-  margin-right: 0.5rem;
-}
-
-/* Loading State */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 0;
-  min-height: 300px;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #186fc6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  margin: 20px 0;
-}
-
-.empty-icon {
-  font-size: 2.5rem;
-  color: #d1d5db;
-  margin-bottom: 16px;
-}
-
-.empty-state h3 {
-  color: #1f2937;
-  margin: 12px 0 8px;
-  font-size: 1.2rem;
-}
-
-.empty-state p {
-  color: #6b7280;
-  margin-bottom: 20px;
-  font-size: 0.9rem;
-  max-width: 300px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.5;
-}
-
-/* View More Button */
-.view-more-container {
-  text-align: center;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.view-more-btn {
-  padding: 10px 24px;
-  background: linear-gradient(135deg, var(--main-600), var(--main-700));
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: 0 2px 8px rgba(27, 109, 181, 0.2);
-}
-
-.view-more-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--main-700), var(--main-800));
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(202, 45, 82, 0.3);
-}
-
-.view-more-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-/* Buttons */
-.btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
-}
-
-.btn-main {
-  background: linear-gradient(135deg, var(--main-600), var(--main-700));
-  color: white;
-}
-
-.btn-main:hover {
-  background: linear-gradient(135deg, var(--main-700), var(--main-800));
-}
-
-.btn-main i {
-  margin-right: 5px;
+:deep(.swiper-slide > *) {
+  height: 100% !important;
+  width: 100% !important;
 }
 </style>

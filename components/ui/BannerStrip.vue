@@ -134,13 +134,11 @@ const handleImageError = (e: Event) => {
 
 .banner-wrapper {
   position: relative;
-  margin-bottom: 25px; 
-  width: 100%; 
+  width: min(100%, 1000px);
   height: 150px;
-  max-width: 1000px;
-  margin: 0 auto;
+  margin: 78px auto 25px;
   overflow: hidden;
-  margin-top: 78px; 
+  border-radius: 30px;
   z-index: 10;
 }
 
@@ -155,7 +153,7 @@ const handleImageError = (e: Event) => {
   width: 100%;
   height: 100%;
   z-index: 1;
-  border-radius: 30px;
+  border-radius: inherit;
   overflow: hidden;
 }
 
@@ -176,8 +174,9 @@ const handleImageError = (e: Event) => {
 
 .offer-strip {
   position: absolute;
-  left: 1px;
-  top: 0;
+  top: 8px;
+  left: 12px;
+  max-width: calc(100% - 24px);
   background: linear-gradient(90deg, #CA2D52, #830622);
   padding: 6px 16px;
   border-radius: 11px;
@@ -185,6 +184,8 @@ const handleImageError = (e: Event) => {
 }
 
 .offer-text {
+  display: block;
+  max-width: 100%;
   color: #fff;
   font-size: 13px;
   font-weight: 700;
@@ -203,11 +204,14 @@ const handleImageError = (e: Event) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  gap: 12px;
+  padding: 38px 24px 10px;
 }
 
 .banner-text {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 62%;
   color: #fff;
   z-index: 5;
 }
@@ -217,7 +221,7 @@ const handleImageError = (e: Event) => {
   font-size: 13px;
   opacity: 0.9;
   font-weight: 500;
-  max-width: 150px;
+  max-width: 100%;
   line-height: 1.4;
 }
 
@@ -227,115 +231,124 @@ const handleImageError = (e: Event) => {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
 .main-img {
-  width: 160px;
+  width: 150px;
   height: auto;
   object-fit: contain;
   z-index: 3;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
-  margin-right: 20px;
+  margin-right: 0;
 }
 
-/* ==================== resposnive ==================== */
+/* Responsive */
+@media (hover: none) {
+  .banner-link:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .banner-link:hover .banner-bg {
+    transform: none;
+  }
+}
 
 @media (max-width: 768px) {
   .banner-wrapper {
-    height: 110px;
+    height: 120px;
     margin-top: 60px;
-    margin-bottom: 20px;
-  }
-
-  .banner-bg-wrapper {
-    border-radius: 0;
+    margin-bottom: 16px;
+    border-radius: 18px;
   }
 
   .banner-content {
-    padding: 0 16px;
+    gap: 10px;
+    padding: 34px 14px 10px;
+  }
+
+  .banner-text {
+    max-width: 65%;
   }
 
   .banner-text p {
     font-size: 11px;
-    max-width: 120px;
+    line-height: 1.35;
   }
 
   .main-img {
-    width: 100px;
-    margin-right: 15px;
+    width: 92px;
   }
 
   .offer-strip {
-    left: 16px;
-    padding: 5px 12px;
+    top: 6px;
+    left: 10px;
+    max-width: calc(100% - 20px);
+    padding: 4px 10px;
   }
-  
-  .offer-text {
-    font-size: 11px;
-  } 
-}
 
-@media (max-width: 1640px) {
-  .banner-wrapper {
-    margin-bottom: 20px;
+  .offer-text {
+    font-size: 10.5px;
   }
 }
 
 @media (max-width: 480px) {
   .banner-wrapper {
-    height: 100px;
-    margin-top: 60px;
-    margin-bottom: 15px;
+    height: 112px;
+    margin-top: 56px;
+    margin-bottom: 12px;
+    border-radius: 14px;
   }
 
   .banner-content {
-    padding: 0 12px;
+    gap: 8px;
+    padding: 32px 10px 8px;
+  }
+
+  .banner-text {
+    max-width: 100%;
   }
 
   .banner-text p {
     font-size: 10px;
-    max-width: 100px;
+    line-height: 1.3;
   }
 
-  .main-img {
-    width: 80px;
-    margin-right: 10px;
+  .images-section {
+    display: none;
   }
 
   .offer-strip {
-    left: 0;
-    right: 0;
-    top: 0;
-    border-radius: 0;
-    display: flex;
-    justify-content: center;
-    padding: 4px 0;
+    top: 6px;
+    left: 8px;
+    right: 8px;
+    max-width: none;
+    border-radius: 8px;
+    padding: 4px 8px;
   }
 
   .offer-text {
     font-size: 10px;
+    text-align: center;
   }
 }
 
-/* 小屏幕移动端 */
-@media (max-width: 460px) {
+@media (max-width: 360px) {
   .banner-wrapper {
-    height: 90px;
+    height: 100px;
     margin-bottom: 0;
   }
 
-  .banner-text p {
-    font-size: 9px;
-    max-width: 90px;
+  .banner-content {
+    padding: 30px 8px 8px;
   }
 
-  .main-img {
-    width: 70px;
-    margin-right: 8px;
+  .banner-text p {
+    font-size: 9.5px;
   }
 }
-
 :global(header) {
   position: fixed !important;
   top: 0 !important;

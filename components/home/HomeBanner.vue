@@ -4,7 +4,7 @@
       <div class="banner-slider">
         <div class="slide active">
           <!-- Background Image -->
-          <Transition name="slide" mode="out-in">
+          <Transition name="slide-fade">
             <img 
               v-if="currentBanner"
               :key="currentBanner.image"
@@ -18,7 +18,7 @@
           <div class="overlay"></div>
           
           <!-- Content -->
-          <Transition name="slide-content" mode="out-in">
+          <Transition name="slide-content-fade">
           <NuxtLink 
             v-if="currentBanner"
             :key="currentBanner.title"
@@ -80,7 +80,7 @@ const startAutoSlide = () => {
   if (autoTimer.value || banners.value.length <= 1) return
   autoTimer.value = setInterval(() => {
     nextBanner()
-  }, 6000)
+  }, 3000)
 }
 
 const stopAutoSlide = () => {
@@ -176,6 +176,7 @@ onUnmounted(() => {
 
 <style scoped>
 .hero-banner {
+  width: 100%;
   min-height: 450px;
   position: relative;
   overflow: hidden;
@@ -194,6 +195,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 12px;
+  backdrop-filter: blur(4px);
+}
+
+.loading-state:hover {
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .spinner {
@@ -236,53 +243,89 @@ onUnmounted(() => {
 
 .banner-content-link {
   position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.25s ease;
 }
 
 .banner-content-link:hover {
-  transform: scale(1.02);
+  transform: none;
 }
 
 .banner-content-link:hover .content {
-  transform: scale(1.05);
-  transition: transform 0.3s ease;
+  transform: none;
 }
 
-/* Smooth slide between slides */
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.6s ease;
-  will-change: transform;
+.banner-content-link:hover .overlay {
+  background: rgba(0, 0, 0, 0.3);
 }
 
-.slide-enter-from {
-  transform: translateX(100%);
+.banner-content-link:hover .banner-image {
+  transform: none;
 }
 
-.slide-leave-to {
-  transform: translateX(-100%);
+/* Crossfade transition for smooth image changes */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: opacity 0.4s ease-in-out;
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
-/* Smooth slide for text/content */
-.slide-content-enter-active,
-.slide-content-leave-active {
-  transition: transform 0.5s ease, opacity 0.5s ease;
-  will-change: transform, opacity;
-}
-
-.slide-content-enter-from {
-  transform: translateX(40px);
+.slide-fade-enter-from {
   opacity: 0;
 }
 
-.slide-content-leave-to {
-  transform: translateX(-40px);
+.slide-fade-leave-to {
   opacity: 0;
+}
+
+/* Crossfade transition for content */
+.slide-content-fade-enter-active,
+.slide-content-fade-leave-active {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.slide-content-fade-enter-from {
+  opacity: 0;
+}
+
+.slide-content-fade-leave-to {
+  opacity: 0;
+}
+
+/* Enhanced animations */
+@keyframes slideInFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 
 .overlay {
@@ -301,7 +344,10 @@ onUnmounted(() => {
   align-items: center;
   color: white;
   text-align: center;
-  padding: 20px;
+  width: 100%;
+  max-width: min(100%, 1100px);
+  margin: 0 auto;
+  padding: 20px 16px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -310,6 +356,10 @@ onUnmounted(() => {
   font-weight: 600;
   margin-bottom: 15px;
   letter-spacing: 1px;
+  max-width: min(90vw, 900px);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  opacity: 1;
 }
 
 .title {
@@ -317,6 +367,10 @@ onUnmounted(() => {
   font-weight: 800;
   margin-bottom: 25px;
   line-height: 1.3;
+  max-width: min(90vw, 980px);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  opacity: 1;
 }
 
 /* Error Indicator (small, non-blocking) */
@@ -330,23 +384,136 @@ onUnmounted(() => {
   border-radius: 4px;
   font-size: 12px;
   z-index: 5;
+  backdrop-filter: blur(4px);
+}
+
+.error-indicator:hover {
+  background: rgba(255, 59, 48, 0.95);
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+  .content {
+    max-width: min(100%, 960px);
+    padding: 18px 20px;
+  }
+  
+  .title {
+    font-size: 32px;
+    max-width: min(92vw, 880px);
+  }
+  
+  .subtitle {
+    font-size: 17px;
+    max-width: min(92vw, 800px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .hero-banner {
+    margin-bottom: 2.5rem;
+  }
+  
+  .content {
+    max-width: min(100%, 880px);
+    padding: 16px 18px;
+  }
+  
+  .title {
+    font-size: 30px;
+    max-width: min(94vw, 800px);
+    margin-bottom: 20px;
+  }
+  
+  .subtitle {
+    font-size: 16px;
+    max-width: min(94vw, 750px);
+    margin-bottom: 12px;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-banner,
   .banner-main,
   .slide,
   .content {
-    min-height: 350px;
+    min-height: 340px;
   }
-  
+
+  .hero-banner {
+    margin-bottom: 2rem;
+  }
+
+  .banner-image {
+    object-position: center;
+  }
+
+  .content {
+    padding: 14px 16px;
+    max-width: min(100%, 720px);
+  }
+
   .title {
     font-size: 28px;
+    line-height: 1.25;
+    max-width: 96vw;
+    margin-bottom: 14px;
   }
-  
+
   .subtitle {
     font-size: 16px;
+    line-height: 1.35;
+    letter-spacing: 0.4px;
+    max-width: 96vw;
+    margin-bottom: 10px;
+  }
+  
+  .loading-state {
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+  }
+  
+  .spinner {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .error-indicator {
+    bottom: 8px;
+    right: 8px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-banner,
+  .banner-main,
+  .slide,
+  .content {
+    min-height: 320px;
+  }
+  
+  .hero-banner {
+    margin-bottom: 1.8rem;
+  }
+  
+  .content {
+    padding: 12px 14px;
+    justify-content: flex-start;
+    padding-top: 60px;
+  }
+
+  .title {
+    font-size: 26px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    line-height: 1.3;
+    margin-bottom: 8px;
   }
 }
 
@@ -355,15 +522,168 @@ onUnmounted(() => {
   .banner-main,
   .slide,
   .content {
-    min-height: 300px;
+    min-height: 280px;
+  }
+
+  .hero-banner {
+    margin-bottom: 1.5rem;
+  }
+
+  .content {
+    padding: 10px 12px;
+    padding-top: 50px;
+    justify-content: flex-start;
+  }
+
+  .title {
+    font-size: 22px;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  
+  .overlay {
+    background: rgba(0, 0, 0, 0.4);
+  }
+  
+  .loading-state {
+    top: 6px;
+    right: 6px;
+    padding: 3px 6px;
+    font-size: 11px;
+  }
+  
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border-width: 1.5px;
+  }
+  
+  .error-indicator {
+    bottom: 6px;
+    right: 6px;
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 414px) {
+  .hero-banner,
+  .banner-main,
+  .slide,
+  .content {
+    min-height: 260px;
+  }
+  
+  .content {
+    padding: 8px 10px;
+    padding-top: 45px;
   }
   
   .title {
-    font-size: 22px;
+    font-size: 20px;
+    margin-bottom: 8px;
   }
   
   .subtitle {
-    font-size: 14px;
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+}
+
+@media (max-width: 375px) {
+  .hero-banner,
+  .banner-main,
+  .slide,
+  .content {
+    min-height: 240px;
+  }
+  
+  .content {
+    padding: 6px 8px;
+    padding-top: 40px;
+  }
+  
+  .title {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+  
+  .subtitle {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-banner,
+  .banner-main,
+  .slide,
+  .content {
+    min-height: 220px;
+  }
+
+  .title {
+    font-size: 17px;
+    margin-bottom: 5px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  
+  .content {
+    padding: 4px 6px;
+    padding-top: 35px;
+  }
+}
+
+@media (max-width: 320px) {
+  .hero-banner,
+  .banner-main,
+  .slide,
+  .content {
+    min-height: 200px;
+  }
+  
+  .content {
+    padding: 2px 4px;
+    padding-top: 30px;
+  }
+  
+  .title {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  
+  .subtitle {
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+}
+
+/* Enhanced mobile hover effects */
+@media (hover: none) {
+  .banner-content-link:hover {
+    transform: none;
+  }
+
+  .banner-content-link:hover .content {
+    transform: none;
+  }
+  
+  .banner-content-link:hover .overlay {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .banner-content-link:hover .banner-image {
+    transform: none;
   }
 }
 </style>

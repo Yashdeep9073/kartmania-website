@@ -1,7 +1,7 @@
 <!-- components/PromotionalBanner.vue -->
 <template>
-  <section v-if="!loading && promotionalBanners.length > 0" class="promotional-banner pb-16 pt-8 pt-md-12 pt-lg-20">
-    <div class="container container-lg px-3 px-md-4">
+  <section v-if="!loading && promotionalBanners.length > 0" class="promotional-banner pb-12 pb-sm-16 pb-md-20 pt-6 pt-sm-8 pt-md-12 pt-lg-20">
+    <div class="container container-lg px-4 px-sm-5 px-md-4">
       <div v-if="loading && showStaticFallback === false" class="text-center py-30 py-md-40">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
@@ -14,7 +14,7 @@
         </div>
       </div>
 
-      <div v-else class="row gy-3 gy-md-4">
+      <div v-else class="row gy-3 gy-sm-4 gy-md-4 gy-lg-5">
         
         <!-- Dynamic Banners from API -->
         <div
@@ -22,21 +22,20 @@
           :key="banner.id"
           :class="getColumnClasses(index)"
         >
-          <NuxtLink :to="banner.slug ? `/shop-all?offer=${banner.slug}` : (banner.category ? `/shop-all?category=${banner.category}` : '/shop-all')" class="promotional-banner-item position-relative rounded-16 rounded-md-20 rounded-lg-24 overflow-hidden z-1 py-56 py-md-64 py-lg-76 ps-40 ps-md-48 ps-lg-64 pe-32 pe-md-40 pe-lg-48 h-100">
+          <NuxtLink :to="banner.slug ? `/shop-all?offer=${banner.slug}` : (banner.category ? `/shop-all?category=${banner.category}` : '/shop-all')" class="promotional-banner-item position-relative rounded-12 rounded-sm-16 rounded-md-20 rounded-lg-24 overflow-hidden z-1 py-40 py-sm-48 py-md-64 py-lg-76 ps-24 ps-sm-32 ps-md-48 ps-lg-64 pe-16 pe-sm-24 pe-md-40 pe-lg-48 h-100 d-flex flex-column justify-content-end">
             <img
               :src="banner.image"
               :alt="banner.title"
               class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover z-n1"
               loading="lazy"
+              decoding="async"
+              @error="handleImageError"
             >
-            <div class="promotional-banner-item__content">
-              <h6 class="promotional-banner-item__title fw-bold mb-2 mb-md-3 mb-lg-4 text-base text-md-lg text-lg-2xl">
-                {{ banner.title }}
-              </h6>
-
-              <div class="d-flex align-items-end gap-2 gap-md-4 gap-lg-8 mb-2 mb-md-3 mb-lg-4">
-                <span class="text-heading fst-italic text-xs text-md-sm text-lg-base">Starting at</span>
-                <h6 class="text-danger-600 mb-0 text-sm text-md-base text-lg-xl">{{ banner.price }}</h6>
+            <div class="promotional-banner-item__content position-relative z-2">
+              <h6 class="promotional-banner-item__title fw-bold mb-2 mb-sm-3 mb-md-4 mb-lg-4 text-sm text-sm-md text-md-lg text-lg-2xl">{{ banner.title }}</h6>
+              <div class="d-flex align-items-center gap-2 gap-sm-3 gap-md-4 gap-lg-8">
+                <span class="text-heading fst-italic text-xs text-sm-sm text-md-base">From</span>
+                <h6 class="text-danger-600 mb-0 fw-bold text-sm text-sm-md text-md-base text-lg-xl">{{ banner.price }}</h6>
               </div>
             </div>
           </NuxtLink>
@@ -104,8 +103,10 @@ const screenWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024
 
 // Determine required banners based on screen size
 const requiredBanners = computed(() => {
-  if (screenWidth.value < 768) return 2 // Mobile: 2 banners
-  return 4 // Tablet/Desktop: 4 banners
+  if (screenWidth.value < 576) return 2 // Small mobile: 2 banners
+  if (screenWidth.value < 768) return 4 // Mobile: 4 banners (2x2 grid)
+  if (screenWidth.value < 992) return 4 // Tablet: 4 banners (2x2 grid)
+  return 4 // Desktop: 4 banners
 })
 
 // Update screen width on resize
@@ -119,7 +120,10 @@ if (typeof window !== 'undefined') {
 
 // Get column classes based on index and screen size
 const getColumnClasses = (index: number): string => {
-  return 'col-12 col-md-4 col-lg-3'
+  // Mobile: 2 columns for better visual appeal
+  // Tablet: 2 columns for comfortable touch targets
+  // Desktop: 4 columns for full utilization
+  return 'col-6 col-sm-6 col-md-4 col-lg-3'
 }
 
 // Fetch offer data from API
@@ -223,6 +227,15 @@ onMounted(() => {
   }, 3000) // Show static after 3 seconds if API is slow
 })
 
+// Handle image errors with fallback
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (!img.dataset.fallbackSet) {
+    img.dataset.fallbackSet = 'true'
+    img.src = '/assets/images/nowcategory/festivel.jpg'
+  }
+}
+
 // Optional: Retry API in background (but keep showing static banners)
 onMounted(() => {
   const retryInterval = setInterval(() => {
@@ -246,16 +259,17 @@ onMounted(() => {
 <style scoped>
 /* Keep all your existing styles */
 .promotional-banner-item {
-  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
-  backdrop-filter: blur(10px);
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  padding: 10px;
   display: block;
   text-decoration: none;
   color: inherit;
+  min-height: 180px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .promotional-banner-item::before {
@@ -265,16 +279,16 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); 
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(124, 58, 237, 0.08) 100%); 
   opacity: 0;
   transition: opacity 0.3s ease;
-  z-index: -1;
+  z-index: 0;
 }
 
 .promotional-banner-item:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);  
-  border-color: rgba(79, 70, 229, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);  
+  border-color: rgba(79, 70, 229, 0.3);
 }
 
 .promotional-banner-item:hover::before {
@@ -282,16 +296,17 @@ onMounted(() => {
 }
 
 .promotional-banner-item__content {
-  padding: 20px;
   position: relative;
   z-index: 2;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .promotional-banner-item__title {
-  font-weight: 700;
+  font-weight: 800;
   color: #1e293b;
-  line-height: 1.3;
+  line-height: 1.2;
   margin-bottom: 0;
+  letter-spacing: -0.025em;
 }
 
 .promotional-banner-item img {
@@ -311,7 +326,8 @@ onMounted(() => {
 
 .text-danger-600 {
   color: #dc2626 !important;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.025em;
 }
 
 .text-heading {
@@ -320,8 +336,8 @@ onMounted(() => {
 
 /* Loading spinner */
 .spinner-border {
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 /* Enhanced Responsive Design */
@@ -354,13 +370,21 @@ onMounted(() => {
 
 /* Small Mobile (<576px) */
 @media (max-width: 575px) {
+  .promotional-banner {
+    padding-top: 24px !important;
+    padding-bottom: 48px !important;
+  }
+  
   .promotional-banner-item {
     margin-bottom: 12px;
+    min-height: 160px;
+    border-radius: 12px !important;
   }
   
   .promotional-banner-item__title {
     font-size: 0.875rem !important;
     line-height: 1.2;
+    margin-bottom: 8px !important;
   }
   
   .text-heading {
@@ -375,18 +399,20 @@ onMounted(() => {
 /* Extra Small Mobile (<400px) */
 @media (max-width: 399px) {
   .container-lg {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
   }
   
   .promotional-banner-item {
-    padding: 20px 16px !important;
-    margin-bottom: 8px;
+    padding: 32px 20px !important;
+    margin-bottom: 10px;
+    min-height: 140px;
   }
   
   .promotional-banner-item__title {
     font-size: 0.8125rem !important;
     line-height: 1.1;
+    margin-bottom: 6px !important;
   }
   
   .text-heading {
@@ -401,10 +427,12 @@ onMounted(() => {
 @media (hover: none) and (pointer: coarse) {
   .promotional-banner-item:hover {
     transform: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
   
   .promotional-banner-item:active {
     transform: scale(0.98);
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.15), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   }
 } 
 </style> 
